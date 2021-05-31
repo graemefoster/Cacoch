@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cacoch.Core", "Cacoch.Core\Cacoch.Core.csproj", "{6C19D8CC-BB24-4D4E-9BA5-158820493E56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cacoch.Provider.AzureArm", "Cacoch.Provider.AzureArm\Cacoch.Provider.AzureArm.csproj", "{ABBE6C63-46BB-43A1-A220-8E0159BBF183}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cacoch.Cli", "Cacoch.Cli\Cacoch.Cli.csproj", "{C4EEDCCF-E866-40AE-AD44-6719B316D00D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cacoch.Provider.AzureArm.Tests", "Cacoch.Provider.AzureArm.Tests\Cacoch.Provider.AzureArm.Tests.csproj", "{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C19D8CC-BB24-4D4E-9BA5-158820493E56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C19D8CC-BB24-4D4E-9BA5-158820493E56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C19D8CC-BB24-4D4E-9BA5-158820493E56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C19D8CC-BB24-4D4E-9BA5-158820493E56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABBE6C63-46BB-43A1-A220-8E0159BBF183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABBE6C63-46BB-43A1-A220-8E0159BBF183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABBE6C63-46BB-43A1-A220-8E0159BBF183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABBE6C63-46BB-43A1-A220-8E0159BBF183}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4EEDCCF-E866-40AE-AD44-6719B316D00D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4EEDCCF-E866-40AE-AD44-6719B316D00D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4EEDCCF-E866-40AE-AD44-6719B316D00D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4EEDCCF-E866-40AE-AD44-6719B316D00D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
