@@ -17,6 +17,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         private readonly ILogger<AzureResourceGroupCreator> _logger;
         private readonly ResourceManagementClient _resourceClient;
         private readonly IOptions<AzureArmSettings> _settings;
+        private Dictionary<string, string> _randomStrings = new();
 
         public AzureResourceGroupCreator(
             IArmDeployer armDeployer,
@@ -44,14 +45,22 @@ namespace Cacoch.Provider.AzureArm.Azure
 
         public async Task<string> GetResourceGroupRandomId(string resourceGroup)
         {
-            var settings = _settings;
+            if (_randomStrings.ContainsKey(resourceGroup))
+            {
+                return _randomStrings[resourceGroup];
+            }
+            
             var outputs = await _armDeployer.DeployArm(
                 resourceGroup,
                 "randomid-finder",
                 await typeof(AzureResourceGroupCreator).GetResourceContents("ResourceGroupRandomId"),
                 new ReadOnlyDictionary<string, object>(new Dictionary<string, object>())
             );
-            return ((dynamic)outputs.Properties.Outputs).randomId.value;
+
+            var resourceGroupRandomId = ((dynamic)outputs.Properties.Outputs).randomId.value;
+            _randomStrings.Add(resourceGroup, resourceGroupRandomId);
+            
+            return resourceGroupRandomId;
         }
     }
 }
