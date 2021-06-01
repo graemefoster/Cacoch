@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Cacoch.Core.Manifest;
 using Cacoch.Provider.AzureArm;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Rest;
@@ -21,7 +23,7 @@ namespace Cacoch.Cli
                 new TokenRequestContext(new[] {"https://management.core.windows.net"}));
             var serviceClientCredentials = new TokenCredentials(token.Token);
 
-            using var host = new HostBuilder()
+            using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hb, svc) =>
                 {
                     svc.RegisterCacoch(typeof(Cacoch.Provider.AzureArm.Resources.Storage.StorageTwin).Assembly);
