@@ -21,28 +21,21 @@
       "metadata": {
         "description": "Location for all resources."
       }
-    }
-  },
-  "variables": {
-    "storageAccountName": "[concat('store', uniquestring(resourceGroup().id))]"
+    },
+    "storageAccountName" : {"type" :  "string"}
   },
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2019-06-01",
-      "name": "[variables('storageAccountName')]",
+      "name": "[parameters('storageAccountName')]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "[parameters('storageAccountType')]"
       },
       "kind": "StorageV2",
+      "tags" : {},
       "properties": {}
     }
-  ],
-  "outputs": {
-    "storageAccountName": {
-      "type": "string",
-      "value": "[variables('storageAccountName')]"
-    }
-  }
+  ]
 }

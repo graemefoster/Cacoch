@@ -11,5 +11,11 @@ namespace Cacoch.Core.Manifest
     public interface IPlatformTwin
     {
         Task<ValidationResult> Validate();
+
+        Task<IDeploymentArtifact> BuildDeploymentArtifact();
+    }
+
+    public interface IDeploymentArtifact
+    {
     }
 }

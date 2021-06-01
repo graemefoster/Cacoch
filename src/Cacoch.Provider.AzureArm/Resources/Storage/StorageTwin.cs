@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest;
 
@@ -15,8 +17,22 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
 
         public Task<ValidationResult> Validate()
         {
-            if (_resource.Name.Length > 4 && _resource.Name.Length < 12) return Task.FromResult(ValidationResult.Success);
-            return Task.FromResult(new ValidationResult("Storage account names must be between 5 and 11 characters"));
+            if (_resource.Name.Length is > 4 and < 12) return Task.FromResult(ValidationResult.Success);
+            return Task.FromResult(new ValidationResult("Azure Storage account names must be between 5 and 11 characters"));
+        }
+
+        public async Task<IDeploymentArtifact> BuildDeploymentArtifact()
+        {
+            return new AzureArmDeploymentArtifact(_resource.Name.ToLowerInvariant(), await GetResourceContents(), new Dictionary<string, object>()
+            {
+                {"storageAccountName", _resource.Name}
+            });
+        }
+
+        private static Task<string> GetResourceContents()
+        {
+            using var stream = new StreamReader(typeof(StorageTwin).Assembly.GetManifestResourceStream(typeof(StorageTwin).FullName + ".json")!);
+            return stream.ReadToEndAsync();
         }
     }
 }
