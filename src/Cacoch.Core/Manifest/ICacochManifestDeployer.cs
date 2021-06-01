@@ -2,7 +2,7 @@
 
 namespace Cacoch.Core.Manifest
 {
-    public interface IPlatformDeployer
+    public interface ICacochManifestDeployer
     {
         Task Deploy(Manifest manifest, IPlatformTwin[] twins);
     }

@@ -9,12 +9,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Azure.ResourceManager.Storage" Version="1.0.0-preview.2" />
       <PackageReference Include="Microsoft.Azure.Management.ResourceManager" Version="3.13.1-preview" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="Resources\WebApp\WebAppTwin.json" />
       <None Remove="Resources\Storage\StorageTwin.json" />
       <EmbeddedResource Include="Resources\Storage\StorageTwin.json" />
     </ItemGroup>

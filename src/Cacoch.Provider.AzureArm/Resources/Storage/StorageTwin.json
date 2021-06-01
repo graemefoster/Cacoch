@@ -22,7 +22,8 @@
         "description": "Location for all resources."
       }
     },
-    "storageAccountName" : {"type" :  "string"}
+    "storageAccountName" : {"type" :  "string"},
+    "containers" : {"type" :  "array"}
   },
   "resources": [
     {
@@ -34,8 +35,7 @@
         "name": "[parameters('storageAccountType')]"
       },
       "kind": "StorageV2",
-      "tags" : {},
-      "properties": {}
+      "tags" : {}
     }
   ]
 }

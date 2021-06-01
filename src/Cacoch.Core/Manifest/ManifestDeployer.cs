@@ -8,12 +8,14 @@ namespace Cacoch.Core.Manifest
     internal class ManifestDeployer : IManifestDeployer
     {
         private readonly PlatformTwinFactory _platformTwinFactory;
-        private readonly IPlatformDeployer _platformDeployer;
+        private readonly ICacochManifestDeployer _cacochManifestDeployer;
 
-        public ManifestDeployer(PlatformTwinFactory platformTwinFactory, IPlatformDeployer platformDeployer)
+        public ManifestDeployer(
+            PlatformTwinFactory platformTwinFactory, 
+            ICacochManifestDeployer cacochManifestDeployer)
         {
             _platformTwinFactory = platformTwinFactory;
-            _platformDeployer = platformDeployer;
+            _cacochManifestDeployer = cacochManifestDeployer;
         }
 
         public async Task Deploy(Manifest manifest)
@@ -25,7 +27,7 @@ namespace Cacoch.Core.Manifest
                 throw new ArgumentException(
                     $"Unable to create platform twins{Environment.NewLine}{string.Join(Environment.NewLine, validation.Where(x => x != ValidationResult.Success).Select(x => x.ErrorMessage))}");
             }
-            await _platformDeployer.Deploy(manifest, twins);
+            await _cacochManifestDeployer.Deploy(manifest, twins);
         }
     }
 }

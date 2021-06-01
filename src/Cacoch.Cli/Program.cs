@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Cacoch.Core.Manifest;
 using Cacoch.Provider.AzureArm;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Rest;
@@ -18,20 +16,20 @@ namespace Cacoch.Cli
     {
         static async Task Main(string[] args)
         {
-            var creds = new DefaultAzureCredential(true);
-            var token = await creds.GetTokenAsync(
-                new TokenRequestContext(new[] {"https://management.core.windows.net"}));
+            var tokenCredential = new DefaultAzureCredential();
+            var token = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[] {"https://management.core.windows.net"}));
             var serviceClientCredentials = new TokenCredentials(token.Token);
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hb, svc) =>
                 {
                     svc.RegisterCacoch(typeof(Cacoch.Provider.AzureArm.Resources.Storage.StorageTwin).Assembly);
-                    svc.RegisterCacochAzureArm(serviceClientCredentials, hb.Configuration.GetSection("Cacoch"));
+                    svc.RegisterCacochAzureArm(serviceClientCredentials, tokenCredential, hb.Configuration.GetSection("Cacoch"));
                 })
                 .ConfigureLogging(lb => lb.AddSerilog()).Build();
             
             await host.StartAsync();
+
             var builder = host.Services.GetService<IManifestDeployer>();
                 
             await builder!.Deploy(
@@ -42,7 +40,8 @@ namespace Cacoch.Cli
                     "Cacoch Test",
                     new List<IResource>
                     {
-                        new Storage("cacochtemplates")
+                        new Storage("cacochstorage", Array.Empty<string>()),
+                        new WebApp("cacochapp")
                     }));
         }
     }

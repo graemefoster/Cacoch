@@ -13,6 +13,7 @@ namespace Cacoch.Core.Manifest
         Task<ValidationResult> Validate();
 
         Task<IDeploymentArtifact> BuildDeploymentArtifact();
+        string Name { get; }
     }
 
     public interface IDeploymentArtifact

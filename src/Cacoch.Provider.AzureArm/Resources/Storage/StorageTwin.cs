@@ -29,6 +29,8 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
             });
         }
 
+        public string Name => _resource.Name;
+
         private static Task<string> GetResourceContents()
         {
             using var stream = new StreamReader(typeof(StorageTwin).Assembly.GetManifestResourceStream(typeof(StorageTwin).FullName + ".json")!);

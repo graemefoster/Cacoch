@@ -5,13 +5,13 @@ namespace Cacoch.Core.Manifest
 {
     public class Storage: IResource
     {
-        private readonly IPlatformTwin<Storage> _twin;
-
-        public Storage(string name)
+        public Storage(string name, string[] containers)
         {
             Name = name;
+            Containers = containers;
         }
 
-        public string Name { get; set; }
+        public string Name { get; }
+        public string[] Containers { get; }
     }
 }
