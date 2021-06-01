@@ -16,6 +16,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="Azure\ResourceGroupRandomId.json" />
+      <EmbeddedResource Include="Resources\Storage\Container.json" />
       <EmbeddedResource Include="Resources\WebApp\WebAppTwin.json" />
       <None Remove="Resources\Storage\StorageTwin.json" />
       <EmbeddedResource Include="Resources\Storage\StorageTwin.json" />

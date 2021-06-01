@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
@@ -18,5 +19,6 @@ namespace Cacoch.Core.Manifest
 
     public interface IDeploymentArtifact
     {
+        IEnumerable<IDeploymentArtifact> ChildArtifacts { get; }
     }
 }

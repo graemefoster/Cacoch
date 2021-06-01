@@ -41,7 +41,7 @@ namespace Cacoch.Cli
                     new List<IResource>
                     {
                         new Storage("cacochstorage", Array.Empty<string>()),
-                        new WebApp("cacochapp")
+                        //new WebApp("cacochapp")
                     }));
         }
     }

@@ -31,10 +31,14 @@ namespace Cacoch.Provider.AzureArm
         internal async Task BuildFoundation()
         {
             await _azureResourceGroupCreator.CreateResourceGroupIfNotExists(_settings.Value.PlatformResources);
-            
+            var uniqueId = await _azureResourceGroupCreator.GetResourceGroupRandomId(_settings.Value.PlatformResources);
+
             var storageTwin =
-                (AzureArmDeploymentArtifact) await new StorageTwin(new Storage(_settings.Value.PlatformStorage, new [] { "armtemplates" })).BuildDeploymentArtifact();
-            
+                (AzureArmDeploymentArtifact) await new StorageTwin(
+                        new Storage(_settings.Value.PlatformStorage + "-" + uniqueId,
+                            new[] {"armtemplates"}))
+                    .BuildDeploymentArtifact();
+
             await _platformDeployer.DeployArm(
                 _settings.Value.PlatformResources,
                 storageTwin.PlatformIdentifier,

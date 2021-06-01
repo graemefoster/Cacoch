@@ -29,6 +29,7 @@ namespace Cacoch.Provider.AzureArm
         {
             await _cacochPlatform.BuildFoundation();
             await _azureResourceGroupCreator.CreateResourceGroupIfNotExists(manifest.Slug);
+            var uniqueId = await _azureResourceGroupCreator.GetResourceGroupRandomId(manifest.Slug);
 
             foreach (var twin in twins)
             {

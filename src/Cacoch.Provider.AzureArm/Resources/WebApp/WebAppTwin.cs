@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest;
 using Cacoch.Provider.AzureArm.Resources.Storage;
@@ -27,19 +27,17 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
 
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact()
         {
-            return new AzureArmDeploymentArtifact(_resource.Name.ToLowerInvariant(), await GetResourceContents(), new Dictionary<string, object>()
-            {
-                {"webAppName", _resource.Name},
-                {"serverFarmId", _settings.Value.ServerFarmId }
-            });
+            return new AzureArmDeploymentArtifact(
+                _resource.Name.ToLowerInvariant(), 
+                await typeof(WebAppTwin).GetResourceContents(),
+                new Dictionary<string, object>()
+                {
+                    {"webAppName", _resource.Name},
+                    {"serverFarmId", _settings.Value.ServerFarmId}
+                },
+                Array.Empty<AzureArmDeploymentArtifact>());
         }
 
-        private static Task<string> GetResourceContents()
-        {
-            using var stream = new StreamReader(typeof(StorageTwin).Assembly.GetManifestResourceStream(typeof(WebAppTwin).FullName + ".json")!);
-            return stream.ReadToEndAsync();
-        }
-        
         public string Name => _resource.Name;
     }
 }

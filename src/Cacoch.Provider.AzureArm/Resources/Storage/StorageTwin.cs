@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest;
 
@@ -23,17 +25,39 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
 
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact()
         {
-            return new AzureArmDeploymentArtifact(_resource.Name.ToLowerInvariant(), await GetResourceContents(), new Dictionary<string, object>()
-            {
-                {"storageAccountName", _resource.Name}
-            });
+            var containerTemplate = await typeof(StorageTwin).GetResourceContents("Container");
+            
+            return new AzureArmDeploymentArtifact(
+                _resource.Name.ToLowerInvariant(),
+                await typeof(StorageTwin).GetResourceContents(),
+                new Dictionary<string, object>()
+                {
+                    {"storageAccountName", _resource.Name}
+                },
+                _resource.Containers.Select(x => new AzureArmDeploymentArtifact(
+                    _resource.Name.ToLowerInvariant() + "/" + x,
+                    containerTemplate,
+                    new Dictionary<string, object>
+                    {
+                        {"storageAccountName", _resource.Name},
+                        {"containerName", x}
+                    },
+                    Array.Empty<AzureArmDeploymentArtifact>())));
         }
 
         public string Name => _resource.Name;
 
-        private static Task<string> GetResourceContents()
+    }
+
+    public static class ResourceEx
+    {
+        public static Task<string> GetResourceContents(this Type relatedType, string templateName = null)
         {
-            using var stream = new StreamReader(typeof(StorageTwin).Assembly.GetManifestResourceStream(typeof(StorageTwin).FullName + ".json")!);
+            var resourceName = templateName == null
+                ? relatedType.FullName + ".json"
+                : relatedType.Namespace + $".{templateName}.json";
+
+            using var stream = new StreamReader(relatedType.Assembly.GetManifestResourceStream(resourceName)!);
             return stream.ReadToEndAsync();
         }
     }
