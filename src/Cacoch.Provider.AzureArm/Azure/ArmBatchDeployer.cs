@@ -22,7 +22,12 @@ namespace Cacoch.Provider.AzureArm.Azure
 {
     internal class ArmBatchDeployer : IArmBatchBuilder
     {
-        private record InternalArmDetails(byte[] Hash, string Name, Dictionary<string, object> Parameters);
+        private record InternalArmDetails(
+            string HashString, 
+            string Id, 
+            string Name, 
+            Dictionary<string, object> Parameters,
+            InternalArmDetails? DependsOn);
 
         private readonly StorageManagementClient _storageManagementClient;
         private readonly BlobServiceClient _blobServiceClient;
@@ -33,8 +38,8 @@ namespace Cacoch.Provider.AzureArm.Azure
         private readonly IDictionary<object, string> _parameterMap = new Dictionary<object, string>();
         private readonly IList<InternalArmDetails> _armsToDeploy = new List<InternalArmDetails>();
 
-        private readonly IDictionary<byte[], (string uid, string arm)> _uniqueArms =
-            new Dictionary<byte[], (string uid, string arm)>();
+        private readonly IDictionary<string, (string uid, string arm)> _uniqueArms =
+            new Dictionary<string, (string uid, string arm)>();
 
         public ArmBatchDeployer(
             StorageManagementClient storageManagementClient,
@@ -52,20 +57,37 @@ namespace Cacoch.Provider.AzureArm.Azure
 
         public void RegisterArm(AzureArmDeploymentArtifact artifact)
         {
+            RegisterArmRecursive(artifact, null);
+        }
+
+        private void RegisterArmRecursive(AzureArmDeploymentArtifact artifact, InternalArmDetails? parent)
+        {
             var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(artifact.Arm));
-            if (!_uniqueArms.ContainsKey(hash))
+            var hashString = Convert.ToBase64String(hash);
+            if (!_uniqueArms.ContainsKey(hashString))
             {
-                _uniqueArms.Add(hash, (Guid.NewGuid().ToString(), artifact.Arm));
+                _uniqueArms.Add(hashString, (Guid.NewGuid().ToString(), artifact.Arm));
             }
 
-            var internalArmDetails = new InternalArmDetails(hash, artifact.PlatformIdentifier, artifact.Parameters);
+            var internalArmDetails = new InternalArmDetails(
+                hashString, 
+                Guid.NewGuid().ToString(),
+                artifact.PlatformIdentifier, artifact.Parameters, parent);
+
             _armsToDeploy.Add(internalArmDetails);
+
             foreach (var parameter in artifact.Parameters)
             {
                 if (!_parameterMap.ContainsKey(parameter.Value))
                 {
                     _parameterMap[parameter.Value] = Guid.NewGuid().ToString();
                 }
+            }
+
+            foreach (var deploymentArtifact in artifact.ChildArtifacts)
+            {
+                var child = (AzureArmDeploymentArtifact) deploymentArtifact;
+                RegisterArmRecursive(child, internalArmDetails);
             }
         }
 
@@ -105,7 +127,7 @@ namespace Cacoch.Provider.AzureArm.Azure
             {
                 var blobClient =
                     containerClient.GetBlockBlobClient(
-                        $"{deploymentTemplateFolder}/{_uniqueArms[x.Hash].uid.ToString()}.json");
+                        $"{deploymentTemplateFolder}/{_uniqueArms[x.HashString].uid.ToString()}.json");
                 var blobSasBuilder = new BlobSasBuilder(BlobSasPermissions.Read,
                     DateTimeOffset.Now.AddHours(5))
                 {
@@ -119,7 +141,8 @@ namespace Cacoch.Provider.AzureArm.Azure
                 {
                     type = "Microsoft.Resources/deployments",
                     apiVersion = "2020-10-01",
-                    name = Guid.NewGuid().ToString(),
+                    name = x.Id,
+                    dependsOn = x.DependsOn == null ? Array.Empty<string>() : new[] {x.DependsOn.Id},
                     properties = new
                     {
                         mode = "Incremental",

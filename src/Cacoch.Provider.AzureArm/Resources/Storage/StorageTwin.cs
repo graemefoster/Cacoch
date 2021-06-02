@@ -22,7 +22,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
 
         public Task<ValidationResult> Validate()
         {
-            if (_resource.Name.Length is > 4 and < 16) return Task.FromResult(ValidationResult.Success);
+            if (_resource.Name.Length is > 4 and < 16) return Task.FromResult(ValidationResult.Success!);
             return Task.FromResult(new ValidationResult("Azure Storage account names must be between 5 and 15 characters"));
         }
 
@@ -54,7 +54,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
 
     public static class ResourceEx
     {
-        public static Task<string> GetResourceContents(this Type relatedType, string templateName = null)
+        public static Task<string> GetResourceContents(this Type relatedType, string? templateName = null)
         {
             var resourceName = templateName == null
                 ? relatedType.FullName + ".json"

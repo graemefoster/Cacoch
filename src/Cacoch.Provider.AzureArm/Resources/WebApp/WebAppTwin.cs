@@ -23,7 +23,7 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
 
         public Task<ValidationResult> Validate()
         {
-            if (_resource.Name.Length is > 4 and < 16) return Task.FromResult(ValidationResult.Success);
+            if (_resource.Name.Length is > 4 and < 16) return Task.FromResult(ValidationResult.Success!);
             return Task.FromResult(new ValidationResult("Web App names must be between 5 and 15 characters"));
         }
 
@@ -35,7 +35,7 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                 new Dictionary<string, object>()
                 {
                     {"webAppName", PlatformName},
-                    {"serverFarmId", _settings.Value.ServerFarmId}
+                    {"serverFarmId", _settings.Value.ServerFarmId!}
                 },
                 Array.Empty<AzureArmDeploymentArtifact>());
         }

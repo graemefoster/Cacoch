@@ -29,20 +29,20 @@ namespace Cacoch.Cli
             
             await host.StartAsync();
 
-            using (var _ = host.Services.CreateScope()) {
-                var builder = host.Services.GetService<IManifestDeployer>();
-
-                await builder!.Deploy(
-                    new Manifest(
-                        Guid.Parse("01010101-0101-0101-0101-010101010101"),
-                        "1.0",
-                        "cacochplatform",
-                        "Cacoch Platform",
-                        new List<IResource>
-                        {
-                            new Storage("cacochstorage", Array.Empty<string>())
-                        }));
-            }
+            // using (var _ = host.Services.CreateScope()) {
+            //     var builder = host.Services.GetService<IManifestDeployer>();
+            //
+            //     await builder!.Deploy(
+            //         new Manifest(
+            //             Guid.Parse("01010101-0101-0101-0101-010101010101"),
+            //             "1.0",
+            //             "cacochplatform",
+            //             "Cacoch Platform",
+            //             new List<IResource>
+            //             {
+            //                 new Storage("cacochstorage", Array.Empty<string>())
+            //             }));
+            // }
 
             using (var _ = host.Services.CreateScope())
             {
@@ -56,7 +56,7 @@ namespace Cacoch.Cli
                         "Cacoch Test",
                         new List<IResource>
                         {
-                            new Storage("cacochstorage", Array.Empty<string>()),
+                            new Storage("cacochstorage", new [] {"containerone", "containertwo"}),
                             new WebApp("cacochapp")
                         }));
             }
