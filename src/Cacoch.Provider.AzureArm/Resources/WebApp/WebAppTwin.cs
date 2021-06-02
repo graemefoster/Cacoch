@@ -14,16 +14,17 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
         private readonly Core.Manifest.WebApp _resource;
         private readonly IOptions<AzureArmSettings> _settings;
 
-        public WebAppTwin(Core.Manifest.WebApp resource, IOptions<AzureArmSettings> settings)
+        public WebAppTwin(IOptions<AzureArmSettings> settings, Core.Manifest.WebApp resource, AzurePlatformContext platformContext)
         {
             _resource = resource;
             _settings = settings;
+            PlatformName = resource.Name + "-" + platformContext.ResourceGroupRandomId;
         }
 
         public Task<ValidationResult> Validate()
         {
             if (_resource.Name.Length is > 4 and < 16) return Task.FromResult(ValidationResult.Success);
-            return Task.FromResult(new ValidationResult("Web App names must be between 5 and 11 characters"));
+            return Task.FromResult(new ValidationResult("Web App names must be between 5 and 15 characters"));
         }
 
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact()
@@ -33,12 +34,12 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                 await typeof(WebAppTwin).GetResourceContents(),
                 new Dictionary<string, object>()
                 {
-                    {"webAppName", _resource.Name},
+                    {"webAppName", PlatformName},
                     {"serverFarmId", _settings.Value.ServerFarmId}
                 },
                 Array.Empty<AzureArmDeploymentArtifact>());
         }
 
-        public string Name => _resource.Name;
+        public string PlatformName { get; }
     }
 }

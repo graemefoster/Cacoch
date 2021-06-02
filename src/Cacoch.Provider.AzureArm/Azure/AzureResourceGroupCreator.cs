@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Cacoch.Provider.AzureArm.Resources;
 using Cacoch.Provider.AzureArm.Resources.Storage;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
@@ -17,7 +16,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         private readonly ILogger<AzureResourceGroupCreator> _logger;
         private readonly ResourceManagementClient _resourceClient;
         private readonly IOptions<AzureArmSettings> _settings;
-        private Dictionary<string, string> _randomStrings = new();
+        private readonly Dictionary<string, string> _randomStrings = new();
 
         public AzureResourceGroupCreator(
             IArmDeployer armDeployer,
@@ -50,14 +49,13 @@ namespace Cacoch.Provider.AzureArm.Azure
                 return _randomStrings[resourceGroup];
             }
             
-            var outputs = await _armDeployer.DeployArm(
+            var outputs = await _armDeployer.Deploy(
                 resourceGroup,
-                "randomid-finder",
                 await typeof(AzureResourceGroupCreator).GetResourceContents("ResourceGroupRandomId"),
-                new ReadOnlyDictionary<string, object>(new Dictionary<string, object>())
+                new Dictionary<string, object>()
             );
 
-            var resourceGroupRandomId = ((dynamic)outputs.Properties.Outputs).randomId.value;
+            var resourceGroupRandomId = (string)((dynamic)outputs.Properties.Outputs).randomId.value;
             _randomStrings.Add(resourceGroup, resourceGroupRandomId);
             
             return resourceGroupRandomId;

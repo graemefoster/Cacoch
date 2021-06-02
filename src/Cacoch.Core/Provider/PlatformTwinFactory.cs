@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cacoch.Core.Provider
 {
-    internal class PlatformTwinFactory
+    internal class PlatformTwinFactory<TPlatformContext> where TPlatformContext : IPlatformContext
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly PlatformTwinDictionary _platformTwinDictionary;
@@ -15,13 +15,14 @@ namespace Cacoch.Core.Provider
             _platformTwinDictionary = platformTwinDictionary;
         }
 
-        public IPlatformTwin Build<T>(T resource) where T : IResource
+        public IPlatformTwin Build<T>(T resource, TPlatformContext platformContext) where T : IResource
         {
             var genericType = typeof(IPlatformTwin<>).MakeGenericType(resource.GetType());
             return (IPlatformTwin)ActivatorUtilities.CreateInstance(
                 _serviceProvider,
                 _platformTwinDictionary.Resolve(genericType), 
-                resource);
+                resource,
+                platformContext);
         }
     }
 }

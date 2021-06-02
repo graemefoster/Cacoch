@@ -4,11 +4,6 @@
   "parameters": {
   },
   "resources": [
-  ],
-  "outputs" : {
-    "randomId": {
-      "type": "string",
-      "value": "[uniqueString(resourcegroup().name)]"
-    }
-  }
+    {{deployments}}
+  ]
 }

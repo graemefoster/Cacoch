@@ -14,6 +14,6 @@ namespace Cacoch.Core.Provider
         Task<ValidationResult> Validate();
 
         Task<IDeploymentArtifact> BuildDeploymentArtifact();
-        string Name { get; }
+        string PlatformName { get; }
     }
 }

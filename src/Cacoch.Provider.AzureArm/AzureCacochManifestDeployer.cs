@@ -7,39 +7,38 @@ using Microsoft.Extensions.Logging;
 
 namespace Cacoch.Provider.AzureArm
 {
-    internal class AzureCacochManifestDeployer : ICacochManifestDeployer
+    internal class AzureCacochManifestDeployer : ICacochManifestDeployer<AzurePlatformContext>
     {
-        private readonly IArmDeployer _armDeployer;
+        private readonly IArmBatchBuilder _armBatchBuilder;
         private readonly ILogger<AzureCacochManifestDeployer> _logger;
         private readonly IResourceGroupCreator _azureResourceGroupCreator;
-        private readonly CacochPlatform _cacochPlatform;
 
         public AzureCacochManifestDeployer(
-            IArmDeployer armDeployer,
+            IArmBatchBuilder armBatchBuilder,
             ILogger<AzureCacochManifestDeployer> logger,
-            IResourceGroupCreator azureResourceGroupCreator,
-            CacochPlatform cacochPlatform)
+            IResourceGroupCreator azureResourceGroupCreator)
         {
-            _armDeployer = armDeployer;
+            _armBatchBuilder = armBatchBuilder;
             _logger = logger;
             _azureResourceGroupCreator = azureResourceGroupCreator;
-            _cacochPlatform = cacochPlatform;
         }
 
         public async Task Deploy(Manifest manifest, IPlatformTwin[] twins)
         {
-            await _cacochPlatform.BuildFoundation();
-            await _azureResourceGroupCreator.CreateResourceGroupIfNotExists(manifest.Slug);
-            var uniqueId = await _azureResourceGroupCreator.GetResourceGroupRandomId(manifest.Slug);
-
             foreach (var twin in twins)
             {
-                _logger.LogDebug("  Deploying twin type {Type} for {Resource}", twin.GetType().Name, twin.Name);
-                var deploymentArtifact = (AzureArmDeploymentArtifact) await twin.BuildDeploymentArtifact();
-                await _armDeployer.DeployArm(manifest.Slug, deploymentArtifact.PlatformIdentifier,
-                    deploymentArtifact.Arm,
-                    deploymentArtifact.Parameters);
+                _logger.LogDebug("  Building arm - Twin type {Type}. Twin platform now:{PlatformName}", twin.GetType().Name, twin.PlatformName);
+                _armBatchBuilder.RegisterArm((AzureArmDeploymentArtifact) await twin.BuildDeploymentArtifact());
             }
+
+            _logger.LogDebug("  Beginning Azure Deployment");
+            await _armBatchBuilder.Deploy(manifest.Slug);
+        }
+
+        public async Task<AzurePlatformContext> PrepareContext(Manifest manifest)
+        {
+            await _azureResourceGroupCreator.CreateResourceGroupIfNotExists(manifest.Slug);
+            return new AzurePlatformContext(await _azureResourceGroupCreator.GetResourceGroupRandomId(manifest.Slug));
         }
     }
 }

@@ -7,10 +7,10 @@ namespace Cacoch.Core.Provider
 {
     public static class PlatformTwinFactoryRegistrationEx
     {
-        public static void RegisterCacoch(this IServiceCollection services, Assembly providerAssembly)
+        public static void RegisterCacoch<TPlatformContext>(this IServiceCollection services, Assembly providerAssembly) where TPlatformContext : IPlatformContext
         {
-            services.AddSingleton<IManifestDeployer, ManifestDeployer>();
-            services.AddSingleton<PlatformTwinFactory>();
+            services.AddSingleton<PlatformTwinFactory<TPlatformContext>>();
+            services.AddScoped<IManifestDeployer, ManifestDeployer<TPlatformContext>>();
             var mappingDictionary = new PlatformTwinDictionary();
             
             var twins = providerAssembly.DefinedTypes
