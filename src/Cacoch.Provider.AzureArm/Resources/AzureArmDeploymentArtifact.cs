@@ -8,7 +8,7 @@ namespace Cacoch.Provider.AzureArm.Resources
     {
         internal string PlatformIdentifier { get; }
         internal string Arm { get; }
-        internal ReadOnlyDictionary<string, object> Parameters { get; }
+        internal Dictionary<string, object> Parameters { get; }
 
         public AzureArmDeploymentArtifact(
             string platformIdentifier, 
@@ -18,7 +18,7 @@ namespace Cacoch.Provider.AzureArm.Resources
         {
             PlatformIdentifier = platformIdentifier;
             Arm = arm;
-            Parameters = new ReadOnlyDictionary<string, object>(parameters);
+            Parameters = parameters;
             ChildArtifacts = childArtifacts;
         }
 

@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
+using Newtonsoft.Json;
 
 namespace Cacoch.Provider.AzureArm.Azure
 {
@@ -28,30 +29,28 @@ namespace Cacoch.Provider.AzureArm.Azure
             string arm,
             Dictionary<string, object> parameters)
         {
+            var deployment = new Deployment(
+                new DeploymentProperties(DeploymentMode.Incremental,
+                    arm,
+                    null,
+                    JsonConvert.SerializeObject(parameters?.ToDictionary(x => x.Key, x =>
+                    {
+                        if (x.Value is { } stringValue)
+                        {
+                            return new
+                            {
+                                value = stringValue
+                            };
+                        }
+
+                        throw new NotSupportedException($"Unsupported parameter type - {x.Value.GetType()}");
+                    }))
+                ));
+
             return await _resourceClient.Deployments.CreateOrUpdateAsync(
                 resourceGroup,
                 "test-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss"),
-                new Deployment(
-                    new DeploymentProperties(DeploymentMode.Incremental,
-                        arm,
-                        null,
-                        parameters == null
-                            ? null
-                            : new Dictionary<string, object>(parameters.Select(p =>
-                            {
-                                if (p.Value is { } stringValue)
-                                {
-                                    return new KeyValuePair<string, object>(
-                                        p.Key,
-                                        new
-                                        {
-                                            value = stringValue
-                                        });
-                                }
-
-                                throw new NotSupportedException($"Unsupported parameter type - {p.Value.GetType()}");
-                            }))
-                    )));
+                deployment);
         }
     }
 }
