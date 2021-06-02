@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Cacoch.Core.Manifest;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core.Provider
 {
     public interface IPlatformTwin<T> : IPlatformTwin where T : IResource
     {
@@ -15,10 +15,5 @@ namespace Cacoch.Core.Manifest
 
         Task<IDeploymentArtifact> BuildDeploymentArtifact();
         string Name { get; }
-    }
-
-    public interface IDeploymentArtifact
-    {
-        IEnumerable<IDeploymentArtifact> ChildArtifacts { get; }
     }
 }

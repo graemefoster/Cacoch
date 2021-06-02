@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core.Provider
 {
     public interface IManifestDeployer
     {
-        Task Deploy(Manifest manifest);
+        Task Deploy(Manifest.Manifest manifest);
     }
 }

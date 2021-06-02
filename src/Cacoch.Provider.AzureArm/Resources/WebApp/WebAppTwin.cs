@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Resources.Storage;
 using Microsoft.Extensions.Options;
 

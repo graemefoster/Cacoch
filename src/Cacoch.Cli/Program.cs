@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -41,7 +42,7 @@ namespace Cacoch.Cli
                     new List<IResource>
                     {
                         new Storage("cacochstorage", Array.Empty<string>()),
-                        //new WebApp("cacochapp")
+                        new WebApp("cacochapp")
                     }));
         }
     }

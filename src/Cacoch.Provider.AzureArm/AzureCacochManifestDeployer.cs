@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Azure;
 using Cacoch.Provider.AzureArm.Resources;
 using Microsoft.Extensions.Logging;

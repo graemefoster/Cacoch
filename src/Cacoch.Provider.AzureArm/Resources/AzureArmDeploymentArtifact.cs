@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Provider;
 
 namespace Cacoch.Provider.AzureArm.Resources
 {

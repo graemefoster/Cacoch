@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Provider;
 
 namespace Cacoch.Provider.AzureArm.Resources.Storage
 {

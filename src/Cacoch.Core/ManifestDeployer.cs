@@ -2,8 +2,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Cacoch.Core.Provider;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core
 {
     internal class ManifestDeployer : IManifestDeployer
     {
@@ -18,7 +19,7 @@ namespace Cacoch.Core.Manifest
             _cacochManifestDeployer = cacochManifestDeployer;
         }
 
-        public async Task Deploy(Manifest manifest)
+        public async Task Deploy(Manifest.Manifest manifest)
         {
             var twins = manifest.Resources.Select(x => _platformTwinFactory.Build(x)).ToArray();
             var validation = await Task.WhenAll(twins.Select(x => x.Validate()).ToArray());

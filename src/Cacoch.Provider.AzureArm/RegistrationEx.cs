@@ -1,5 +1,6 @@
 using Azure.Core;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

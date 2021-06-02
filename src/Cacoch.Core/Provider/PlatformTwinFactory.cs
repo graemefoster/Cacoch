@@ -1,25 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using Cacoch.Core.Manifest;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core.Provider
 {
-    internal class PlatformTwinDictionary
-    {
-        private IDictionary<Type, Type> _mapping = new Dictionary<Type, Type>();
-
-        public void Map(Type service, Type impl)
-        {
-            _mapping.Add(service, impl);
-        }
-
-        public Type Resolve(Type t)
-        {
-            return _mapping[t];
-        }
-    }
-    
     internal class PlatformTwinFactory
     {
         private readonly IServiceProvider _serviceProvider;

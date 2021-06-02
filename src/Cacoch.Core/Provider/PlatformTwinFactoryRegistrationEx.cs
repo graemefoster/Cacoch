@@ -1,8 +1,9 @@
 using System.Linq;
 using System.Reflection;
+using Cacoch.Core.Manifest;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core.Provider
 {
     public static class PlatformTwinFactoryRegistrationEx
     {
