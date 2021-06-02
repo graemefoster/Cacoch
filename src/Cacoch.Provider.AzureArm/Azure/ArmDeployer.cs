@@ -24,7 +24,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         }
 
         public async Task<DeploymentExtended> Deploy(
-            string resourceGroup, 
+            string resourceGroup,
             string arm,
             Dictionary<string, object> parameters)
         {
@@ -35,20 +35,22 @@ namespace Cacoch.Provider.AzureArm.Azure
                     new DeploymentProperties(DeploymentMode.Incremental,
                         arm,
                         null,
-                        new Dictionary<string, object>(parameters.Select(p =>
-                        {
-                            if (p.Value is { } stringValue)
+                        parameters == null
+                            ? null
+                            : new Dictionary<string, object>(parameters.Select(p =>
                             {
-                                return new KeyValuePair<string, object>(
-                                    p.Key,
-                                    new
-                                    {
-                                        value = stringValue
-                                    });
-                            }
+                                if (p.Value is { } stringValue)
+                                {
+                                    return new KeyValuePair<string, object>(
+                                        p.Key,
+                                        new
+                                        {
+                                            value = stringValue
+                                        });
+                                }
 
-                            throw new NotSupportedException($"Unsupported parameter type - {p.Value.GetType()}");
-                        }))
+                                throw new NotSupportedException($"Unsupported parameter type - {p.Value.GetType()}");
+                            }))
                     )));
         }
     }

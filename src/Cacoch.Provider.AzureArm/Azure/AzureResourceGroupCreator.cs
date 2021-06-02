@@ -49,6 +49,7 @@ namespace Cacoch.Provider.AzureArm.Azure
                 return _randomStrings[resourceGroup];
             }
             
+            _logger.LogDebug("  Fetching random-id to help with unique resource names");
             var outputs = await _armDeployer.Deploy(
                 resourceGroup,
                 await typeof(AzureResourceGroupCreator).GetResourceContents("ResourceGroupRandomId"),
@@ -57,6 +58,7 @@ namespace Cacoch.Provider.AzureArm.Azure
 
             var resourceGroupRandomId = (string)((dynamic)outputs.Properties.Outputs).randomId.value;
             _randomStrings.Add(resourceGroup, resourceGroupRandomId);
+            _logger.LogDebug("  Fetched random id {RandomId} for resource group {ResourceGroup}", resourceGroupRandomId, resourceGroup);
             
             return resourceGroupRandomId;
         }

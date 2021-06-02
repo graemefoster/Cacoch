@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure;
 using Azure.ResourceManager.Storage;
 using Azure.ResourceManager.Storage.Models;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using Cacoch.Provider.AzureArm.Resources;
+using Cacoch.Provider.AzureArm.Resources.Storage;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -51,74 +54,88 @@ namespace Cacoch.Provider.AzureArm.Azure
             _logger.LogDebug("Ensuring arm template storage container exists");
             var container = await GetOrCreateTemplateStorageContainer();
             _logger.LogDebug("Getting blob container client");
-            var client = _blobServiceClient.GetBlobContainerClient(container.Name);
+            var containerClient = _blobServiceClient.GetBlobContainerClient(container.Name);
             var deploymentTemplateFolder = resourceGroup + "-" + Guid.NewGuid().ToString().ToLowerInvariant();
             _logger.LogDebug("Will place templates in {Folder}", deploymentTemplateFolder);
 
-            await Task.WhenAll(_armsToDeploy.Select(x =>
+            await Task.WhenAll(_armsToDeploy.Select(async x =>
             {
-                using var ms = new MemoryStream(Encoding.Default.GetBytes(x.Arm));
+                await using var ms = new MemoryStream(Encoding.Default.GetBytes(x.Arm));
                 var blobName = $"{deploymentTemplateFolder}/{x.PlatformIdentifier}.json";
                 _logger.LogDebug(" Uploading arm for {PlatformResource} to {Blob}", x.PlatformIdentifier, blobName);
-                return client.UploadBlobAsync(blobName, ms);
+                await containerClient.UploadBlobAsync(blobName, ms);
             }));
 
-            _logger.LogDebug("  Getting SAS token for arm deployment");
-            var sasKey =
-                client.GenerateSasUri(new BlobSasBuilder(BlobContainerSasPermissions.Read,
-                    DateTimeOffset.Now.AddHours(5)));
-            _logger.LogDebug("  Got SAS token for arm deployment. Ends with {SasTokenSuffix}", sasKey.AbsoluteUri.Substring(sasKey.AbsoluteUri.Length - 10, 10));
-
-            var deploymentResources = _armsToDeploy.Select(x => new
+            var deploymentResources = _armsToDeploy.Select(x =>
             {
-                type = "Microsoft.Resources/deployments",
-                apiVersion = "2020-10-01",
-                name = "networksTemplate",
-                mode = "Incremental",
-                templateLink = new
+                var blobClient = containerClient.GetBlockBlobClient($"{deploymentTemplateFolder}/{x.PlatformIdentifier}.json");
+                var blobSasBuilder = new BlobSasBuilder(BlobSasPermissions.Read,
+                    DateTimeOffset.Now.AddHours(5))
                 {
-                    uri = $"{client.Uri}/{deploymentTemplateFolder}/{x.PlatformIdentifier}.json?",
-                    contentVersion = "1.0.0.0"
-                },
-                parameters = new Dictionary<string, object>(x.Parameters.Select(p =>
-                {
-                    if (p.Value is { } stringValue)
-                    {
-                        return new KeyValuePair<string, object>(
-                            p.Key,
-                            new
-                            {
-                                value = stringValue
-                            });
-                    }
+                    BlobContainerName = blobClient.BlobContainerName,
+                    BlobName = blobClient.Name,
+                    Resource = "b"
+                };
+                var sasUri = blobClient.GenerateSasUri(blobSasBuilder);
 
-                    throw new NotSupportedException($"Unsupported parameter type - {p.Value.GetType()}");
-                }))
+                return new
+                {
+                    type = "Microsoft.Resources/deployments",
+                    apiVersion = "2020-10-01",
+                    name = x.PlatformIdentifier,
+                    properties = new
+                    {
+                        mode = "Incremental",
+                        templateLink = new
+                        {
+                            uri = sasUri.AbsoluteUri,
+                            contentVersion = "1.0.0.0"
+                        },
+                        parameters = new Dictionary<string, object>(x.Parameters.Select(p =>
+                        {
+                            if (p.Value is { } stringValue)
+                            {
+                                return new KeyValuePair<string, object>(
+                                    p.Key,
+                                    new
+                                    {
+                                        value = stringValue
+                                    });
+                            }
+
+                            throw new NotSupportedException($"Unsupported parameter type - {p.Value.GetType()}");
+                        }))
+                    }
+                };
             }).ToArray();
 
+            _armsToDeploy.Clear();
             _logger.LogDebug("Uploaded templates. Initiating ARM deployment");
-            return await _armDeployer.Deploy(resourceGroup, JsonConvert.SerializeObject(deploymentResources), null);
+            return await _armDeployer.Deploy(resourceGroup,
+                (await typeof(AzureResourceGroupCreator).GetResourceContents("MainDeploymentTemplate")).Replace(
+                    "{{deployments}}",
+                    JsonConvert.SerializeObject(deploymentResources)), null);
         }
 
         private async Task<BlobContainer> GetOrCreateTemplateStorageContainer()
         {
-            var templateContainer = await _storageManagementClient.BlobContainers.GetAsync(
-                _settings.Value.PlatformResources,
-                _settings.Value.PlatformStorage,
-                "templates");
-
-            if (templateContainer.Value == null)
+            try
             {
-                var blobContainer = new BlobContainer() {PublicAccess = PublicAccess.None};
-                await _storageManagementClient.BlobContainers.CreateAsync(
+                return await _storageManagementClient.BlobContainers.GetAsync(
+                    _settings.Value.PlatformResources,
+                    _settings.Value.PlatformStorage,
+                    "templates");
+            }
+            catch (RequestFailedException re) when (re.Status == 404)
+            {
+                _logger.LogDebug("  Could not find template storage container. Building it");
+
+                return await _storageManagementClient.BlobContainers.CreateAsync(
                     _settings.Value.PlatformResources,
                     _settings.Value.PlatformStorage,
                     "templates",
-                    blobContainer);
-                return blobContainer;
+                    new BlobContainer() {PublicAccess = PublicAccess.None});
             }
-
-            return templateContainer;
         }
     }
 }
