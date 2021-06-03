@@ -1,19 +1,33 @@
-﻿using Cacoch.Core.Provider;
+﻿using System.Collections.Generic;
+using Cacoch.Core.Provider;
 
 namespace Cacoch.Provider.AzureArm.Resources
 {
     /// <summary>
     /// Requests an output from another IPlatformTwin
     /// </summary>
-    public class ArmOutput
+    internal class ArmOutput
     {
         public IPlatformTwin Twin { get; }
-        public string Name { get; }
+        public string? TemplateName { get; }
+        public string TemplateOutputName { get; }
 
-        public ArmOutput(IPlatformTwin twin, string name)
+        public ArmOutput(IPlatformTwin twin, string? templateName, string templateOutputName)
         {
             Twin = twin;
-            Name = name;
+            TemplateName = templateName;
+            TemplateOutputName = templateOutputName;
+        }
+        public ArmOutput(IPlatformTwin twin, string templateOutputName)
+        {
+            Twin = twin;
+            TemplateOutputName = templateOutputName;
         }
     }
+
+    internal class ArmOutputNameValueObjectArray
+    {
+        public Dictionary<string, ArmOutput> PropertySet = new Dictionary<string, ArmOutput>();
+    }
+    
 }

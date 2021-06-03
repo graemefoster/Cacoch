@@ -22,9 +22,24 @@
         "description": "Location for all resources."
       }
     },
-    "appSettings" : {
-      "type" : "array"
+    "appSettings": {
+      "type": "array"
+    },
+    "secretReferences": {
+      "type": "array"
     }
+  },
+  "variables": {
+    "copy": [
+      {
+        "name": "formatterSecretReferences",
+        "count": "[length(parameters('secretReferences'))]",
+        "input": {
+          "name": "[parameters('secretReferences')[copyIndex('formatterSecretReferences')].name]",
+          "value": "[concat('@Microsoft.KeyVault(SecretUri=', parameters('secretReferences')[copyIndex('formatterSecretReferences')].value, ')')]"
+        }
+      }
+    ]
   },
   "resources": [
     {
@@ -40,15 +55,15 @@
         "serverFarmId": "[parameters('serverFarmId')]",
         "siteConfig": {
           "alwaysOn": true,
-          "appSettings": "[parameters('appSettings')]"
+          "appSettings": "[union(parameters('appSettings'), variables('formatterSecretReferences'))]"
         }
       }
     }
   ],
-  "outputs" : {
-    "identity" : {
-      "type" : "string",
-      "value" : "[reference(concat('Microsoft.Web/sites/', parameters('webAppName')), '2016-08-01', 'Full').identity.principalId]"
+  "outputs": {
+    "identity": {
+      "type": "string",
+      "value": "[reference(concat('Microsoft.Web/sites/', parameters('webAppName')), '2016-08-01', 'Full').identity.principalId]"
     }
   }
 }

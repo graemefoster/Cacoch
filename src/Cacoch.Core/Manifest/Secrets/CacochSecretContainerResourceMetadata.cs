@@ -6,7 +6,9 @@ namespace Cacoch.Core.Manifest.Secrets
 {
     [CacochResource("secrets")]
     public record CacochSecretContainerResourceMetadata
-        (string Name, List<CacochResourceLinkMetadata>? Links) : CacochResourceMetadata(Name, "Secrets",
+        (string Name,
+            HashSet<string>? RequiredSecretNames,
+            List<CacochResourceLinkMetadata>? Links) : CacochResourceMetadata(Name, "Secrets",
             Links ?? new List<CacochResourceLinkMetadata>());
 
     [CacochResource("secretsLink")]

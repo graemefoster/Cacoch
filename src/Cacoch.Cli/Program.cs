@@ -23,7 +23,7 @@ namespace Cacoch.Cli
         {
             var tokenCredential = new DefaultAzureCredential();
             var token = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[]
-                {"https://management.core.windows.net"}));
+                {"https://management.core.windows.net/user_impersonation"}));
             var serviceClientCredentials = new TokenCredentials(token.Token);
 
             using var host = Host.CreateDefaultBuilder(args)
@@ -64,6 +64,11 @@ namespace Cacoch.Cli
                         new List<CacochResourceMetadata>
                         {
                             new CacochSecretContainerResourceMetadata("secrets",
+                                new HashSet<string>()
+                                {
+                                    "secret-one",
+                                    "secret-two",
+                                },
                                 new List<CacochResourceLinkMetadata>
                                 {
                                     new SecretsLink("cacochapp", LinkAccess.Read)
@@ -88,6 +93,7 @@ namespace Cacoch.Cli
                             {
                                 {"CONFIG_SETTING_ONE", "ONE"},
                                 {"CONFIG_SETTING_TWO", "TWO"},
+                                {"SECRET_REFERENCE", "[secret.secrets.secret-two]"}
                             })
                         }));
             }

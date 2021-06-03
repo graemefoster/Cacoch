@@ -31,5 +31,11 @@ namespace Cacoch.Provider.AzureArm.Resources
         public string HashString { get; }
 
         public IEnumerable<IDeploymentArtifact> ChildArtifacts { get; }
+
+        public string NameForTemplate(ArmOutput armOutput)
+        {
+            if (armOutput.TemplateName != null) return armOutput.TemplateName;
+            return Name;
+        }
     }
 }

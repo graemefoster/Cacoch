@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Cacoch.Core.Manifest;
 using Cacoch.Core.Provider;
-using Cacoch.Provider.AzureArm.Resources.Storage;
+using Cacoch.Provider.AzureArm.Resources.Secrets;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace Cacoch.Provider.AzureArm.Resources.WebApp
 {
@@ -32,8 +30,8 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
 
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact(IPlatformTwin[] allTwins)
         {
-            var appSettings = PrepareAppSettings();
-
+            var appSettings = PrepareAppSettings(allTwins, out ArmOutputNameValueObjectArray requiredSecretReferences);
+            
             return new AzureArmDeploymentArtifact(
                 _resource.Name.ToLowerInvariant(),
                 await typeof(WebAppTwin).GetResourceContents(),
@@ -41,21 +39,45 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                 {
                     ["webAppName"] = PlatformName,
                     ["serverFarmId"] = _settings.Value.ServerFarmId!,
-                    ["appSettings"] = appSettings.Select(x => new { name = x.Key, value = x.Value }).ToArray()
+                    ["appSettings"] = appSettings.Select(x => new { name = x.Key, value = x.Value }).ToArray(),
+                    ["secretReferences"] = requiredSecretReferences
                 },
                 Array.Empty<IPlatformTwin>(),
                 Array.Empty<AzureArmDeploymentArtifact>());
         }
 
-        private Dictionary<string, string> PrepareAppSettings()
+        private Dictionary<string, string> PrepareAppSettings(IPlatformTwin[] allTwins, out ArmOutputNameValueObjectArray requiredInputs)
         {
-            var userRequiredSettings =
-                new Dictionary<string, string>(_resource.Configuration ?? new Dictionary<string, string>())
+            var requiredSecretReferences = new ArmOutputNameValueObjectArray();
+            var settings = new Dictionary<string, string>()
+            {
+                ["WEBSITE_ENABLE_SYNC_UPDATE_SITE"] = "true",
+                ["WEBSITE_RUN_FROM_PACKAGE"] = "true"
+            };
+            foreach (var configuredSetting in _resource.Configuration ?? new Dictionary<string, string>())
+            {
+                var val = configuredSetting.Value;
+                if (val.StartsWith("[secret."))
                 {
-                    ["WEBSITE_ENABLE_SYNC_UPDATE_SITE"] = "true",
-                    ["WEBSITE_RUN_FROM_PACKAGE"] = "true"
-                };
-            return userRequiredSettings;
+                    //we need to get a reference to a secret uri from the secret container.
+                    var secretParts = val.Substring(1, val.Length - 2).Substring("secret.".Length).Split(".");
+                    var vaultTwin = (SecretsTwin)allTwins.Single(x => x.ResourceName == secretParts[0]);
+
+                    //secretReference gives us the arm expression to get the output from the secret template
+                    var secretReference = vaultTwin.ArmOutputFor(secretParts[1]);
+
+                    //an object will get passed in to this template. It will have all the secret uri's within it.
+                    var parameterName = $"secreturi-{secretParts[1]}";
+                    requiredSecretReferences.PropertySet[parameterName] = secretReference;
+                }
+                else
+                {
+                    settings[configuredSetting.Key] = configuredSetting.Value;
+                }
+            }
+
+            requiredInputs = requiredSecretReferences;
+            return settings;
         }
 
         public string PlatformName { get; }

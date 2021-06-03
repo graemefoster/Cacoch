@@ -33,11 +33,6 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
 
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact(IPlatformTwin[] allTwins)
         {
-            var linkTemplate = await typeof(SecretsTwin).GetResourceContents("Link");
-
-            var links = _resource.Links.OfType<SecretsLink>().Select(x =>
-                new {type = x.Access, requestor = allTwins.Single(t => t.ResourceName == x.Name)});
-
             return new AzureArmDeploymentArtifact(
                 _resource.Name.ToLowerInvariant(),
                 await typeof(SecretsTwin).GetResourceContents(),
@@ -47,28 +42,70 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     ["location"] = _settings.Value.PrimaryLocation!
                 },
                 Array.Empty<IPlatformTwin>(),
-                links.Select(x =>
-                {
-                    var assignmentDetails = $"{_resource.Name}-{_resource.FriendlyType}-link-{x.requestor.PlatformName}-{x.type}".ToLowerInvariant();
-                    var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(assignmentDetails));
-                    var guidRepresentingAssignment = new Guid(hash[..16]).ToString();
-
-                    return new AzureArmDeploymentArtifact(
-                        $"{_resource.Name}-link-{x.requestor.PlatformName}-{x.type}",
-                        linkTemplate,
-                        new Dictionary<string, object>
-                        {
-                            {"assignmentName", guidRepresentingAssignment},
-                            {"vaultName", PlatformName},
-                            {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")},
-                        },
-                        new[] {x.requestor},
-                        Array.Empty<AzureArmDeploymentArtifact>());
-                })
+                (await BuildLinks(allTwins))
+                .Union(await BuildSecrets())
             );
+        }
+
+        private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildSecrets()
+        {
+            var secretTemplate = await typeof(SecretsTwin).GetResourceContents("Secret");
+            return (_resource.RequiredSecretNames ?? new HashSet<string>()).Select(x => new AzureArmDeploymentArtifact(
+                SecretTemplateNameFor(x),
+                secretTemplate,
+                new Dictionary<string, object>()
+                {
+                    ["vaultName"] = PlatformName,
+                    ["secretName"] = x,
+                    ["secretValue"] =
+                        new CacochSecret(
+                            $"{Guid.NewGuid().ToString().ToLowerInvariant()}-{Guid.NewGuid().ToString().ToLowerInvariant()}{Guid.NewGuid().ToString().ToLowerInvariant()}"),
+                },
+                Array.Empty<IPlatformTwin>(),
+                Array.Empty<AzureArmDeploymentArtifact>()
+            ));
+        }
+
+        private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildLinks(IPlatformTwin[] allTwins)
+        {
+            var linkTemplate = await typeof(SecretsTwin).GetResourceContents("Link");
+
+            var links = _resource.Links.OfType<SecretsLink>().Select(x =>
+                new {type = x.Access, requestor = allTwins.Single(t => t.ResourceName == x.Name)});
+
+            return links.Select(x =>
+            {
+                var assignmentDetails =
+                    $"{_resource.Name}-{_resource.FriendlyType}-link-{x.requestor.PlatformName}-{x.type}"
+                        .ToLowerInvariant();
+                var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(assignmentDetails));
+                var guidRepresentingAssignment = new Guid(hash[..16]).ToString();
+
+                return new AzureArmDeploymentArtifact(
+                    $"{_resource.Name}-link-{x.requestor.PlatformName}-{x.type}",
+                    linkTemplate,
+                    new Dictionary<string, object>
+                    {
+                        {"assignmentName", guidRepresentingAssignment},
+                        {"vaultName", PlatformName},
+                        {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")},
+                    },
+                    new[] {x.requestor},
+                    Array.Empty<AzureArmDeploymentArtifact>());
+            });
         }
 
         public string PlatformName { get; }
         public string ResourceName => _resource.Name;
+
+        private string SecretTemplateNameFor(string secretPart)
+        {
+            return $"{_resource.Name}-secret-{secretPart}";
+        }
+
+        internal ArmOutput ArmOutputFor(string secretPart)
+        {
+            return new ArmOutput(this, SecretTemplateNameFor(secretPart), "secretUri");
+        }
     }
 }

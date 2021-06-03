@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cacoch.Core.Manifest.Secrets;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
@@ -39,15 +40,17 @@ namespace Cacoch.Provider.AzureArm.Azure
                     null,
                     JsonConvert.SerializeObject(parameters?.ToDictionary(x => x.Key, x =>
                     {
-                        if (x.Value is { } stringValue)
+                        if (x.Value is CacochSecret secret)
                         {
                             return new
                             {
-                                value = stringValue
+                                value = (object)secret.Secret
                             };
                         }
-
-                        throw new NotSupportedException($"Unsupported parameter type - {x.Value.GetType()}");
+                        return new
+                        {
+                            value = x.Value
+                        };
                     }))
                 ));
 

@@ -12,9 +12,9 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
+using Cacoch.Core.Manifest.Secrets;
 using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Resources;
-using Cacoch.Provider.AzureArm.Resources.Storage;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,7 +36,9 @@ namespace Cacoch.Provider.AzureArm.Azure
         private readonly IArmDeployer _armDeployer;
         private readonly ILogger<ArmBatchDeployer> _logger;
 
-        private readonly IDictionary<IPlatformTwin, AzureArmDeploymentArtifact> _topLevels = new Dictionary<IPlatformTwin, AzureArmDeploymentArtifact>();
+        private readonly IDictionary<IPlatformTwin, AzureArmDeploymentArtifact> _topLevels =
+            new Dictionary<IPlatformTwin, AzureArmDeploymentArtifact>();
+
         private readonly IDictionary<object, string> _parameterMap = new Dictionary<object, string>();
         private readonly IList<InternalArmDetails> _armsToDeploy = new List<InternalArmDetails>();
 
@@ -95,7 +97,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         {
             foreach (var parameter in artifact.Parameters)
             {
-                if (!(parameter.Value is ArmOutput))
+                if (!(parameter.Value is ArmOutput) && !(parameter.Value is ArmOutputNameValueObjectArray))
                 {
                     if (!_parameterMap.ContainsKey(parameter.Value))
                     {
@@ -112,7 +114,8 @@ namespace Cacoch.Provider.AzureArm.Azure
         /// <param name="artifact"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private InternalArmDetails BuildInternalArmDetails(AzureArmDeploymentArtifact artifact, InternalArmDetails? parent)
+        private InternalArmDetails BuildInternalArmDetails(AzureArmDeploymentArtifact artifact,
+            InternalArmDetails? parent)
         {
             var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(artifact.Arm));
             var hashString = Convert.ToBase64String(hash);
@@ -188,7 +191,10 @@ namespace Cacoch.Provider.AzureArm.Azure
                 var sasUri = blobClient.GenerateSasUri(blobSasBuilder);
 
                 var dependsOn = x.DependsOn == null ? Array.Empty<string>() : new[] {x.DependsOn.Name};
-                var parameterDependencies = x.Parameters.Select(x => x.Value).OfType<ArmOutput>().Select(x => _topLevels[x.Twin].Name).ToArray();
+
+                //if we depend on
+                var parameterDependencies = x.Parameters.Select(x => x.Value).OfType<ArmOutput>()
+                    .Select(a => _topLevels[a.Twin].NameForTemplate(a)).ToArray();
 
                 return new
                 {
@@ -208,8 +214,28 @@ namespace Cacoch.Provider.AzureArm.Azure
                         {
                             if (p.Value is ArmOutput armOutput)
                             {
+                                var armTemplateName = _topLevels[armOutput.Twin].NameForTemplate(armOutput);
                                 return new KeyValuePair<string, object>(p.Key,
-                                    new {value = $"[reference('{_topLevels[armOutput.Twin].Name}').outputs['{armOutput.Name}'].value]"});
+                                    new
+                                    {
+                                        value =
+                                            $"[reference('{armTemplateName}').outputs['{armOutput.TemplateOutputName}'].value]"
+                                    });
+                            }
+
+                            if (p.Value is ArmOutputNameValueObjectArray armOutputObject)
+                            {
+                                return new KeyValuePair<string, object>(p.Key,
+                                    new
+                                    {
+                                        value = armOutputObject.PropertySet.Select(o => new
+                                        {
+                                            name = o.Key,
+                                            value =
+                                                $"[reference('{_topLevels[o.Value.Twin].NameForTemplate(o.Value)}').outputs['{o.Value.TemplateOutputName}'].value]"
+                                        })
+                                    }
+                                );
                             }
 
                             return new KeyValuePair<string, object>(p.Key,
@@ -238,6 +264,16 @@ namespace Cacoch.Provider.AzureArm.Azure
                         new
                         {
                             type = "string"
+                        });
+                }
+
+                if (key is CacochSecret)
+                {
+                    return new KeyValuePair<string, object>(
+                        value,
+                        new
+                        {
+                            type = "secureString"
                         });
                 }
 
