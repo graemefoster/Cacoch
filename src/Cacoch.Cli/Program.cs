@@ -6,6 +6,7 @@ using Azure.Identity;
 using Cacoch.Core.Manifest;
 using Cacoch.Core.Manifest.Abstractions;
 using Cacoch.Core.Manifest.Storage;
+using Cacoch.Core.Manifest.WebApp;
 using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,7 +78,11 @@ namespace Cacoch.Cli
                                 {
                                     new StorageLink("cacochapp", LinkAccess.ReadWrite)
                                 }),
-                            new WebApp("cacochapp")
+                            new WebApp("cacochapp", new Dictionary<string, string>()
+                            {
+                                {"CONFIG_SETTING_ONE", "ONE"},
+                                {"CONFIG_SETTING_TWO", "TWO"},
+                            })
                         }));
             }
         }

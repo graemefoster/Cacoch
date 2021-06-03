@@ -21,6 +21,9 @@
       "metadata": {
         "description": "Location for all resources."
       }
+    },
+    "appSettings" : {
+      "type" : "array"
     }
   },
   "resources": [
@@ -37,16 +40,7 @@
         "serverFarmId": "[parameters('serverFarmId')]",
         "siteConfig": {
           "alwaysOn": true,
-          "appSettings": [
-            {
-              "name": "WEBSITE_ENABLE_SYNC_UPDATE_SITE",
-              "value": true
-            },
-            {
-              "name": "WEBSITE_RUN_FROM_PACKAGE",
-              "value": 1
-            }
-          ]
+          "appSettings": "[parameters('appSettings')]"
         }
       }
     }

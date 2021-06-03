@@ -231,13 +231,23 @@ namespace Cacoch.Provider.AzureArm.Azure
             var uniqueParameters = new Dictionary<string, object>(_parameterMap.Select(p =>
             {
                 var (key, value) = p;
-                if (key is { } stringValue)
+                if (key is string)
                 {
                     return new KeyValuePair<string, object>(
                         value,
                         new
                         {
                             type = "string"
+                        });
+                }
+
+                if (key is Array)
+                {
+                    return new KeyValuePair<string, object>(
+                        value,
+                        new
+                        {
+                            type = "array"
                         });
                 }
 
