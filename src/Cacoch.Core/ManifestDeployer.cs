@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Cacoch.Core.Provider;
 using Microsoft.Extensions.Logging;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core
 {
     internal class ManifestDeployer<TPlatformContext> : IManifestDeployer where TPlatformContext : IPlatformContext
     {
@@ -23,7 +23,7 @@ namespace Cacoch.Core.Manifest
             _logger = logger;
         }
 
-        public async Task Deploy(Manifest manifest)
+        public async Task Deploy(Manifest.Manifest manifest)
         {
             var context = await _cacochManifestDeployer.PrepareContext(manifest);
 

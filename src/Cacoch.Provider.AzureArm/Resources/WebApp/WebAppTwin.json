@@ -30,11 +30,14 @@
       "name": "[parameters('webAppName')]",
       "location": "[parameters('location')]",
       "kind": "webapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "properties": {
         "serverFarmId": "[parameters('serverFarmId')]",
         "siteConfig": {
           "alwaysOn": true,
-          "appSettings" : [
+          "appSettings": [
             {
               "name": "WEBSITE_ENABLE_SYNC_UPDATE_SITE",
               "value": true
@@ -47,5 +50,11 @@
         }
       }
     }
-  ]
+  ],
+  "outputs" : {
+    "identity" : {
+      "type" : "string",
+      "value" : "[reference(concat('Microsoft.Web/sites/', parameters('webAppName')), '2016-08-01', 'Full').identity.principalId]"
+    }
+  }
 }

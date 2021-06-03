@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "assignmentName": {
+      "type": "string"
+    },
+    "storageName" : {
+      "type" : "string"
+    },
+    "requestorPrincipalId" : {
+      "type" : "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2018-09-01-preview",
+      "name": "[parameters('assignmentName')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', parameters('storageName'))]",
+      "properties": {
+        "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1')]",
+        "principalId": "[parameters('requestorPrincipalId')]"
+      }
+    }
+  ]
+}

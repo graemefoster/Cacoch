@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Manifest.Abstractions;
+using Cacoch.Core.Manifest.Storage;
+using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,16 +20,18 @@ namespace Cacoch.Cli
         static async Task Main(string[] args)
         {
             var tokenCredential = new DefaultAzureCredential();
-            var token = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[] {"https://management.core.windows.net"}));
+            var token = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[]
+                {"https://management.core.windows.net"}));
             var serviceClientCredentials = new TokenCredentials(token.Token);
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hb, svc) =>
                 {
-                    svc.RegisterCacochAzureArm(serviceClientCredentials, tokenCredential, hb.Configuration.GetSection("Cacoch"));
+                    svc.RegisterCacochAzureArm(serviceClientCredentials, tokenCredential,
+                        hb.Configuration.GetSection("Cacoch"));
                 })
                 .ConfigureLogging(lb => lb.AddSerilog()).Build();
-            
+
             await host.StartAsync();
 
             // using (var _ = host.Services.CreateScope()) {
@@ -54,9 +59,20 @@ namespace Cacoch.Cli
                         "1.0",
                         "cacochtest",
                         "Cacoch Test",
-                        new List<IResource>
+                        new List<CacochResourceMetadata>
                         {
-                            new Storage("cacochstorage", new [] {"containerone", "containertwo"}),
+                            new Storage(
+                                "cacochstorage",
+                                new[]
+                                {
+                                    new CacochStorageResourceContainer(CacochStorageResourceContainerType.Storage,
+                                        "containerone"),
+                                    new CacochStorageResourceContainer(CacochStorageResourceContainerType.Storage,
+                                        "containertwo")
+                                }, new List<CacochResourceLinkMetadata>()
+                                {
+                                    new StorageLink("cacochapp", LinkAccess.ReadWrite)
+                                }),
                             new WebApp("cacochapp")
                         }));
             }

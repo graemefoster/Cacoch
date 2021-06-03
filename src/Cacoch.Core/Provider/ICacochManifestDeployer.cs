@@ -1,11 +1,10 @@
 ﻿using System.Threading.Tasks;
-using Cacoch.Core.Provider;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core.Provider
 {
     public interface ICacochManifestDeployer<TPlatformContext> where TPlatformContext: IPlatformContext
     {
-        Task Deploy(Manifest manifest, IPlatformTwin[] twins);
-        Task<TPlatformContext> PrepareContext(Manifest manifest);
+        Task Deploy(Manifest.Manifest manifest, IPlatformTwin[] twins);
+        Task<TPlatformContext> PrepareContext(Manifest.Manifest manifest);
     }
 }

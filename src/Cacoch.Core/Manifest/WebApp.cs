@@ -1,12 +1,7 @@
+using System.Collections.Generic;
+using Cacoch.Core.Manifest.Abstractions;
+
 namespace Cacoch.Core.Manifest
 {
-    public class WebApp: IResource
-    {
-        public WebApp(string name)
-        {
-            Name = name;
-        }
-
-        public string Name { get; set; }
-    }
+    public record WebApp(string Name) : CacochResourceMetadata(Name, "WebApp", new List<CacochResourceLinkMetadata>());
 }

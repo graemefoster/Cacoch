@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Resources;
 using Microsoft.Azure.Management.ResourceManager.Models;
 
@@ -7,7 +8,7 @@ namespace Cacoch.Provider.AzureArm.Azure
 {
     internal interface IArmBatchBuilder
     {
-        void RegisterArm(AzureArmDeploymentArtifact artifact);
+        void RegisterArm(IPlatformTwin twin, AzureArmDeploymentArtifact artifact);
         Task<DeploymentExtended> Deploy(string resourceGroup);
     }
 

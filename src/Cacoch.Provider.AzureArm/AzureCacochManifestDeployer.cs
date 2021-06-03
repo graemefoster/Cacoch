@@ -28,7 +28,7 @@ namespace Cacoch.Provider.AzureArm
             foreach (var twin in twins)
             {
                 _logger.LogDebug("Building arm - Twin type {Type}. Twin platform now:{PlatformName}", twin.GetType().Name, twin.PlatformName);
-                _armBatchBuilder.RegisterArm((AzureArmDeploymentArtifact) await twin.BuildDeploymentArtifact());
+                _armBatchBuilder.RegisterArm(twin, (AzureArmDeploymentArtifact) await twin.BuildDeploymentArtifact(twins));
             }
 
             _logger.LogInformation("Beginning Azure Deployment");

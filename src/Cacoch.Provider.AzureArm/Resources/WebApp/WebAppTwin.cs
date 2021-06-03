@@ -27,7 +27,7 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
             return Task.FromResult(new ValidationResult("Web App names must be between 5 and 15 characters"));
         }
 
-        public async Task<IDeploymentArtifact> BuildDeploymentArtifact()
+        public async Task<IDeploymentArtifact> BuildDeploymentArtifact(IPlatformTwin[] allTwins)
         {
             return new AzureArmDeploymentArtifact(
                 _resource.Name.ToLowerInvariant(), 
@@ -37,9 +37,11 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                     {"webAppName", PlatformName},
                     {"serverFarmId", _settings.Value.ServerFarmId!}
                 },
+                Array.Empty<IPlatformTwin>(),
                 Array.Empty<AzureArmDeploymentArtifact>());
         }
 
         public string PlatformName { get; }
+        public string ResourceName => _resource.Name;
     }
 }

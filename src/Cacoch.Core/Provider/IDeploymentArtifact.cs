@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core.Provider
 {
     public interface IDeploymentArtifact
     {

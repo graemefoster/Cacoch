@@ -1,5 +1,6 @@
 using System;
 using Cacoch.Core.Manifest;
+using Cacoch.Core.Manifest.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cacoch.Core.Provider
@@ -15,7 +16,7 @@ namespace Cacoch.Core.Provider
             _platformTwinDictionary = platformTwinDictionary;
         }
 
-        public IPlatformTwin Build<T>(T resource, TPlatformContext platformContext) where T : IResource
+        public IPlatformTwin Build<T>(T resource, TPlatformContext platformContext) where T : CacochResourceMetadata
         {
             var genericType = typeof(IPlatformTwin<>).MakeGenericType(resource.GetType());
             return (IPlatformTwin)ActivatorUtilities.CreateInstance(

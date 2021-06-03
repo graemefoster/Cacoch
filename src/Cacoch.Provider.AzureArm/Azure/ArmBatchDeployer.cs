@@ -12,7 +12,9 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
+using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Resources;
+using Cacoch.Provider.AzureArm.Resources.Storage;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -34,6 +36,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         private readonly IArmDeployer _armDeployer;
         private readonly ILogger<ArmBatchDeployer> _logger;
 
+        private readonly IDictionary<IPlatformTwin, AzureArmDeploymentArtifact> _topLevels = new Dictionary<IPlatformTwin, AzureArmDeploymentArtifact>();
         private readonly IDictionary<object, string> _parameterMap = new Dictionary<object, string>();
         private readonly IList<InternalArmDetails> _armsToDeploy = new List<InternalArmDetails>();
 
@@ -56,8 +59,9 @@ namespace Cacoch.Provider.AzureArm.Azure
             _logger = logger;
         }
 
-        public void RegisterArm(AzureArmDeploymentArtifact artifact)
+        public void RegisterArm(IPlatformTwin twin, AzureArmDeploymentArtifact artifact)
         {
+            _topLevels[twin] = artifact;
             RegisterArmRecursive(artifact, null);
         }
 
@@ -91,9 +95,12 @@ namespace Cacoch.Provider.AzureArm.Azure
         {
             foreach (var parameter in artifact.Parameters)
             {
-                if (!_parameterMap.ContainsKey(parameter.Value))
+                if (!(parameter.Value is ArmOutput))
                 {
-                    _parameterMap[parameter.Value] = Guid.NewGuid().ToString();
+                    if (!_parameterMap.ContainsKey(parameter.Value))
+                    {
+                        _parameterMap[parameter.Value] = Guid.NewGuid().ToString();
+                    }
                 }
             }
         }
@@ -105,8 +112,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         /// <param name="artifact"></param>
         /// <param name="parent"></param>
         /// <returns></returns>
-        private InternalArmDetails BuildInternalArmDetails(AzureArmDeploymentArtifact artifact,
-            InternalArmDetails? parent)
+        private InternalArmDetails BuildInternalArmDetails(AzureArmDeploymentArtifact artifact, InternalArmDetails? parent)
         {
             var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(artifact.Arm));
             var hashString = Convert.ToBase64String(hash);
@@ -155,7 +161,6 @@ namespace Cacoch.Provider.AzureArm.Azure
                     new Dictionary<string, object>(_parameterMap.Select(x =>
                         new KeyValuePair<string, object>(x.Value.ToString(), x.Key)))
                 );
-
             }
             finally
             {
@@ -182,12 +187,15 @@ namespace Cacoch.Provider.AzureArm.Azure
                 };
                 var sasUri = blobClient.GenerateSasUri(blobSasBuilder);
 
+                var dependsOn = x.DependsOn == null ? Array.Empty<string>() : new[] {x.DependsOn.Name};
+                var parameterDependencies = x.Parameters.Select(x => x.Value).OfType<ArmOutput>().Select(x => _topLevels[x.Twin].Name).ToArray();
+
                 return new
                 {
                     type = "Microsoft.Resources/deployments",
                     apiVersion = "2020-10-01",
                     name = x.Name,
-                    dependsOn = x.DependsOn == null ? Array.Empty<string>() : new[] {x.DependsOn.Name},
+                    dependsOn = dependsOn.Union(parameterDependencies).ToArray(),
                     properties = new
                     {
                         mode = "Incremental",
@@ -197,8 +205,16 @@ namespace Cacoch.Provider.AzureArm.Azure
                             contentVersion = "1.0.0.0"
                         },
                         parameters = new Dictionary<string, object>(x.Parameters.Select(p =>
-                            new KeyValuePair<string, object>(p.Key,
-                                new {value = $"[parameters('{_parameterMap[p.Value].ToString()}')]"})))
+                        {
+                            if (p.Value is ArmOutput armOutput)
+                            {
+                                return new KeyValuePair<string, object>(p.Key,
+                                    new {value = $"[reference('{_topLevels[armOutput.Twin].Name}').outputs['{armOutput.Name}'].value]"});
+                            }
+
+                            return new KeyValuePair<string, object>(p.Key,
+                                new {value = $"[parameters('{_parameterMap[p.Value].ToString()}')]"});
+                        }))
                     }
                 };
             }).ToArray();

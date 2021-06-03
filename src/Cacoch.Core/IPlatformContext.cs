@@ -1,4 +1,4 @@
-namespace Cacoch.Core.Manifest
+namespace Cacoch.Core
 {
     public interface IPlatformContext
     {

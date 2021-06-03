@@ -1,4 +1,5 @@
-﻿using Cacoch.Core.Manifest;
+﻿using Cacoch.Core;
+using Cacoch.Core.Manifest;
 
 namespace Cacoch.Provider.AzureArm
 {
