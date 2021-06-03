@@ -24,7 +24,7 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <None Remove="appsettings.local.json"  />
-      <Content Include="appsettings.local.json" Condition="Exists(%(Content.FullPath))">
+      <Content Include="appsettings.local.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
