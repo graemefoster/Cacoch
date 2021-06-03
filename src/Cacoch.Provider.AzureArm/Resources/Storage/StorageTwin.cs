@@ -37,7 +37,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                     {"storageAccountName", PlatformName}
                 },
                 _resource.Containers.Select(x => new AzureArmDeploymentArtifact(
-                    _resource.Name.ToLowerInvariant() + "/" + x,
+                    x,
                     containerTemplate,
                     new Dictionary<string, object>
                     {

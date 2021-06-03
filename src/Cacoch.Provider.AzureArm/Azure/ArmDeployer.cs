@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
 using Newtonsoft.Json;
@@ -12,12 +13,15 @@ namespace Cacoch.Provider.AzureArm.Azure
 {
     internal class ArmDeployer : IArmDeployer
     {
+        private readonly ILogger<ArmDeployer> _logger;
         private readonly ResourceManagementClient _resourceClient;
 
         public ArmDeployer(
             ServiceClientCredentials credentials,
-            IOptions<AzureArmSettings> settings)
+            IOptions<AzureArmSettings> settings, 
+            ILogger<ArmDeployer> logger)
         {
+            _logger = logger;
             _resourceClient = new ResourceManagementClient(credentials)
             {
                 SubscriptionId = settings.Value.SubscriptionId
@@ -47,10 +51,13 @@ namespace Cacoch.Provider.AzureArm.Azure
                     }))
                 ));
 
-            return await _resourceClient.Deployments.CreateOrUpdateAsync(
+            var response =  await _resourceClient.Deployments.CreateOrUpdateAsync(
                 resourceGroup,
                 "test-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss"),
                 deployment);
+            
+            _logger.LogDebug("Finished deployment");
+            return response;
         }
     }
 }
