@@ -51,12 +51,13 @@ namespace Cacoch.Provider.AzureArm.Azure
                     }))
                 ));
 
+            var deploymentName = $"{resourceGroup}-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss");
             var response =  await _resourceClient.Deployments.CreateOrUpdateAsync(
                 resourceGroup,
-                "test-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss"),
+                deploymentName,
                 deployment);
             
-            _logger.LogDebug("Finished deployment");
+            _logger.LogDebug("Finished deployment {DeploymentName}", deploymentName);
             return response;
         }
     }

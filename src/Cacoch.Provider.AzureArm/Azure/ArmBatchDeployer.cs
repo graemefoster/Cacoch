@@ -263,7 +263,7 @@ namespace Cacoch.Provider.AzureArm.Azure
             }
             catch (RequestFailedException re) when (re.Status == 404)
             {
-                _logger.LogDebug("  Could not find template storage container. Building it");
+                _logger.LogDebug("Could not find template storage container. Building it");
 
                 return await _storageManagementClient.BlobContainers.CreateAsync(
                     _settings.Value.PlatformResources,
