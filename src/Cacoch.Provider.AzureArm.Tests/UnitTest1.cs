@@ -16,8 +16,8 @@ namespace Cacoch.Provider.AzureArm.Tests
         [InlineData("aaaa", false)]
         [InlineData("aaaaa", true)]
         [InlineData("abcdabcdabc", true)]
-        [InlineData("abcdabcdabcd", false)]
-        public async Task allows_between_5_and_11_characters(string name, bool valid)
+        [InlineData("abcdabcdabcdabcd", false)]
+        public async Task allows_between_5_and_15_characters(string name, bool valid)
         {
             var storage = new Cacoch.Provider.AzureArm.Resources.Storage.StorageTwin(
                 new Storage(name, Array.Empty<CacochStorageResourceContainer>(),

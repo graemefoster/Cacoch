@@ -68,7 +68,11 @@ namespace Cacoch.Cli
                                     new CacochStorageResourceContainer(CacochStorageResourceContainerType.Storage,
                                         "containerone"),
                                     new CacochStorageResourceContainer(CacochStorageResourceContainerType.Storage,
-                                        "containertwo")
+                                        "containertwo"),
+                                    new CacochStorageResourceContainer(CacochStorageResourceContainerType.Table,
+                                        "tableone"),
+                                    new CacochStorageResourceContainer(CacochStorageResourceContainerType.Queue,
+                                        "queueone")
                                 }, new List<CacochResourceLinkMetadata>()
                                 {
                                     new StorageLink("cacochapp", LinkAccess.ReadWrite)

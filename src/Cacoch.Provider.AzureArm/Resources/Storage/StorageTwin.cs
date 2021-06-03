@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Azure.ResourceManager.Storage.Models;
 using Cacoch.Core.Manifest.Storage;
 using Cacoch.Core.Provider;
 
@@ -30,7 +31,6 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
 
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact(IPlatformTwin[] allTwins)
         {
-            var containerTemplate = await typeof(StorageTwin).GetResourceContents("Container");
             var linkTemplate = await typeof(StorageTwin).GetResourceContents("Link");
 
             var links = _resource.Links.OfType<StorageLink>().Select(x =>
@@ -44,22 +44,16 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                     {"storageAccountName", PlatformName}
                 },
                 Array.Empty<IPlatformTwin>(),
-                _resource.Containers.Select(x => new AzureArmDeploymentArtifact(
-                    x.Name,
-                    containerTemplate,
-                    new Dictionary<string, object>
-                    {
-                        {"storageAccountName", PlatformName},
-                        {"containerName", x.Name}
-                    },
-                    Array.Empty<IPlatformTwin>(),
-                    Array.Empty<AzureArmDeploymentArtifact>())).Union(
+                (await Containers())
+                .Union(await Queues())
+                .Union(await Tables())
+                .Union(
                     links.Select(x =>
                     {
                         var assignmentDetails = $"{_resource.Name}-link-{x.requestor.PlatformName}-{x.type}";
                         var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(assignmentDetails));
                         var guidRepresentingAssignment = new Guid(hash[0..16]).ToString();
-                        
+
                         return new AzureArmDeploymentArtifact(
                             $"{_resource.Name}-link-{x.requestor.PlatformName}-{x.type}",
                             linkTemplate,
@@ -72,6 +66,40 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                             new[] {x.requestor},
                             Array.Empty<AzureArmDeploymentArtifact>());
                     })));
+        }
+
+        private async Task<IEnumerable<AzureArmDeploymentArtifact>> Containers()
+        {
+            return StorageChild(CacochStorageResourceContainerType.Storage,
+                await typeof(StorageTwin).GetResourceContents("Container"));
+        }
+
+        private async Task<IEnumerable<AzureArmDeploymentArtifact>> Queues()
+        {
+            return StorageChild(CacochStorageResourceContainerType.Queue,
+                await typeof(StorageTwin).GetResourceContents("Queue"));
+        }
+
+        private async Task<IEnumerable<AzureArmDeploymentArtifact>> Tables()
+        {
+            return StorageChild(CacochStorageResourceContainerType.Table,
+                await typeof(StorageTwin).GetResourceContents("Table"));
+        }
+
+        private IEnumerable<AzureArmDeploymentArtifact> StorageChild(CacochStorageResourceContainerType type,
+            string template)
+        {
+            return _resource.Containers.Where(x => x.Type == type).Select(x =>
+                new AzureArmDeploymentArtifact(
+                    x.Name,
+                    template,
+                    new Dictionary<string, object>
+                    {
+                        {"storageAccountName", PlatformName},
+                        {"name", x.Name}
+                    },
+                    Array.Empty<IPlatformTwin>(),
+                    Array.Empty<AzureArmDeploymentArtifact>()));
         }
 
         public string PlatformName { get; }

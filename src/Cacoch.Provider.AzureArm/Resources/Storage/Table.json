@@ -12,7 +12,7 @@
   "resources": [
     {
       "name": "[concat(parameters('storageAccountName'), '/default/', parameters('name'))]",
-      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
       "apiVersion": "2021-02-01",
       "properties": {
         "publicAccess": "None"
