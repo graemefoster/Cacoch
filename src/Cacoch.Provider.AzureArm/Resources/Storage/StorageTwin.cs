@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest;
@@ -50,18 +49,5 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
 
         public string PlatformName { get; }
 
-    }
-
-    public static class ResourceEx
-    {
-        public static Task<string> GetResourceContents(this Type relatedType, string? templateName = null)
-        {
-            var resourceName = templateName == null
-                ? relatedType.FullName + ".json"
-                : relatedType.Namespace + $".{templateName}.json";
-
-            using var stream = new StreamReader(relatedType.Assembly.GetManifestResourceStream(resourceName)!);
-            return stream.ReadToEndAsync();
-        }
     }
 }

@@ -12,7 +12,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using Cacoch.Provider.AzureArm.Resources;
-using Cacoch.Provider.AzureArm.Resources.Storage;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -41,6 +40,8 @@ namespace Cacoch.Provider.AzureArm.Azure
         private readonly IDictionary<string, (string uid, string arm)> _uniqueArms =
             new Dictionary<string, (string uid, string arm)>();
 
+        private bool _deployed;
+
         public ArmBatchDeployer(
             StorageManagementClient storageManagementClient,
             BlobServiceClient blobServiceClient,
@@ -62,6 +63,50 @@ namespace Cacoch.Provider.AzureArm.Azure
 
         private void RegisterArmRecursive(AzureArmDeploymentArtifact artifact, InternalArmDetails? parent)
         {
+            var internalArmDetails = BuildInternalArmDetails(artifact, parent);
+            MapInParametersToTemplate(artifact);
+            RecurseChildArtifacts(artifact, internalArmDetails);
+        }
+
+        /// <summary>
+        /// Arm templates often have children. This processes them, and marks them as dependent on their parent.
+        /// </summary>
+        /// <param name="artifact"></param>
+        /// <param name="internalArmDetails"></param>
+        private void RecurseChildArtifacts(AzureArmDeploymentArtifact artifact, InternalArmDetails? internalArmDetails)
+        {
+            foreach (var deploymentArtifact in artifact.ChildArtifacts)
+            {
+                var child = (AzureArmDeploymentArtifact) deploymentArtifact;
+                RegisterArmRecursive(child, internalArmDetails);
+            }
+        }
+
+        /// <summary>
+        /// Parameters are stored external to the templates. We only pass unique parameters up, so there might be a 1-many of
+        /// parameters to the template that use them.
+        /// </summary>
+        /// <param name="artifact"></param>
+        private void MapInParametersToTemplate(AzureArmDeploymentArtifact artifact)
+        {
+            foreach (var parameter in artifact.Parameters)
+            {
+                if (!_parameterMap.ContainsKey(parameter.Value))
+                {
+                    _parameterMap[parameter.Value] = Guid.NewGuid().ToString();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates an intermediate object for every arm template... To save uploading all templates we take a hash of its contents, and
+        /// only upload unique ones.
+        /// </summary>
+        /// <param name="artifact"></param>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        private InternalArmDetails BuildInternalArmDetails(AzureArmDeploymentArtifact artifact, InternalArmDetails? parent)
+        {
             var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(artifact.Arm));
             var hashString = Convert.ToBase64String(hash);
             if (!_uniqueArms.ContainsKey(hashString))
@@ -70,59 +115,62 @@ namespace Cacoch.Provider.AzureArm.Azure
             }
 
             var internalArmDetails = new InternalArmDetails(
-                hashString, 
+                hashString,
                 Guid.NewGuid().ToString(),
                 artifact.PlatformIdentifier, artifact.Parameters, parent);
 
             _armsToDeploy.Add(internalArmDetails);
-
-            foreach (var parameter in artifact.Parameters)
-            {
-                if (!_parameterMap.ContainsKey(parameter.Value))
-                {
-                    _parameterMap[parameter.Value] = Guid.NewGuid().ToString();
-                }
-            }
-
-            foreach (var deploymentArtifact in artifact.ChildArtifacts)
-            {
-                var child = (AzureArmDeploymentArtifact) deploymentArtifact;
-                RegisterArmRecursive(child, internalArmDetails);
-            }
+            return internalArmDetails;
         }
 
         public async Task<DeploymentExtended> Deploy(string resourceGroup)
         {
-            _logger.LogDebug("Ensuring arm template storage container exists");
-            var container = await GetOrCreateTemplateStorageContainer();
-            _logger.LogDebug("Getting blob container client");
-            var containerClient = _blobServiceClient.GetBlobContainerClient(container.Name);
-            var deploymentTemplateFolder = resourceGroup + "-" + Guid.NewGuid().ToString().ToLowerInvariant();
-            _logger.LogDebug("Will place templates in {Folder}", deploymentTemplateFolder);
-
-            await Task.WhenAll(_uniqueArms.Select(async x =>
+            try
             {
-                await using var ms = new MemoryStream(Encoding.Default.GetBytes(x.Value.arm));
-                var blobName = $"{deploymentTemplateFolder}/{x.Value.uid.ToString()}.json";
-                _logger.LogDebug(" Uploading arm to {Blob}", blobName);
-                await containerClient.UploadBlobAsync(blobName, ms);
-            }));
-
-            var uniqueParameters = new Dictionary<string, object>(_parameterMap.Select(p =>
-            {
-                if (p.Key is { } stringValue)
+                if (_deployed)
                 {
-                    return new KeyValuePair<string, object>(
-                        p.Value,
-                        new
-                        {
-                            type = "string"
-                        });
+                    throw new InvalidOperationException(
+                        "Batch deployer has already deployed. Please create a new one for another deployment");
                 }
 
-                throw new NotSupportedException($"Unsupported parameter type - {p.Key.GetType()}");
-            }));
+                _logger.LogDebug("Ensuring arm template storage container exists");
+                var container = await GetOrCreateTemplateStorageContainer();
+                _logger.LogDebug("Getting blob container client");
+                var containerClient = _blobServiceClient.GetBlobContainerClient(container.Name);
+                var deploymentTemplateFolder = resourceGroup + "-" + Guid.NewGuid().ToString().ToLowerInvariant();
+                _logger.LogDebug("Will place templates in {Folder}", deploymentTemplateFolder);
 
+                await UploadAllTemplatesAsync(deploymentTemplateFolder, containerClient);
+                var uniqueParameters = CreateParametersSectionOfMainTemplate();
+                var deploymentResources = BuildAllDeploymentResources(containerClient, deploymentTemplateFolder);
+
+                _uniqueArms.Clear();
+                _armsToDeploy.Clear();
+
+                _logger.LogDebug("Uploaded templates. Initiating ARM deployment");
+
+                return await _armDeployer.Deploy(resourceGroup,
+                    (await typeof(AzureResourceGroupCreator).GetResourceContents("MainDeploymentTemplate"))
+                    .Replace("{{deployments}}", JsonConvert.SerializeObject(deploymentResources))
+                    .Replace("{{parameters}}", JsonConvert.SerializeObject(uniqueParameters)),
+                    new Dictionary<string, object>(_parameterMap.Select(x =>
+                        new KeyValuePair<string, object>(x.Value.ToString(), x.Key)))
+                );
+            }
+            finally
+            {
+                _deployed = true;
+            }
+        }
+
+        /// <summary>
+        /// Creates a new deployment resource for every template to be deployed.
+        /// </summary>
+        /// <param name="containerClient"></param>
+        /// <param name="deploymentTemplateFolder"></param>
+        /// <returns></returns>
+        private object BuildAllDeploymentResources(BlobContainerClient containerClient, string? deploymentTemplateFolder)
+        {
             var deploymentResources = _armsToDeploy.Select(x =>
             {
                 var blobClient =
@@ -157,19 +205,48 @@ namespace Cacoch.Provider.AzureArm.Azure
                     }
                 };
             }).ToArray();
+            return deploymentResources;
+        }
 
-            _uniqueArms.Clear();
-            _armsToDeploy.Clear();
+        /// <summary>
+        /// Creates a parameter object declaring all unique parameters used by the template.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        private Dictionary<string, object> CreateParametersSectionOfMainTemplate()
+        {
+            var uniqueParameters = new Dictionary<string, object>(_parameterMap.Select(p =>
+            {
+                var (key, value) = p;
+                if (key is { } stringValue)
+                {
+                    return new KeyValuePair<string, object>(
+                        value,
+                        new
+                        {
+                            type = "string"
+                        });
+                }
 
-            _logger.LogDebug("Uploaded templates. Initiating ARM deployment");
+                throw new NotSupportedException($"Unsupported parameter type - {key.GetType()}");
+            }));
+            return uniqueParameters;
+        }
 
-            return await _armDeployer.Deploy(resourceGroup,
-                (await typeof(AzureResourceGroupCreator).GetResourceContents("MainDeploymentTemplate"))
-                .Replace("{{deployments}}", JsonConvert.SerializeObject(deploymentResources))
-                .Replace("{{parameters}}", JsonConvert.SerializeObject(uniqueParameters)),
-                new Dictionary<string, object>(_parameterMap.Select(x =>
-                    new KeyValuePair<string, object>(x.Value.ToString(), x.Key)))
-            );
+        /// <summary>
+        /// Uploads all template to blob storage
+        /// </summary>
+        /// <param name="deploymentTemplateFolder"></param>
+        /// <param name="containerClient"></param>
+        private async Task UploadAllTemplatesAsync(string? deploymentTemplateFolder, BlobContainerClient containerClient)
+        {
+            await Task.WhenAll(_uniqueArms.Select(async x =>
+            {
+                await using var ms = new MemoryStream(Encoding.Default.GetBytes(x.Value.arm));
+                var blobName = $"{deploymentTemplateFolder}/{x.Value.uid.ToString()}.json";
+                _logger.LogDebug(" Uploading arm to {Blob}", blobName);
+                await containerClient.UploadBlobAsync(blobName, ms);
+            }));
         }
 
         private async Task<BlobContainer> GetOrCreateTemplateStorageContainer()
