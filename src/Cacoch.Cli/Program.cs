@@ -5,6 +5,7 @@ using Azure.Core;
 using Azure.Identity;
 using Cacoch.Core.Manifest;
 using Cacoch.Core.Manifest.Abstractions;
+using Cacoch.Core.Manifest.Secrets;
 using Cacoch.Core.Manifest.Storage;
 using Cacoch.Core.Manifest.WebApp;
 using Cacoch.Core.Provider;
@@ -62,7 +63,12 @@ namespace Cacoch.Cli
                         "Cacoch Test",
                         new List<CacochResourceMetadata>
                         {
-                            new Storage(
+                            new CacochSecretContainerResourceMetadata("secrets",
+                                new List<CacochResourceLinkMetadata>
+                                {
+                                    new SecretsLink("cacochapp", LinkAccess.Read)
+                                }),
+                            new CacochStorageResourceMetadata(
                                 "cacochstorage",
                                 new[]
                                 {
@@ -78,7 +84,7 @@ namespace Cacoch.Cli
                                 {
                                     new StorageLink("cacochapp", LinkAccess.ReadWrite)
                                 }),
-                            new WebApp("cacochapp", new Dictionary<string, string>()
+                            new CacochWebAppResourceMetadata("cacochapp", new Dictionary<string, string>()
                             {
                                 {"CONFIG_SETTING_ONE", "ONE"},
                                 {"CONFIG_SETTING_TWO", "TWO"},

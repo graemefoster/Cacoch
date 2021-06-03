@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Cacoch.Core.Manifest.Abstractions;
+using Cacoch.Core.Manifest.Secrets;
+using Cacoch.Core.Manifest.Storage;
 using Cacoch.Core.Provider;
 using Microsoft.Extensions.Logging;
 

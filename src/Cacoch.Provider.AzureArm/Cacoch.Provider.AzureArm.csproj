@@ -20,13 +20,15 @@
     <ItemGroup>
       <EmbeddedResource Include="Azure\MainDeploymentTemplate.json" />
       <EmbeddedResource Include="Azure\ResourceGroupRandomId.json" />
+      <EmbeddedResource Include="Resources\Secrets\SecretsTwin.json" />
       <EmbeddedResource Include="Resources\Storage\Container.json" />
       <EmbeddedResource Include="Resources\Storage\Link.json" />
       <EmbeddedResource Include="Resources\Storage\Queue.json" />
       <EmbeddedResource Include="Resources\Storage\Table.json" />
       <EmbeddedResource Include="Resources\WebApp\WebAppTwin.json" />
-      <None Remove="Resources\Storage\StorageTwin.json" />
       <EmbeddedResource Include="Resources\Storage\StorageTwin.json" />
+      <None Remove="Resources\Secrets\Link.json" />
+      <EmbeddedResource Include="Resources\Secrets\Link.json" />
     </ItemGroup>
 
 </Project>

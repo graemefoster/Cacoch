@@ -1,6 +1,6 @@
 ﻿using Cacoch.Core.Provider;
 
-namespace Cacoch.Provider.AzureArm.Resources.Storage
+namespace Cacoch.Provider.AzureArm.Resources
 {
     /// <summary>
     /// Requests an output from another IPlatformTwin

@@ -11,11 +11,11 @@ using Cacoch.Core.Provider;
 
 namespace Cacoch.Provider.AzureArm.Resources.Storage
 {
-    public class StorageTwin : IPlatformTwin<Core.Manifest.Storage.Storage>
+    public class StorageTwin : IPlatformTwin<Core.Manifest.Storage.CacochStorageResourceMetadata>
     {
-        private readonly Core.Manifest.Storage.Storage _resource;
+        private readonly Core.Manifest.Storage.CacochStorageResourceMetadata _resource;
 
-        public StorageTwin(Core.Manifest.Storage.Storage resource, AzurePlatformContext context)
+        public StorageTwin(Core.Manifest.Storage.CacochStorageResourceMetadata resource, AzurePlatformContext context)
         {
             _resource = resource;
             PlatformName = _resource.Name + context.ResourceGroupRandomId;
@@ -50,9 +50,9 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                 .Union(
                     links.Select(x =>
                     {
-                        var assignmentDetails = $"{_resource.Name}-link-{x.requestor.PlatformName}-{x.type}";
+                        var assignmentDetails = $"{_resource.Name}-{_resource.FriendlyType}-link-{x.requestor.PlatformName}-{x.type}".ToLowerInvariant();
                         var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(assignmentDetails));
-                        var guidRepresentingAssignment = new Guid(hash[0..16]).ToString();
+                        var guidRepresentingAssignment = new Guid(hash[..16]).ToString();
 
                         return new AzureArmDeploymentArtifact(
                             $"{_resource.Name}-link-{x.requestor.PlatformName}-{x.type}",

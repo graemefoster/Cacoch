@@ -20,7 +20,7 @@ namespace Cacoch.Provider.AzureArm.Tests
         public async Task allows_between_5_and_15_characters(string name, bool valid)
         {
             var storage = new Cacoch.Provider.AzureArm.Resources.Storage.StorageTwin(
-                new Storage(name, Array.Empty<CacochStorageResourceContainer>(),
+                new CacochStorageResourceMetadata(name, Array.Empty<CacochStorageResourceContainer>(),
                     new List<CacochResourceLinkMetadata>()), new AzurePlatformContext(""));
             var validationResult = await storage.Validate();
             if (valid) validationResult.ShouldBe(ValidationResult.Success);

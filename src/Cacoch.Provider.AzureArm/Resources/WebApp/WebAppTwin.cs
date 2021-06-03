@@ -11,12 +11,12 @@ using Newtonsoft.Json;
 
 namespace Cacoch.Provider.AzureArm.Resources.WebApp
 {
-    internal class WebAppTwin : IPlatformTwin<Core.Manifest.WebApp.WebApp>
+    internal class WebAppTwin : IPlatformTwin<Core.Manifest.WebApp.CacochWebAppResourceMetadata>
     {
-        private readonly Core.Manifest.WebApp.WebApp _resource;
+        private readonly Core.Manifest.WebApp.CacochWebAppResourceMetadata _resource;
         private readonly IOptions<AzureArmSettings> _settings;
 
-        public WebAppTwin(IOptions<AzureArmSettings> settings, Core.Manifest.WebApp.WebApp resource,
+        public WebAppTwin(IOptions<AzureArmSettings> settings, Core.Manifest.WebApp.CacochWebAppResourceMetadata resource,
             AzurePlatformContext platformContext)
         {
             _resource = resource;
