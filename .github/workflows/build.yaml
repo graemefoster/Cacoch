@@ -2,6 +2,10 @@ name: dotnet package
 
 on: [push]
 
+defaults:
+  run:
+    working-directory: ./src
+
 jobs:
   build:
 
