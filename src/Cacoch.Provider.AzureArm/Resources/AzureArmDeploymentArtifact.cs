@@ -6,17 +6,17 @@ namespace Cacoch.Provider.AzureArm.Resources
 {
     internal class AzureArmDeploymentArtifact : IDeploymentArtifact
     {
-        internal string PlatformIdentifier { get; }
+        internal string Name { get; }
         internal string Arm { get; }
         internal Dictionary<string, object> Parameters { get; }
 
         public AzureArmDeploymentArtifact(
-            string platformIdentifier, 
+            string name, 
             string arm, 
             Dictionary<string, object> parameters,
             IEnumerable<AzureArmDeploymentArtifact> childArtifacts)
         {
-            PlatformIdentifier = platformIdentifier;
+            Name = name;
             Arm = arm;
             Parameters = parameters;
             ChildArtifacts = childArtifacts;

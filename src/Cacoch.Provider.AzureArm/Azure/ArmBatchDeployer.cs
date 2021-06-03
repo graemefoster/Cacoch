@@ -9,6 +9,7 @@ using Azure;
 using Azure.ResourceManager.Storage;
 using Azure.ResourceManager.Storage.Models;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using Cacoch.Provider.AzureArm.Resources;
@@ -23,7 +24,6 @@ namespace Cacoch.Provider.AzureArm.Azure
     {
         private record InternalArmDetails(
             string HashString, 
-            string Id, 
             string Name, 
             Dictionary<string, object> Parameters,
             InternalArmDetails? DependsOn);
@@ -36,9 +36,7 @@ namespace Cacoch.Provider.AzureArm.Azure
 
         private readonly IDictionary<object, string> _parameterMap = new Dictionary<object, string>();
         private readonly IList<InternalArmDetails> _armsToDeploy = new List<InternalArmDetails>();
-
-        private readonly IDictionary<string, (string uid, string arm)> _uniqueArms =
-            new Dictionary<string, (string uid, string arm)>();
+        private readonly IDictionary<string, (string uid, string arm)> _uniqueArms = new Dictionary<string, (string uid, string arm)>();
 
         private bool _deployed;
 
@@ -111,13 +109,14 @@ namespace Cacoch.Provider.AzureArm.Azure
             var hashString = Convert.ToBase64String(hash);
             if (!_uniqueArms.ContainsKey(hashString))
             {
-                _uniqueArms.Add(hashString, (Guid.NewGuid().ToString(), artifact.Arm));
+                _uniqueArms.Add(hashString, (hashString.Substring(0, 10), artifact.Arm));
             }
 
             var internalArmDetails = new InternalArmDetails(
                 hashString,
-                Guid.NewGuid().ToString(),
-                artifact.PlatformIdentifier, artifact.Parameters, parent);
+                artifact.Name, 
+                artifact.Parameters, 
+                parent);
 
             _armsToDeploy.Add(internalArmDetails);
             return internalArmDetails;
@@ -135,17 +134,13 @@ namespace Cacoch.Provider.AzureArm.Azure
 
                 _logger.LogDebug("Ensuring arm template storage container exists");
                 var container = await GetOrCreateTemplateStorageContainer();
+
                 _logger.LogDebug("Getting blob container client");
                 var containerClient = _blobServiceClient.GetBlobContainerClient(container.Name);
-                var deploymentTemplateFolder = resourceGroup + "-" + Guid.NewGuid().ToString().ToLowerInvariant();
-                _logger.LogDebug("Will place templates in {Folder}", deploymentTemplateFolder);
 
-                await UploadAllTemplatesAsync(deploymentTemplateFolder, containerClient);
+                await UploadAllTemplatesAsync( containerClient);
                 var uniqueParameters = CreateParametersSectionOfMainTemplate();
-                var deploymentResources = BuildAllDeploymentResources(containerClient, deploymentTemplateFolder);
-
-                _uniqueArms.Clear();
-                _armsToDeploy.Clear();
+                var deploymentResources = BuildAllDeploymentResources(containerClient);
 
                 _logger.LogDebug("Uploaded templates. Initiating ARM deployment");
 
@@ -167,17 +162,14 @@ namespace Cacoch.Provider.AzureArm.Azure
         /// Creates a new deployment resource for every template to be deployed.
         /// </summary>
         /// <param name="containerClient"></param>
-        /// <param name="deploymentTemplateFolder"></param>
         /// <returns></returns>
-        private object BuildAllDeploymentResources(BlobContainerClient containerClient, string? deploymentTemplateFolder)
+        private object BuildAllDeploymentResources(BlobContainerClient containerClient)
         {
             var deploymentResources = _armsToDeploy.Select(x =>
             {
-                var blobClient =
-                    containerClient.GetBlockBlobClient(
-                        $"{deploymentTemplateFolder}/{_uniqueArms[x.HashString].uid.ToString()}.json");
-                var blobSasBuilder = new BlobSasBuilder(BlobSasPermissions.Read,
-                    DateTimeOffset.Now.AddHours(5))
+                var blobClient = containerClient.GetBlockBlobClient($"{_uniqueArms[x.HashString].uid.ToString()}.json");
+
+                var blobSasBuilder = new BlobSasBuilder(BlobSasPermissions.Read, DateTimeOffset.Now.AddHours(5))
                 {
                     BlobContainerName = blobClient.BlobContainerName,
                     BlobName = blobClient.Name,
@@ -189,8 +181,8 @@ namespace Cacoch.Provider.AzureArm.Azure
                 {
                     type = "Microsoft.Resources/deployments",
                     apiVersion = "2020-10-01",
-                    name = x.Id,
-                    dependsOn = x.DependsOn == null ? Array.Empty<string>() : new[] {x.DependsOn.Id},
+                    name = x.Name,
+                    dependsOn = x.DependsOn == null ? Array.Empty<string>() : new[] {x.DependsOn.Name},
                     properties = new
                     {
                         mode = "Incremental",
@@ -236,16 +228,23 @@ namespace Cacoch.Provider.AzureArm.Azure
         /// <summary>
         /// Uploads all template to blob storage
         /// </summary>
-        /// <param name="deploymentTemplateFolder"></param>
         /// <param name="containerClient"></param>
-        private async Task UploadAllTemplatesAsync(string? deploymentTemplateFolder, BlobContainerClient containerClient)
+        private async Task UploadAllTemplatesAsync(BlobContainerClient containerClient)
         {
             await Task.WhenAll(_uniqueArms.Select(async x =>
             {
-                await using var ms = new MemoryStream(Encoding.Default.GetBytes(x.Value.arm));
-                var blobName = $"{deploymentTemplateFolder}/{x.Value.uid.ToString()}.json";
-                _logger.LogDebug(" Uploading arm to {Blob}", blobName);
-                await containerClient.UploadBlobAsync(blobName, ms);
+                var blobName = $"{x.Value.uid.ToString()}.json";
+                var existingBlob = containerClient.GetBlobsAsync(BlobTraits.Metadata, BlobStates.All, blobName);
+                if (existingBlob.GetAsyncEnumerator().Current == null)
+                {
+                    await using var ms = new MemoryStream(Encoding.Default.GetBytes(x.Value.arm));
+                    _logger.LogDebug(" Uploading arm to {Blob}", blobName);
+                    await containerClient.UploadBlobAsync(blobName, ms);
+                }
+                else
+                {
+                    _logger.LogDebug("Blob {Blob} already exists", blobName);
+                }
             }));
         }
 
