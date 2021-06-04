@@ -39,7 +39,9 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                 new Dictionary<string, object>()
                 {
                     ["vaultName"] = PlatformName,
-                    ["location"] = _settings.Value.PrimaryLocation!
+                    ["secrets"] = _resource.RequiredSecretNames?.ToArray() ?? Array.Empty<string>(),
+                    ["location"] = _settings.Value.PrimaryLocation!,
+                    ["existingResourceGroupTags"] = new ArmFunction("[resourceGroup().tags]")
                 },
                 Array.Empty<IPlatformTwin>(),
                 (await BuildLinks(allTwins))
@@ -60,6 +62,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     ["secretValue"] =
                         new CacochSecret(
                             $"{Guid.NewGuid().ToString().ToLowerInvariant()}-{Guid.NewGuid().ToString().ToLowerInvariant()}{Guid.NewGuid().ToString().ToLowerInvariant()}"),
+                    ["currentSecrets"] = new ArmOutput(this, "currentSecrets")
                 },
                 Array.Empty<IPlatformTwin>(),
                 Array.Empty<AzureArmDeploymentArtifact>()
@@ -88,7 +91,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     {
                         {"assignmentName", guidRepresentingAssignment},
                         {"vaultName", PlatformName},
-                        {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")},
+                        {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")}
                     },
                     new[] {x.requestor},
                     Array.Empty<AzureArmDeploymentArtifact>());

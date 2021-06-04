@@ -68,6 +68,10 @@ namespace Cacoch.Cli
                                 {
                                     "secret-one",
                                     "secret-two",
+                                    "secret-three",
+                                    "secret-four",
+                                    "secret-five",
+                                    "secret-six",
                                 },
                                 new List<CacochResourceLinkMetadata>
                                 {

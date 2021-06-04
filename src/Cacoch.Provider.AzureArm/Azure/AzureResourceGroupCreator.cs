@@ -45,6 +45,8 @@ namespace Cacoch.Provider.AzureArm.Azure
 
         public async Task<string> GetResourceGroupRandomId(string resourceGroup)
         {
+            return "s2iypjwlsxzki";
+            
             if (_randomStrings.ContainsKey(resourceGroup))
             {
                 return _randomStrings[resourceGroup];

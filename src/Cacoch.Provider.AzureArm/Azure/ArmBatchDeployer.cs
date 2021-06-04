@@ -97,7 +97,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         {
             foreach (var parameter in artifact.Parameters)
             {
-                if (!(parameter.Value is ArmOutput) && !(parameter.Value is ArmOutputNameValueObjectArray))
+                if (!(parameter.Value is ArmOutput) && !(parameter.Value is ArmOutputNameValueObjectArray) && !(parameter.Value is ArmFunction))
                 {
                     if (!_parameterMap.ContainsKey(parameter.Value))
                     {
@@ -220,6 +220,15 @@ namespace Cacoch.Provider.AzureArm.Azure
                                     {
                                         value =
                                             $"[reference('{armTemplateName}').outputs['{armOutput.TemplateOutputName}'].value]"
+                                    });
+                            }
+                            
+                            if (p.Value is ArmFunction armFunction)
+                            {
+                                return new KeyValuePair<string, object>(p.Key,
+                                    new
+                                    {
+                                        value = armFunction.Function
                                     });
                             }
 

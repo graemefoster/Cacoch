@@ -18,6 +18,7 @@ namespace Cacoch.Provider.AzureArm.Resources
             TemplateName = templateName;
             TemplateOutputName = templateOutputName;
         }
+
         public ArmOutput(IPlatformTwin twin, string templateOutputName)
         {
             Twin = twin;
@@ -25,9 +26,21 @@ namespace Cacoch.Provider.AzureArm.Resources
         }
     }
 
+    /// <summary>
+    /// Requests an input from an arm function
+    /// </summary>
+    internal class ArmFunction
+    {
+        public string Function { get; }
+
+        public ArmFunction(string function)
+        {
+            Function = function;
+        }
+    }
+
     internal class ArmOutputNameValueObjectArray
     {
         public Dictionary<string, ArmOutput> PropertySet = new Dictionary<string, ArmOutput>();
     }
-    
 }
