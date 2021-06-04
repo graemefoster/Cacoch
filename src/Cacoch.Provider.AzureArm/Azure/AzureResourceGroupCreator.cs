@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
+using Microsoft.Rest.Azure.OData;
 
 namespace Cacoch.Provider.AzureArm.Azure
 {
@@ -38,20 +39,27 @@ namespace Cacoch.Provider.AzureArm.Azure
         {
             _logger.LogDebug("Ensuring resource group {ResourceGroup} in {Location} exists", resourceGroup,
                 _settings.Value.PrimaryLocation);
-            
-            await _resourceClient.ResourceGroups.CreateOrUpdateAsync(resourceGroup,
-                new ResourceGroup(_settings.Value.PrimaryLocation));
+
+            try
+            {
+                await _resourceClient.ResourceGroups.GetAsync(resourceGroup);
+            }
+            catch (RestException re)
+            {
+                await _resourceClient.ResourceGroups.CreateOrUpdateAsync(resourceGroup,
+                    new ResourceGroup(_settings.Value.PrimaryLocation));
+            }
         }
 
         public async Task<string> GetResourceGroupRandomId(string resourceGroup)
         {
             return "s2iypjwlsxzki";
-            
+
             if (_randomStrings.ContainsKey(resourceGroup))
             {
                 return _randomStrings[resourceGroup];
             }
-            
+
             _logger.LogDebug("Fetching random-id to help with unique resource names");
             var outputs = await _armDeployer.Deploy(
                 resourceGroup,
@@ -59,10 +67,11 @@ namespace Cacoch.Provider.AzureArm.Azure
                 new Dictionary<string, object>()
             );
 
-            var resourceGroupRandomId = (string)((dynamic)outputs.Properties.Outputs).randomId.value;
+            var resourceGroupRandomId = (string) ((dynamic) outputs.Properties.Outputs).randomId.value;
             _randomStrings.Add(resourceGroup, resourceGroupRandomId);
-            _logger.LogDebug("Fetched random id {RandomId} for resource group {ResourceGroup}", resourceGroupRandomId, resourceGroup);
-            
+            _logger.LogDebug("Fetched random id {RandomId} for resource group {ResourceGroup}", resourceGroupRandomId,
+                resourceGroup);
+
             return resourceGroupRandomId;
         }
     }

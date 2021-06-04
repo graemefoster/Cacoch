@@ -41,7 +41,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     ["vaultName"] = PlatformName,
                     ["secrets"] = _resource.RequiredSecretNames?.ToArray() ?? Array.Empty<string>(),
                     ["location"] = _settings.Value.PrimaryLocation!,
-                    ["existingResourceGroupTags"] = new ArmFunction("[resourceGroup().tags]")
+                    ["existingRgTags"] = new ArmFunction("[if(contains(resourceGroup(), 'tags'), resourceGroup().tags, createObject())]")
                 },
                 Array.Empty<IPlatformTwin>(),
                 (await BuildLinks(allTwins))
