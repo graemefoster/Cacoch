@@ -9,11 +9,14 @@ namespace Cacoch.Provider.AzureArm.Azure
     internal interface IArmBatchBuilder
     {
         void RegisterArm(IPlatformTwin twin, AzureArmDeploymentArtifact artifact);
-        Task<DeploymentExtended> Deploy(string resourceGroup);
+        Task<Dictionary<string, IDeploymentOutput>> Deploy(string resourceGroup);
     }
 
     internal interface IArmDeployer
     {
-        Task<DeploymentExtended> Deploy(string resourceGroup, string template, Dictionary<string, object> parameters);
+        Task<IDictionary<string, ArmDeploymentOutput>> Deploy(
+            string resourceGroup, 
+            string template, 
+            Dictionary<string, object> parameters);
     }
 }

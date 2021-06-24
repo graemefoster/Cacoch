@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Azure.ResourceManager.Storage.Models;
 using Cacoch.Core.Manifest.Storage;
 using Cacoch.Core.Provider;
 
@@ -43,14 +42,16 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                 {
                     {"storageAccountName", PlatformName}
                 },
-                Array.Empty<IPlatformTwin>(),
+                Array.Empty<string>(),
                 (await Containers())
                 .Union(await Queues())
                 .Union(await Tables())
                 .Union(
                     links.Select(x =>
                     {
-                        var assignmentDetails = $"{_resource.Name}-{_resource.FriendlyType}-link-{x.requestor.PlatformName}-{x.type}".ToLowerInvariant();
+                        var assignmentDetails =
+                            $"{_resource.Name}-{_resource.FriendlyType}-link-{x.requestor.PlatformName}-{x.type}"
+                                .ToLowerInvariant();
                         var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(assignmentDetails));
                         var guidRepresentingAssignment = new Guid(hash[..16]).ToString();
 
@@ -63,9 +64,20 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                                 {"storageName", PlatformName},
                                 {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")},
                             },
-                            new[] {x.requestor},
+                            Array.Empty<string>(),
                             Array.Empty<AzureArmDeploymentArtifact>());
                     })));
+        }
+
+        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(
+            IDictionary<string, IDeploymentOutput> allTwins)
+        {
+            return Task.FromResult(default(IDeploymentArtifact));
+        }
+
+        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(IPlatformTwin[] allTwins)
+        {
+            return Task.FromResult(default(IDeploymentArtifact));
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> Containers()
@@ -98,7 +110,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                         {"storageAccountName", PlatformName},
                         {"name", x.Name}
                     },
-                    Array.Empty<IPlatformTwin>(),
+                    Array.Empty<string>(),
                     Array.Empty<AzureArmDeploymentArtifact>()));
         }
 

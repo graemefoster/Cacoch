@@ -14,7 +14,8 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
         private readonly Core.Manifest.WebApp.CacochWebAppResourceMetadata _resource;
         private readonly IOptions<AzureArmSettings> _settings;
 
-        public WebAppTwin(IOptions<AzureArmSettings> settings, Core.Manifest.WebApp.CacochWebAppResourceMetadata resource,
+        public WebAppTwin(IOptions<AzureArmSettings> settings,
+            Core.Manifest.WebApp.CacochWebAppResourceMetadata resource,
             AzurePlatformContext platformContext)
         {
             _resource = resource;
@@ -31,7 +32,7 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact(IPlatformTwin[] allTwins)
         {
             var appSettings = PrepareAppSettings(allTwins, out ArmOutputNameValueObjectArray requiredSecretReferences);
-            
+
             return new AzureArmDeploymentArtifact(
                 _resource.Name.ToLowerInvariant(),
                 await typeof(WebAppTwin).GetResourceContents(),
@@ -39,14 +40,26 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                 {
                     ["webAppName"] = PlatformName,
                     ["serverFarmId"] = _settings.Value.ServerFarmId!,
-                    ["appSettings"] = appSettings.Select(x => new { name = x.Key, value = x.Value }).ToArray(),
+                    ["appSettings"] = appSettings.Select(x => new {name = x.Key, value = x.Value}).ToArray(),
                     ["secretReferences"] = requiredSecretReferences
                 },
-                Array.Empty<IPlatformTwin>(),
+                new[] {"hostName"},
                 Array.Empty<AzureArmDeploymentArtifact>());
         }
 
-        private Dictionary<string, string> PrepareAppSettings(IPlatformTwin[] allTwins, out ArmOutputNameValueObjectArray requiredInputs)
+        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(
+            IDictionary<string, IDeploymentOutput> allTwins)
+        {
+            return Task.FromResult(default(IDeploymentArtifact));
+        }
+
+        public Task<IDeploymentArtifact> PostDeployBuildDeploymentArtifact(IPlatformTwin[] allTwins)
+        {
+            return Task.FromResult(default(IDeploymentArtifact)!);
+        }
+
+        private Dictionary<string, string> PrepareAppSettings(IPlatformTwin[] allTwins,
+            out ArmOutputNameValueObjectArray requiredInputs)
         {
             var requiredSecretReferences = new ArmOutputNameValueObjectArray();
             var settings = new Dictionary<string, string>()
@@ -61,7 +74,7 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                 {
                     //we need to get a reference to a secret uri from the secret container.
                     var secretParts = val.Substring(1, val.Length - 2).Substring("secret.".Length).Split(".");
-                    var vaultTwin = (SecretsTwin)allTwins.Single(x => x.ResourceName == secretParts[0]);
+                    var vaultTwin = (SecretsTwin) allTwins.Single(x => x.ResourceName == secretParts[0]);
 
                     //secretReference gives us the arm expression to get the output from the secret template
                     var secretReference = vaultTwin.ArmOutputFor(secretParts[1]);

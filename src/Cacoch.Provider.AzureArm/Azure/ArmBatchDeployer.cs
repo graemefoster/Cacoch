@@ -15,7 +15,6 @@ using Azure.Storage.Sas;
 using Cacoch.Core.Manifest.Secrets;
 using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Resources;
-using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -28,6 +27,7 @@ namespace Cacoch.Provider.AzureArm.Azure
             string HashString,
             string Name,
             Dictionary<string, object> Parameters,
+            string[] OutputsToExpose,
             InternalArmDetails? DependsOn);
 
         private readonly StorageManagementClient _storageManagementClient;
@@ -97,7 +97,8 @@ namespace Cacoch.Provider.AzureArm.Azure
         {
             foreach (var parameter in artifact.Parameters)
             {
-                if (!(parameter.Value is ArmOutput) && !(parameter.Value is ArmOutputNameValueObjectArray) && !(parameter.Value is ArmFunction))
+                if (!(parameter.Value is ArmOutput) && !(parameter.Value is ArmOutputNameValueObjectArray) &&
+                    !(parameter.Value is ArmFunction))
                 {
                     if (!_parameterMap.ContainsKey(parameter.Value))
                     {
@@ -128,13 +129,14 @@ namespace Cacoch.Provider.AzureArm.Azure
                 hashString,
                 artifact.Name,
                 artifact.Parameters,
+                artifact.ExposedOutputs,
                 parent);
 
             _armsToDeploy.Add(internalArmDetails);
             return internalArmDetails;
         }
 
-        public async Task<DeploymentExtended> Deploy(string resourceGroup)
+        public async Task<Dictionary<string, IDeploymentOutput>> Deploy(string resourceGroup)
         {
             try
             {
@@ -153,17 +155,22 @@ namespace Cacoch.Provider.AzureArm.Azure
                 _logger.LogDebug("Ensuring arm templates are in storage");
                 await UploadAllTemplatesAsync(containerClient);
                 var uniqueParameters = CreateParametersSectionOfMainTemplate();
+                var outputs = CreateOutputsSectionOfMainTemplate();
                 var deploymentResources = BuildAllDeploymentResources(containerClient);
 
                 _logger.LogDebug("Uploaded templates. Initiating ARM deployment");
 
-                return await _armDeployer.Deploy(resourceGroup,
+                var armTemplate =
                     (await typeof(AzureResourceGroupCreator).GetResourceContents("MainDeploymentTemplate"))
                     .Replace("{{deployments}}", JsonConvert.SerializeObject(deploymentResources))
-                    .Replace("{{parameters}}", JsonConvert.SerializeObject(uniqueParameters)),
+                    .Replace("{{parameters}}", JsonConvert.SerializeObject(uniqueParameters))
+                    .Replace("{{outputs}}", JsonConvert.SerializeObject(outputs));
+
+                return (await _armDeployer.Deploy(resourceGroup,
+                    armTemplate,
                     new Dictionary<string, object>(_parameterMap.Select(x =>
                         new KeyValuePair<string, object>(x.Value.ToString(), x.Key)))
-                );
+                )).ToDictionary(x => x.Key, x => x.Value as IDeploymentOutput);
             }
             finally
             {
@@ -222,7 +229,7 @@ namespace Cacoch.Provider.AzureArm.Azure
                                             $"[reference('{armTemplateName}').outputs['{armOutput.TemplateOutputName}'].value]"
                                     });
                             }
-                            
+
                             if (p.Value is ArmFunction armFunction)
                             {
                                 return new KeyValuePair<string, object>(p.Key,
@@ -298,6 +305,26 @@ namespace Cacoch.Provider.AzureArm.Azure
 
                 throw new NotSupportedException($"Unsupported parameter type - {key.GetType()}");
             }));
+            return uniqueParameters;
+        }
+
+        /// <summary>
+        /// Creates an outputs object collecting all parameters that resources want to expose to others in their pre-process step.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
+        private Dictionary<string, object> CreateOutputsSectionOfMainTemplate()
+        {
+            var uniqueParameters = new Dictionary<string, object>(_armsToDeploy.SelectMany(p =>
+                p.OutputsToExpose.Select(x =>
+                    new KeyValuePair<string, object>(
+                        $"{p.Name}_{x}",
+                        new
+                        {
+                            type = "string",
+                            value = $"[reference('{p.Name}').outputs['{x}'].value]"
+                        }))
+            ));
             return uniqueParameters;
         }
 

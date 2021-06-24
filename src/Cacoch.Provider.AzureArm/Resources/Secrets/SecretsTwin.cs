@@ -41,12 +41,19 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     ["vaultName"] = PlatformName,
                     ["secrets"] = _resource.RequiredSecretNames?.ToArray() ?? Array.Empty<string>(),
                     ["location"] = _settings.Value.PrimaryLocation!,
-                    ["existingRgTags"] = new ArmFunction("[if(contains(resourceGroup(), 'tags'), resourceGroup().tags, createObject())]")
+                    ["existingRgTags"] =
+                        new ArmFunction("[if(contains(resourceGroup(), 'tags'), resourceGroup().tags, createObject())]")
                 },
-                Array.Empty<IPlatformTwin>(),
+                Array.Empty<string>(),
                 (await BuildLinks(allTwins))
                 .Union(await BuildSecrets())
             );
+        }
+
+        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(
+            IDictionary<string, IDeploymentOutput> allTwins)
+        {
+            return Task.FromResult(default(IDeploymentArtifact));
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildSecrets()
@@ -64,7 +71,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                             $"{Guid.NewGuid().ToString().ToLowerInvariant()}-{Guid.NewGuid().ToString().ToLowerInvariant()}{Guid.NewGuid().ToString().ToLowerInvariant()}"),
                     ["currentSecrets"] = new ArmOutput(this, "currentSecrets")
                 },
-                Array.Empty<IPlatformTwin>(),
+                Array.Empty<string>(),
                 Array.Empty<AzureArmDeploymentArtifact>()
             ));
         }
@@ -93,7 +100,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                         {"vaultName", PlatformName},
                         {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")}
                     },
-                    new[] {x.requestor},
+                    Array.Empty<string>(),
                     Array.Empty<AzureArmDeploymentArtifact>());
             });
         }

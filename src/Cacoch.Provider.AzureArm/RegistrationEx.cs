@@ -47,7 +47,7 @@ namespace Cacoch.Provider.AzureArm
                     new StorageSharedKeyCredential(settings.PlatformStorage, key));
             });
 
-            services.AddScoped<IArmBatchBuilder, ArmBatchDeployer>();
+            services.AddTransient<IArmBatchBuilder, ArmBatchDeployer>();
             services.AddSingleton<IArmDeployer, ArmDeployer>();
             services.AddScoped<ICacochManifestDeployer<AzurePlatformContext>, AzureCacochManifestDeployer>();
 

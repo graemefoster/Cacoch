@@ -5,6 +5,7 @@ using Azure.Core;
 using Azure.Identity;
 using Cacoch.Core.Manifest;
 using Cacoch.Core.Manifest.Abstractions;
+using Cacoch.Core.Manifest.OAuthClient;
 using Cacoch.Core.Manifest.Secrets;
 using Cacoch.Core.Manifest.Storage;
 using Cacoch.Core.Manifest.WebApp;
@@ -13,6 +14,7 @@ using Cacoch.Provider.AzureArm;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Rest;
+using Microsoft.Rest.Azure;
 using Serilog;
 
 namespace Cacoch.Cli
@@ -36,7 +38,8 @@ namespace Cacoch.Cli
 
             await host.StartAsync();
 
-            // using (var _ = host.Services.CreateScope()) {
+            // using (var _ = host.Services.CreateScope())
+            // {
             //     var builder = host.Services.GetService<IManifestDeployer>();
             //
             //     await builder!.Deploy(
@@ -45,9 +48,12 @@ namespace Cacoch.Cli
             //             "1.0",
             //             "cacochplatform",
             //             "Cacoch Platform",
-            //             new List<IResource>
+            //             new List<CacochResourceMetadata>
             //             {
-            //                 new Storage("cacochstorage", Array.Empty<string>())
+            //                 new CacochStorageResourceMetadata(
+            //                     "cacochstorage",
+            //                     Array.Empty<CacochStorageResourceContainer>(),
+            //                     new List<CacochResourceLinkMetadata>())
             //             }));
             // }
 
@@ -99,7 +105,11 @@ namespace Cacoch.Cli
                                 {"CONFIG_SETTING_ONE", "ONE"},
                                 {"CONFIG_SETTING_TWO", "TWO"},
                                 {"SECRET_REFERENCE", "[secret.secrets.secret-two]"}
-                            })
+                            }),
+                            new CacochOAuthClientResourceMetadata("cacochtestapp", OAuthClientType.Web,
+                                "http://localhost:9000/", new[] {"http://localhost:9000/sign-oidc"},
+                                new[] {"cacochapp"}, new[] {""}, new List<OAuthRole>(), new List<OAuthScope>(),
+                                new List<CacochResourceLinkMetadata>())
                         }));
             }
         }

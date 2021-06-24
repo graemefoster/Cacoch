@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest.Secrets;
+using Cacoch.Core.Provider;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Cacoch.Provider.AzureArm.Azure
 {
@@ -19,7 +22,7 @@ namespace Cacoch.Provider.AzureArm.Azure
 
         public ArmDeployer(
             ServiceClientCredentials credentials,
-            IOptions<AzureArmSettings> settings, 
+            IOptions<AzureArmSettings> settings,
             ILogger<ArmDeployer> logger)
         {
             _logger = logger;
@@ -29,14 +32,14 @@ namespace Cacoch.Provider.AzureArm.Azure
             };
         }
 
-        public async Task<DeploymentExtended> Deploy(
+        public async Task<IDictionary<string, ArmDeploymentOutput>> Deploy(
             string resourceGroup,
-            string arm,
+            string template,
             Dictionary<string, object> parameters)
         {
             var deployment = new Deployment(
                 new DeploymentProperties(DeploymentMode.Incremental,
-                    arm,
+                    template,
                     null,
                     JsonConvert.SerializeObject(parameters?.ToDictionary(x => x.Key, x =>
                     {
@@ -44,9 +47,10 @@ namespace Cacoch.Provider.AzureArm.Azure
                         {
                             return new
                             {
-                                value = (object)secret.Secret
+                                value = (object) secret.Secret
                             };
                         }
+
                         return new
                         {
                             value = x.Value
@@ -55,13 +59,29 @@ namespace Cacoch.Provider.AzureArm.Azure
                 ));
 
             var deploymentName = $"{resourceGroup}-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss");
-            var response =  await _resourceClient.Deployments.CreateOrUpdateAsync(
+            var response = await _resourceClient.Deployments.CreateOrUpdateAsync(
                 resourceGroup,
                 deploymentName,
                 deployment);
-            
+
             _logger.LogDebug("Finished deployment {DeploymentName}", deploymentName);
-            return response;
+
+            if (response.Properties.Outputs is JObject outputs)
+            {
+                return ((IEnumerable<KeyValuePair<string, JToken>>) outputs)
+                    .Select(x => new
+                    {
+                        Template = x.Key.Contains("_") ? x.Key.Split("_")[0] : "",
+                        PropertyName = x.Key.Contains("_") ? x.Key.Split("_")[1] : x.Key,
+                        PropertyValue = x.Value["value"].Value<string>()
+                    })
+                    .GroupBy(x => x.Template)
+                    .ToDictionary(
+                        x => x.Key,
+                        x => new ArmDeploymentOutput(x.ToDictionary(y => y.PropertyName, y => y.PropertyValue)));
+            }
+
+            return new Dictionary<string, ArmDeploymentOutput>();
         }
     }
 }

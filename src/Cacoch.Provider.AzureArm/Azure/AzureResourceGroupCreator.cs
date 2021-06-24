@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Cacoch.Provider.AzureArm.Resources;
-using Cacoch.Provider.AzureArm.Resources.Storage;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
-using Microsoft.Rest.Azure.OData;
 
 namespace Cacoch.Provider.AzureArm.Azure
 {
@@ -65,7 +63,7 @@ namespace Cacoch.Provider.AzureArm.Azure
                 new Dictionary<string, object>()
             );
 
-            var resourceGroupRandomId = (string) ((dynamic) outputs.Properties.Outputs).randomId.value;
+            var resourceGroupRandomId = outputs.Single().Value["randomId"];
             _randomStrings.Add(resourceGroup, resourceGroupRandomId);
             _logger.LogDebug("Fetched random id {RandomId} for resource group {ResourceGroup}", resourceGroupRandomId,
                 resourceGroup);

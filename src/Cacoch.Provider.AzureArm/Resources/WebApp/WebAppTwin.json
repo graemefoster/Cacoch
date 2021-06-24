@@ -64,6 +64,10 @@
     "identity": {
       "type": "string",
       "value": "[reference(concat('Microsoft.Web/sites/', parameters('webAppName')), '2016-08-01', 'Full').identity.principalId]"
+    },
+    "hostName" : {
+      "type" : "string",
+      "value": "[reference(concat('Microsoft.Web/sites/', parameters('webAppName')), '2016-08-01', 'Full').properties.hostNames[0]]"
     }
   }
 }
