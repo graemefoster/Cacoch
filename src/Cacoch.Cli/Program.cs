@@ -13,8 +13,6 @@ using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Rest;
-using Microsoft.Rest.Azure;
 using Serilog;
 
 namespace Cacoch.Cli
@@ -23,15 +21,15 @@ namespace Cacoch.Cli
     {
         static async Task Main(string[] args)
         {
-            var tokenCredential = new DefaultAzureCredential();
-            var token = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[]
-                {"https://management.core.windows.net/user_impersonation"}));
-            var serviceClientCredentials = new TokenCredentials(token.Token);
+            var tokenCredential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions()
+            {
+            });
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hb, svc) =>
                 {
-                    svc.RegisterCacochAzureArm(serviceClientCredentials, tokenCredential,
+                    svc.RegisterCacochAzureArm(
+                        tokenCredential,
                         hb.Configuration.GetSection("Cacoch"));
                 })
                 .ConfigureLogging(lb => lb.AddSerilog()).Build();
@@ -78,7 +76,7 @@ namespace Cacoch.Cli
                                     "secret-four",
                                     "secret-five",
                                     "secret-six",
-                                    "secret-seven",
+                                    "secret-seven"
                                 },
                                 new List<CacochResourceLinkMetadata>
                                 {

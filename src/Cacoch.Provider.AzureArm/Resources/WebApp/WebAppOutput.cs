@@ -1,6 +1,8 @@
-﻿namespace Cacoch.Provider.AzureArm.Resources.WebApp
+﻿using Cacoch.Core.Provider;
+
+namespace Cacoch.Provider.AzureArm.Resources.WebApp
 {
-    internal class WebAppOutput
+    internal class WebAppOutput : IDeploymentOutput
     {
         public WebAppOutput(string hostName)
         {

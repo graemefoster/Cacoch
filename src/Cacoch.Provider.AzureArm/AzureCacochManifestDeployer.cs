@@ -6,6 +6,7 @@ using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Azure;
 using Cacoch.Provider.AzureArm.Resources;
 using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
 
 namespace Cacoch.Provider.AzureArm
 {
@@ -14,15 +15,18 @@ namespace Cacoch.Provider.AzureArm
         private readonly IArmBatchBuilder _armBatchBuilder;
         private readonly ILogger<AzureCacochManifestDeployer> _logger;
         private readonly IResourceGroupCreator _azureResourceGroupCreator;
+        private readonly GraphServiceClient _graphServiceClient;
 
         public AzureCacochManifestDeployer(
             IArmBatchBuilder armBatchBuilder,
             ILogger<AzureCacochManifestDeployer> logger,
-            IResourceGroupCreator azureResourceGroupCreator)
+            IResourceGroupCreator azureResourceGroupCreator,
+            GraphServiceClient graphServiceClient)
         {
             _armBatchBuilder = armBatchBuilder;
             _logger = logger;
             _azureResourceGroupCreator = azureResourceGroupCreator;
+            _graphServiceClient = graphServiceClient;
         }
 
         public async Task Deploy(Manifest manifest, IPlatformTwin[] twins)
@@ -30,17 +34,33 @@ namespace Cacoch.Provider.AzureArm
             var allDeploymentArtifacts = new List<IDeploymentArtifact>();
             foreach (var twin in twins)
             {
-                _logger.LogDebug("Building arm - Twin type {Type}. Twin platform now:{PlatformName}", twin.GetType().Name, twin.PlatformName);
+                _logger.LogDebug("Building arm - Twin type {Type}. Twin platform now:{PlatformName}",
+                    twin.GetType().Name, twin.PlatformName);
                 var deploymentArtifact = await twin.BuildDeploymentArtifact(twins);
                 if (deploymentArtifact is AzureArmDeploymentArtifact arm)
                 {
                     _armBatchBuilder.RegisterArm(twin, arm);
                 }
+
                 allDeploymentArtifacts.Add(deploymentArtifact);
             }
 
+            var aadArtifacts = allDeploymentArtifacts.OfType<AzureActiveDirectoryApiDeploymentArtifact>().ToArray();
+
             _logger.LogInformation("Beginning Azure Arm Deployment");
+
+            foreach (var aadArtifact in aadArtifacts)
+            {
+                await aadArtifact.Deploy(_graphServiceClient);
+            }
+
             var armOutputs = await _armBatchBuilder.Deploy(manifest.Slug);
+            foreach (var aadArtifact in aadArtifacts)
+            {
+                await aadArtifact.PostDeploy(_graphServiceClient, armOutputs);
+            }
+
+
             _logger.LogInformation("Finished Azure Deployment");
         }
 

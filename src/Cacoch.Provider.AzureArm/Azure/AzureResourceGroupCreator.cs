@@ -20,16 +20,13 @@ namespace Cacoch.Provider.AzureArm.Azure
 
         public AzureResourceGroupCreator(
             IArmDeployer armDeployer,
-            ServiceClientCredentials credentials,
+            ResourceManagementClient resourceClient,
             ILogger<AzureResourceGroupCreator> logger,
             IOptions<AzureArmSettings> settings)
         {
             _armDeployer = armDeployer;
             _logger = logger;
-            _resourceClient = new ResourceManagementClient(credentials)
-            {
-                SubscriptionId = settings.Value.SubscriptionId
-            };
+            _resourceClient = resourceClient;
             _settings = settings;
         }
 

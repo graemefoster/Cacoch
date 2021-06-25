@@ -46,14 +46,9 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                 },
                 Array.Empty<string>(),
                 (await BuildLinks(allTwins))
-                .Union(await BuildSecrets())
+                .Union(await BuildSecrets()),
+                _ => new NoOutput()
             );
-        }
-
-        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(
-            IDictionary<string, IDeploymentOutput> allTwins)
-        {
-            return Task.FromResult(default(IDeploymentArtifact));
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildSecrets()
@@ -72,7 +67,8 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     ["currentSecrets"] = new ArmOutput(this, "currentSecrets")
                 },
                 Array.Empty<string>(),
-                Array.Empty<AzureArmDeploymentArtifact>()
+                Array.Empty<AzureArmDeploymentArtifact>(),
+                _ => new NoOutput()
             ));
         }
 
@@ -101,7 +97,8 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                         {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")}
                     },
                     Array.Empty<string>(),
-                    Array.Empty<AzureArmDeploymentArtifact>());
+                    Array.Empty<AzureArmDeploymentArtifact>(),
+                    _ => new NoOutput());
             });
         }
 

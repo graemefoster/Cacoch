@@ -65,19 +65,9 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                                 {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")},
                             },
                             Array.Empty<string>(),
-                            Array.Empty<AzureArmDeploymentArtifact>());
-                    })));
-        }
-
-        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(
-            IDictionary<string, IDeploymentOutput> allTwins)
-        {
-            return Task.FromResult(default(IDeploymentArtifact));
-        }
-
-        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(IPlatformTwin[] allTwins)
-        {
-            return Task.FromResult(default(IDeploymentArtifact));
+                            Array.Empty<AzureArmDeploymentArtifact>(),
+                            _ => new NoOutput());
+                    })), _ => new NoOutput());
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> Containers()
@@ -111,7 +101,8 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                         {"name", x.Name}
                     },
                     Array.Empty<string>(),
-                    Array.Empty<AzureArmDeploymentArtifact>()));
+                    Array.Empty<AzureArmDeploymentArtifact>(),
+                    _ => new NoOutput()));
         }
 
         public string PlatformName { get; }

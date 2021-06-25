@@ -35,73 +35,78 @@ namespace Cacoch.Provider.AzureArm.Resources.OAuthClients
         {
             return Task.FromResult(
                 (IDeploymentArtifact) new AzureActiveDirectoryApiDeploymentArtifact(_resource.Name, async graphApi =>
-                {
-                    var existingApplication = await graphApi.Applications[PlatformName].Request().GetAsync();
-                    if (existingApplication == null)
                     {
-                        var application = await graphApi.Applications.Request().AddAsync(new Application()
+                        var aadApplications = await graphApi.Applications.Request()
+                            .Filter($"tags/any(c:c eq '{PlatformName}')")
+                            .GetAsync();
+
+                        if (!aadApplications.Any())
                         {
-                            DisplayName = _resource.Name,
-                            Tags = new[] {PlatformName},
-                            SignInAudience = GetSignInAudience(),
-                            Web = _resource.ClientType == OAuthClientType.Web
-                                ? new WebApplication()
+                            var applicationDefinition = new Application()
+                            {
+                                DisplayName = _resource.Name,
+                                Tags = new[] {PlatformName},
+                                SignInAudience = GetSignInAudience()
+                            };
+                            if (_resource.ClientType == OAuthClientType.Web)
+                            {
+                                applicationDefinition.Web = new WebApplication()
                                 {
-                                    RedirectUris = _resource.RedirectsFrom,
+                                    RedirectUris = new [] {"http://localhost:5001/signin-oidc"},
                                     HomePageUrl = _resource.SignOnUri,
                                     ImplicitGrantSettings = new ImplicitGrantSettings()
                                     {
                                         EnableAccessTokenIssuance = false,
                                         EnableIdTokenIssuance = true
                                     }
-                                }
-                                : null,
-                            PublicClient = _resource.ClientType == OAuthClientType.Public
-                                ? new PublicClientApplication()
+                                };
+                            }
+                            else
+                            {
+                                applicationDefinition.PublicClient = new PublicClientApplication()
                                 {
                                     RedirectUris = _resource.RedirectsFrom
-                                }
-                                : null
-                        });
-                        
-                        await graphApi.Applications[application.Id].Request().UpdateAsync(new Application
-                        {
-                            IdentifierUris = new[] {$"api://{application.AppId}"}
-                        });
-                        
-                        if (_resource.ClientType == OAuthClientType.Web)
-                        {
-                            var password = await graphApi.Applications[application.Id].AddPassword(new PasswordCredential()
+                                };
+                            }
+
+                            var application = await graphApi.Applications.Request().AddAsync(applicationDefinition);
+
+                            await graphApi.Applications[application.Id].Request().UpdateAsync(new Application
                             {
-                                DisplayName = "Speedway Client Secret",
-                            }).Request().PostAsync();
+                                IdentifierUris = new[] {$"api://{application.AppId}"}
+                            });
+
+                            if (_resource.ClientType == OAuthClientType.Web)
+                            {
+                                var password = await graphApi.Applications[application.Id].AddPassword(
+                                    new PasswordCredential()
+                                    {
+                                        DisplayName = "Speedway Client Secret",
+                                    }).Request().PostAsync();
+                            }
                         }
-                    }
 
-                    return new NoOutput();
-                }));
-        }
+                        return new NoOutput();
+                    },
+                    async (graphApi, twins) =>
+                    {
+                        var redirects = _resource.RedirectsFrom?
+                            .Select(x => $"https://{((WebAppOutput) twins[x]).HostName}/signin-oidc")
+                            .ToArray() ?? Array.Empty<string>();
 
-        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(IDictionary<string, IDeploymentOutput> allTwins)
-        {
-            var redirects = _resource.RedirectsFrom?.Select(x => $"{((WebAppOutput) allTwins[x]).HostName}/signin-oidc").ToArray() ?? Array.Empty<string>();
-            await AddRedirects(redirects);
-            return default;
-        }
-        
-        public async Task AddRedirects(string[] redirects)
-        {
-            _logger.LogInformation("Adding redirect Uris: {Uris} to application {AppName}",
-                string.Join(",", redirects), application!.DisplayName);
-            
-            var updatedApplication = new Application()
-            {
-                Web = new WebApplication()
-                {
-                    RedirectUris = _application!.Web.RedirectUris.Union(asArray)
-                }
-            };
-            await _graphClient.Applications[_application.Id].Request().UpdateAsync(updatedApplication);
+                        var application = await graphApi.Applications[PlatformName].Request().GetAsync();
+                        _logger.LogInformation("Adding redirect Uris: {Uris} to application {AppName}",
+                            string.Join(",", redirects), application!.DisplayName);
+
+                        var updatedApplication = new Application()
+                        {
+                            Web = new WebApplication()
+                            {
+                                RedirectUris = application!.Web.RedirectUris.Union(redirects)
+                            }
+                        };
+                        await graphApi.Applications[application.Id].Request().UpdateAsync(updatedApplication);
+                    }));
         }
 
         public string PlatformName { get; }

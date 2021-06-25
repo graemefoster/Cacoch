@@ -15,8 +15,6 @@ namespace Cacoch.Core.Provider
 
         Task<IDeploymentArtifact> BuildDeploymentArtifact(IPlatformTwin[] allTwins);
 
-        Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(IDictionary<string, IDeploymentOutput> allTwins);
-
         string PlatformName { get; }
         string ResourceName { get; }
     }

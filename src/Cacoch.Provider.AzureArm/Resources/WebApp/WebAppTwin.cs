@@ -44,18 +44,8 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                     ["secretReferences"] = requiredSecretReferences
                 },
                 new[] {"hostName"},
-                Array.Empty<AzureArmDeploymentArtifact>());
-        }
-
-        public Task<IDeploymentArtifact?> PostDeployBuildDeploymentArtifact(
-            IDictionary<string, IDeploymentOutput> allTwins)
-        {
-            return Task.FromResult(default(IDeploymentArtifact));
-        }
-
-        public Task<IDeploymentArtifact> PostDeployBuildDeploymentArtifact(IPlatformTwin[] allTwins)
-        {
-            return Task.FromResult(default(IDeploymentArtifact)!);
+                Array.Empty<AzureArmDeploymentArtifact>(),
+                output => new WebAppOutput(output["hostName"]));
         }
 
         private Dictionary<string, string> PrepareAppSettings(IPlatformTwin[] allTwins,

@@ -4,13 +4,13 @@ using Azure.Core;
 using Azure.ResourceManager.Storage;
 using Azure.Storage;
 using Azure.Storage.Blobs;
-using Cacoch.Core.Manifest;
 using Cacoch.Core.Provider;
 using Cacoch.Provider.AzureArm.Azure;
-using Microsoft.Extensions.Azure;
+using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
 using Microsoft.Rest;
 
 namespace Cacoch.Provider.AzureArm
@@ -19,19 +19,27 @@ namespace Cacoch.Provider.AzureArm
     {
         public static void RegisterCacochAzureArm(
             this IServiceCollection services,
-            ServiceClientCredentials credentials,
             TokenCredential tokenCredential,
             IConfigurationSection configurationSection)
         {
             services.RegisterCacoch<AzurePlatformContext>(typeof(RegistrationEx).Assembly);
 
-            services.AddSingleton(credentials);
-            services.AddSingleton(tokenCredential);
-
+            services.AddSingleton(sp => new ResourceManagementClient(new TokenCredentials(
+                tokenCredential.GetToken(new TokenRequestContext(new[]
+                {
+                    "https://management.core.windows.net/.default"
+                }), CancellationToken.None).Token
+            ))
+            {
+                SubscriptionId = sp.GetRequiredService<IOptions<AzureArmSettings>>().Value.SubscriptionId
+            });
             services.AddSingleton<IResourceGroupCreator, AzureResourceGroupCreator>();
+
             services.AddSingleton(sp => new StorageManagementClient(
                 sp.GetRequiredService<IOptions<AzureArmSettings>>().Value.SubscriptionId,
                 tokenCredential));
+
+            services.AddSingleton(sp => new GraphServiceClient(tokenCredential, new [] {"https://graph.microsoft.com/.default"}));
 
             services.AddSingleton(sp =>
             {

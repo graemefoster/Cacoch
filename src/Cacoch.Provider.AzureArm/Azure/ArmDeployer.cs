@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest.Secrets;
-using Cacoch.Core.Provider;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.Rest;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,15 +17,11 @@ namespace Cacoch.Provider.AzureArm.Azure
         private readonly ResourceManagementClient _resourceClient;
 
         public ArmDeployer(
-            ServiceClientCredentials credentials,
-            IOptions<AzureArmSettings> settings,
+            ResourceManagementClient resourceClient,
             ILogger<ArmDeployer> logger)
         {
             _logger = logger;
-            _resourceClient = new ResourceManagementClient(credentials)
-            {
-                SubscriptionId = settings.Value.SubscriptionId
-            };
+            _resourceClient = resourceClient;
         }
 
         public async Task<IDictionary<string, ArmDeploymentOutput>> Deploy(
