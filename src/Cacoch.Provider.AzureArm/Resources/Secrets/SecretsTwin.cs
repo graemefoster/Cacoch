@@ -34,21 +34,21 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
         public async Task<IDeploymentArtifact> BuildDeploymentArtifact(IPlatformTwin[] allTwins)
         {
             return new AzureArmDeploymentArtifact(
-                _resource.Name.ToLowerInvariant(),
-                await typeof(SecretsTwin).GetResourceContents(),
-                new Dictionary<string, object>()
-                {
-                    ["vaultName"] = PlatformName,
-                    ["secrets"] = _resource.RequiredSecretNames?.ToArray() ?? Array.Empty<string>(),
-                    ["location"] = _settings.Value.PrimaryLocation!,
-                    ["existingRgTags"] =
-                        new ArmFunction("[if(contains(resourceGroup(), 'tags'), resourceGroup().tags, createObject())]")
-                },
-                Array.Empty<string>(),
-                (await BuildLinks(allTwins))
-                .Union(await BuildSecrets()),
-                _ => new NoOutput()
-            );
+                    _resource.Name.ToLowerInvariant(),
+                    await typeof(SecretsTwin).GetResourceContents(),
+                    new Dictionary<string, object>()
+                    {
+                        ["vaultName"] = PlatformName,
+                        ["secrets"] = _resource.RequiredSecretNames?.ToArray() ?? Array.Empty<string>(),
+                        ["location"] = _settings.Value.PrimaryLocation!,
+                        ["existingRgTags"] =
+                            new ArmFunction(
+                                "[if(contains(resourceGroup(), 'tags'), resourceGroup().tags, createObject())]")
+                    },
+                    Array.Empty<string>(),
+                    _ => new NoOutput()
+                ).AddChildren(await BuildLinks(allTwins))
+                .AddChildren(await BuildSecrets());
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildSecrets()
@@ -67,7 +67,6 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     ["currentSecrets"] = new ArmOutput(this, "currentSecrets")
                 },
                 Array.Empty<string>(),
-                Array.Empty<AzureArmDeploymentArtifact>(),
                 _ => new NoOutput()
             ));
         }
@@ -97,7 +96,6 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                         {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")}
                     },
                     Array.Empty<string>(),
-                    Array.Empty<AzureArmDeploymentArtifact>(),
                     _ => new NoOutput());
             });
         }

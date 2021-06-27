@@ -36,18 +36,18 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                 new {type = x.Access, requestor = allTwins.Single(t => t.ResourceName == x.Name)});
 
             return new AzureArmDeploymentArtifact(
-                _resource.Name.ToLowerInvariant(),
-                await typeof(StorageTwin).GetResourceContents(),
-                new Dictionary<string, object>
-                {
-                    {"storageAccountName", PlatformName}
-                },
-                Array.Empty<string>(),
-                (await Containers())
-                .Union(await Queues())
-                .Union(await Tables())
-                .Union(
-                    links.Select(x =>
+                        _resource.Name.ToLowerInvariant(),
+                        await typeof(StorageTwin).GetResourceContents(),
+                        new Dictionary<string, object>
+                        {
+                            {"storageAccountName", PlatformName}
+                        },
+                        Array.Empty<string>(),
+                        _ => new NoOutput())
+                    .AddChildren(await Containers())
+                    .AddChildren(await Queues())
+                    .AddChildren(await Tables())
+                    .AddChildren(links.Select(x =>
                     {
                         var assignmentDetails =
                             $"{_resource.Name}-{_resource.FriendlyType}-link-{x.requestor.PlatformName}-{x.type}"
@@ -65,9 +65,8 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                                 {"requestorPrincipalId", new ArmOutput(x.requestor, "identity")},
                             },
                             Array.Empty<string>(),
-                            Array.Empty<AzureArmDeploymentArtifact>(),
                             _ => new NoOutput());
-                    })), _ => new NoOutput());
+                    }));
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> Containers()
@@ -101,7 +100,6 @@ namespace Cacoch.Provider.AzureArm.Resources.Storage
                         {"name", x.Name}
                     },
                     Array.Empty<string>(),
-                    Array.Empty<AzureArmDeploymentArtifact>(),
                     _ => new NoOutput()));
         }
 

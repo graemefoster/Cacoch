@@ -44,7 +44,6 @@ namespace Cacoch.Provider.AzureArm.Resources.WebApp
                     ["secretReferences"] = requiredSecretReferences
                 },
                 new[] {"hostName"},
-                Array.Empty<AzureArmDeploymentArtifact>(),
                 output => new WebAppOutput(output["hostName"]));
         }
 

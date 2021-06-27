@@ -23,13 +23,6 @@ namespace Cacoch.Provider.AzureArm.Azure
 {
     internal class ArmBatchDeployer : IArmBatchBuilder
     {
-        private record InternalArmDetails(
-            string HashString,
-            string Name,
-            Dictionary<string, object> Parameters,
-            string[] OutputsToExpose,
-            InternalArmDetails? DependsOn);
-
         private readonly StorageManagementClient _storageManagementClient;
         private readonly BlobServiceClient _blobServiceClient;
         private readonly IOptions<AzureArmSettings> _settings;
@@ -40,7 +33,7 @@ namespace Cacoch.Provider.AzureArm.Azure
             new Dictionary<IPlatformTwin, AzureArmDeploymentArtifact>();
 
         private readonly IDictionary<object, string> _parameterMap = new Dictionary<object, string>();
-        private readonly IList<InternalArmDetails> _armsToDeploy = new List<InternalArmDetails>();
+        private readonly IList<AzureArmDeploymentArtifact> _armsToDeploy = new List<AzureArmDeploymentArtifact>();
 
         private readonly IDictionary<string, (string uid, string arm)> _uniqueArms =
             new Dictionary<string, (string uid, string arm)>();
@@ -64,14 +57,14 @@ namespace Cacoch.Provider.AzureArm.Azure
         public void RegisterArm(IPlatformTwin twin, AzureArmDeploymentArtifact artifact)
         {
             _topLevels[twin] = artifact;
-            RegisterArmRecursive(artifact, null);
+            RegisterArmRecursive(artifact);
         }
 
-        private void RegisterArmRecursive(AzureArmDeploymentArtifact artifact, InternalArmDetails? parent)
+        private void RegisterArmRecursive(AzureArmDeploymentArtifact artifact)
         {
-            var internalArmDetails = BuildInternalArmDetails(artifact, parent);
+            BuildInternalArmDetails(artifact);
             MapInParametersToTemplate(artifact);
-            RecurseChildArtifacts(artifact, internalArmDetails);
+            RecurseChildArtifacts(artifact);
         }
 
         /// <summary>
@@ -79,12 +72,12 @@ namespace Cacoch.Provider.AzureArm.Azure
         /// </summary>
         /// <param name="artifact"></param>
         /// <param name="internalArmDetails"></param>
-        private void RecurseChildArtifacts(AzureArmDeploymentArtifact artifact, InternalArmDetails? internalArmDetails)
+        private void RecurseChildArtifacts(AzureArmDeploymentArtifact artifact)
         {
             foreach (var deploymentArtifact in artifact.ChildArtifacts)
             {
                 var child = (AzureArmDeploymentArtifact) deploymentArtifact;
-                RegisterArmRecursive(child, internalArmDetails);
+                RegisterArmRecursive(child);
             }
         }
 
@@ -113,27 +106,17 @@ namespace Cacoch.Provider.AzureArm.Azure
         /// only upload unique ones.
         /// </summary>
         /// <param name="artifact"></param>
-        /// <param name="parent"></param>
         /// <returns></returns>
-        private InternalArmDetails BuildInternalArmDetails(AzureArmDeploymentArtifact artifact,
-            InternalArmDetails? parent)
+        private AzureArmDeploymentArtifact BuildInternalArmDetails(
+            AzureArmDeploymentArtifact artifact)
         {
-            var hash = SHA512.Create().ComputeHash(Encoding.Default.GetBytes(artifact.Arm));
-            var hashString = Convert.ToBase64String(hash);
-            if (!_uniqueArms.ContainsKey(hashString))
+            if (!_uniqueArms.ContainsKey(artifact.Hash))
             {
-                _uniqueArms.Add(hashString, (hashString.Substring(0, 10), artifact.Arm));
+                _uniqueArms.Add(artifact.Hash, (artifact.Hash.Substring(0, 10), artifact.Arm));
             }
 
-            var internalArmDetails = new InternalArmDetails(
-                hashString,
-                artifact.Name,
-                artifact.Parameters,
-                artifact.ExposedOutputs,
-                parent);
-
-            _armsToDeploy.Add(internalArmDetails);
-            return internalArmDetails;
+            _armsToDeploy.Add(artifact);
+            return artifact;
         }
 
         public async Task<Dictionary<string, IDeploymentOutput>> Deploy(string resourceGroup)
@@ -161,16 +144,25 @@ namespace Cacoch.Provider.AzureArm.Azure
                 _logger.LogDebug("Uploaded templates. Initiating ARM deployment");
 
                 var armTemplate =
-                    (await typeof(AzureResourceGroupCreator).GetResourceContents("MainDeploymentTemplate"))
+                    (await typeof(ArmBatchDeployer).GetResourceContents("MainDeploymentTemplate"))
                     .Replace("{{deployments}}", JsonConvert.SerializeObject(deploymentResources))
                     .Replace("{{parameters}}", JsonConvert.SerializeObject(uniqueParameters))
                     .Replace("{{outputs}}", JsonConvert.SerializeObject(outputs));
 
-                return (await _armDeployer.Deploy(resourceGroup,
-                    armTemplate,
-                    new Dictionary<string, object>(_parameterMap.Select(x =>
-                        new KeyValuePair<string, object>(x.Value.ToString(), x.Key)))
-                )).ToDictionary(x => x.Key, x => x.Value as IDeploymentOutput);
+                var armOutputsByTemplate = (await _armDeployer.Deploy(resourceGroup,
+                        armTemplate,
+                        new Dictionary<string, object>(
+                            _parameterMap.Select(
+                                x => new KeyValuePair<string, object>(x.Value.ToString(), x.Key)))))
+                    .ToDictionary(x => x.Key, x => x.Value);
+
+                var response = new Dictionary<string, IDeploymentOutput>();
+                foreach (var output in armOutputsByTemplate)
+                {
+                    response.Add(output.Key,
+                        _armsToDeploy.Single(x => x.Name == output.Key).OutputTransformer(output.Value));
+                }
+                return response;
             }
             finally
             {
@@ -187,7 +179,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         {
             var deploymentResources = _armsToDeploy.Select(x =>
             {
-                var blobClient = containerClient.GetBlockBlobClient($"{_uniqueArms[x.HashString].uid}.json");
+                var blobClient = containerClient.GetBlockBlobClient($"{_uniqueArms[x.Hash].uid}.json");
 
                 var blobSasBuilder = new BlobSasBuilder(BlobSasPermissions.Read, DateTimeOffset.Now.AddHours(5))
                 {
@@ -197,7 +189,7 @@ namespace Cacoch.Provider.AzureArm.Azure
                 };
                 var sasUri = blobClient.GenerateSasUri(blobSasBuilder);
 
-                var dependsOn = x.DependsOn == null ? Array.Empty<string>() : new[] {x.DependsOn.Name};
+                var dependsOn = x.Parent == null ? Array.Empty<string>() : new[] {x.Parent.Name};
 
                 //if we depend on
                 var parameterDependencies = x.Parameters.Select(x => x.Value).OfType<ArmOutput>()
@@ -316,7 +308,7 @@ namespace Cacoch.Provider.AzureArm.Azure
         private Dictionary<string, object> CreateOutputsSectionOfMainTemplate()
         {
             var uniqueParameters = new Dictionary<string, object>(_armsToDeploy.SelectMany(p =>
-                p.OutputsToExpose.Select(x =>
+                p.ExposedOutputs.Select(x =>
                     new KeyValuePair<string, object>(
                         $"{p.Name}_{x}",
                         new
