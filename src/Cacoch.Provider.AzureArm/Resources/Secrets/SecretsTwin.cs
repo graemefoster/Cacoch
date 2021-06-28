@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Cacoch.Core.Manifest.Secrets;
 using Cacoch.Core.Provider;
+using Cacoch.Provider.AzureArm.Resources.OAuthClients;
 using Microsoft.Extensions.Options;
 
 namespace Cacoch.Provider.AzureArm.Resources.Secrets
@@ -48,7 +49,14 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                     Array.Empty<string>(),
                     _ => new NoOutput()
                 ).AddChildren(await BuildLinks(allTwins))
-                .AddChildren(await BuildSecrets());
+                    .AddChildren(await BuildSecrets())
+                    .AddChildren(await BuildKnownSecrets())
+                ;
+        }
+
+        internal void AddLastMinuteSecret(LastMinuteSecretOutput lastMinuteSecret)
+        {
+            lastMinuteSecret.AddTo(_resource.KnownSecrets);
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildSecrets()
@@ -69,6 +77,24 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
                 Array.Empty<string>(),
                 _ => new NoOutput()
             ));
+        }
+        
+        private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildKnownSecrets()
+        {
+            var secretTemplate = await typeof(SecretsTwin).GetResourceContents("Secret");
+            return (_resource.KnownSecrets.Select(x => new AzureArmDeploymentArtifact(
+                SecretTemplateNameFor(x.Key),
+                secretTemplate,
+                new Dictionary<string, object>()
+                {
+                    ["vaultName"] = PlatformName,
+                    ["secretName"] = x.Key,
+                    ["secretValue"] = new CacochSecret(x.Value),
+                    ["currentSecrets"] = new ArmOutput(this, "currentSecrets")
+                },
+                Array.Empty<string>(),
+                _ => new NoOutput()
+            )));
         }
 
         private async Task<IEnumerable<AzureArmDeploymentArtifact>> BuildLinks(IPlatformTwin[] allTwins)
@@ -110,7 +136,7 @@ namespace Cacoch.Provider.AzureArm.Resources.Secrets
 
         internal ArmOutput ArmOutputFor(string secretPart)
         {
-            return new ArmOutput(this, SecretTemplateNameFor(secretPart), "secretUri");
+            return new(this, SecretTemplateNameFor(secretPart), "secretUri");
         }
     }
 }

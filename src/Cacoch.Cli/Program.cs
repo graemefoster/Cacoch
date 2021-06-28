@@ -78,6 +78,7 @@ namespace Cacoch.Cli
                                     "secret-six",
                                     "secret-seven"
                                 },
+                                new Dictionary<string, string>(),
                                 new List<CacochResourceLinkMetadata>
                                 {
                                     new SecretsLink("cacochapp", LinkAccess.Read)

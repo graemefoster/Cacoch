@@ -83,6 +83,8 @@ namespace Cacoch.Provider.AzureArm.Resources.OAuthClients
                                     {
                                         DisplayName = "Speedway Client Secret",
                                     }).Request().PostAsync();
+
+                                return new LastMinuteSecretOutput("ClientSecret", password.SecretText);
                             }
                         }
 
