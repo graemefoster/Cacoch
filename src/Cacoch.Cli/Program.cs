@@ -103,7 +103,8 @@ namespace Cacoch.Cli
                             {
                                 {"CONFIG_SETTING_ONE", "ONE"},
                                 {"CONFIG_SETTING_TWO", "TWO"},
-                                {"SECRET_REFERENCE", "[secret.secrets.secret-two]"}
+                                {"SECRET_REFERENCE", "[secret.secrets.secret-two]"},
+                                {"AzureAD.ClientSecret", "[secret.secrets.cacochtestapp-ClientSecret]"},
                             }),
                             new CacochOAuthClientResourceMetadata("cacochtestapp", OAuthClientType.Web,
                                 "http://localhost:9000/", new[] {"http://localhost:9000/sign-oidc"},

@@ -36,11 +36,9 @@ namespace Cacoch.Provider.AzureArm.Resources.OAuthClients
             return Task.FromResult(
                 (IDeploymentArtifact) new AzureActiveDirectoryApiDeploymentArtifact(_resource.Name, async graphApi =>
                     {
-                        var aadApplications = await graphApi.Applications.Request()
-                            .Filter($"tags/any(c:c eq '{PlatformName}')")
-                            .GetAsync();
+                        var aadApplication = await FindAadApplication(graphApi);
 
-                        if (!aadApplications.Any())
+                        if (aadApplication == null)
                         {
                             var applicationDefinition = new Application()
                             {
@@ -84,7 +82,7 @@ namespace Cacoch.Provider.AzureArm.Resources.OAuthClients
                                         DisplayName = "Speedway Client Secret",
                                     }).Request().PostAsync();
 
-                                return new LastMinuteSecretOutput("ClientSecret", password.SecretText);
+                                return new LastMinuteSecretOutput($"{_resource.Name}-ClientSecret", password.SecretText);
                             }
                         }
 
@@ -96,7 +94,7 @@ namespace Cacoch.Provider.AzureArm.Resources.OAuthClients
                             .Select(x => $"https://{((WebAppOutput) twins[x]).HostName}/signin-oidc")
                             .ToArray() ?? Array.Empty<string>();
 
-                        var application = await graphApi.Applications[PlatformName].Request().GetAsync();
+                        var application = await FindAadApplication(graphApi)!;
                         _logger.LogInformation("Adding redirect Uris: {Uris} to application {AppName}",
                             string.Join(",", redirects), application!.DisplayName);
 
@@ -109,6 +107,14 @@ namespace Cacoch.Provider.AzureArm.Resources.OAuthClients
                         };
                         await graphApi.Applications[application.Id].Request().UpdateAsync(updatedApplication);
                     }));
+        }
+
+        private async Task<Application?> FindAadApplication(GraphServiceClient graphApi)
+        {
+            var aadApplications = await graphApi.Applications.Request()
+                .Filter($"tags/any(c:c eq '{PlatformName}')")
+                .GetAsync();
+            return aadApplications.Any() ? aadApplications.Single() : null;
         }
 
         public string PlatformName { get; }
