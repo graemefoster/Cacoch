@@ -1,5 +1,6 @@
 ﻿using System;
 using Cooker.Kitchens.AzureArm;
+using Cooker.Recipes.Storage;
 
 namespace Cooker.Recipes
 {

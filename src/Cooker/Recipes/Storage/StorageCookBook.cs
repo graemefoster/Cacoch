@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Cooker.Recipes;
-using Cooker.Recipes.Storage;
+using Cooker.Kitchens;
+using Cooker.Kitchens.AzureArm;
 
-namespace Cooker.Kitchens.AzureArm
+namespace Cooker.Recipes.Storage
 {
     public class StorageCookBook : ICookBook
     {
