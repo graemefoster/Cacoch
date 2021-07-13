@@ -2,7 +2,7 @@
 
 namespace Cooker.Recipes
 {
-    public abstract class LineItem<TOutput> : ILineItem where TOutput : IEdible
+    public abstract class LineItem<TOutput> : ILineItem where TOutput : ILineItemOutput
     {
         public string Name { get; }
 

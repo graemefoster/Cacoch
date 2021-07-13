@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cooker.Recipes;
+using Cooker.Kitchens;
 
-namespace Cooker.Kitchens.AzureArm
+namespace Cooker.Recipes
 {
     static class DepedencyHelper
     {
-        public static bool IsSatisfied(string value, IDictionary<ILineItem, IEdible> edibles, out string? prop)
+        public static bool IsSatisfied(string value, IDictionary<ILineItem, ILineItemOutput> edibles, out string? prop)
         {
             if (value.Contains("["))
             {

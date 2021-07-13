@@ -10,44 +10,47 @@ namespace Cooker
     public class Restaurant
     {
         private readonly Bookshelf _bookshelf;
-        private readonly IEnumerable<Kitchen> _stations;
+        private readonly Kitchen _kitchen;
 
         public Restaurant(
-            IEnumerable<Kitchen> stations,
+            Kitchen kitchen,
             Bookshelf bookshelf)
         {
             _bookshelf = bookshelf;
-            _stations = stations;
+            _kitchen = kitchen;
         }
 
 
         public async Task<Meal> PlaceOrder(Docket docket)
         {
-            var allRemainingCookbooks= docket.LineItems.Select(x => _bookshelf.GetCookbookFor(x)).ToList();
-            var allBuiltRecipes = new Dictionary<ILineItem, IEdible>();
+            var allRemainingInstructions= docket.LineItems.Select(x => _bookshelf.GetCookbookFor(x)).ToList();
+            var cookedRecipes = new Dictionary<ILineItem, ILineItemOutput>();
 
-            while (allRemainingCookbooks.Any())
+            while (allRemainingInstructions.Any())
             {
-                var readyToCook = allRemainingCookbooks.Where(x => x.CanCook(allBuiltRecipes)).ToArray();
-                if (readyToCook.Length == 0)
+                var recipes = 
+                    allRemainingInstructions
+                        .Where(x => x.CanCook(cookedRecipes))
+                        .Select(x => new {x.LineItem, Instructions = x.BuildCookingInstructions(cookedRecipes) })
+                        .ToDictionary(x => x.LineItem, x => x.Instructions);
+
+                if (!recipes.Any())
                 {
                     throw new InvalidOperationException("Remaining recipes but not can be built. Suspected dependency issue");
                 }
-
-                var recipes = readyToCook.Select(x => x.BuildCookingInstructions(allBuiltRecipes));
-                var nextBatches = await Task.WhenAll(_stations.Select(async x => await x.CookNextRecipes(recipes)));
+                var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(recipes));
                 
-                foreach (var batch in nextBatches)
+                foreach (var batch in cooked)
                 {
                     foreach (var edibleItem in batch)
                     {
-                        allBuiltRecipes.Add(edibleItem.Key, edibleItem.Value);
+                        cookedRecipes.Add(edibleItem.Key, edibleItem.Value);
                     }
                 }
-                allRemainingCookbooks.RemoveAll(readyToCook.Contains);
+                allRemainingInstructions.RemoveAll(rb => cookedRecipes.Keys.Contains(rb.LineItem));
             }
 
-            return new Meal(allBuiltRecipes);
+            return new Meal(cookedRecipes);
         }
     }
 }

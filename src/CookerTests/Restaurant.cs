@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Cooker;
 using Cooker.Kitchens;
 using Cooker.Kitchens.AzureArm;
 using Cooker.Recipes;
@@ -20,9 +19,7 @@ namespace CookerTests
             var storage = new Storage(name);
             var docket = new Docket(storage);
 
-            var restaurant = new Cooker.Restaurant(
-                new[] {(Kitchen) new ArmKitchen()},
-                new Bookshelf());
+            var restaurant = BuildTestRestaurant();
 
             var meal = await restaurant.PlaceOrder(docket);
             var edible = (StorageOutput) meal[storage];
@@ -36,17 +33,22 @@ namespace CookerTests
         {
             var storage1 = new Storage("one");
             var storage2 = new Storage("[one.Name]-foofoo");
-            
+
             var docket = new Docket(storage1, storage2);
 
-            var restaurant = new Cooker.Restaurant(
-                new[] {(Kitchen) new ArmKitchen()},
-                new Bookshelf());
+            var restaurant = BuildTestRestaurant();
 
             var meal = await restaurant.PlaceOrder(docket);
-            
-            meal[storage2].Name.ShouldBe("one-foofoo");
 
+            meal[storage2].Name.ShouldBe("one-foofoo");
+        }
+
+        private static Cooker.Restaurant BuildTestRestaurant()
+        {
+            var restaurant = new Cooker.Restaurant(
+                new Kitchen(new[] {new ArmKitchenStation()}),
+                new Bookshelf());
+            return restaurant;
         }
 
         [Fact]
@@ -54,12 +56,10 @@ namespace CookerTests
         {
             var storage1 = new Storage("one");
             var storage2 = new Storage("[one.DoesNotExist]-foofoo");
-            
+
             var docket = new Docket(storage1, storage2);
 
-            var restaurant = new Cooker.Restaurant(
-                new[] {(Kitchen) new ArmKitchen()},
-                new Bookshelf());
+            var restaurant = BuildTestRestaurant();
 
             Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(docket));
         }
@@ -69,15 +69,12 @@ namespace CookerTests
         {
             var storage1 = new Storage("one");
             var storage2 = new Storage("[storage1.Name]-foofoo");
-            
+
             var docket = new Docket(storage1, storage2);
 
-            var restaurant = new Cooker.Restaurant(
-                new[] {(Kitchen) new ArmKitchen()},
-                new Bookshelf());
+            var restaurant = BuildTestRestaurant();
 
             Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(docket));
-
         }
 
         [Fact]
@@ -86,9 +83,7 @@ namespace CookerTests
             var unknown = new UnknownItem();
             var docket = new Docket(unknown);
 
-            var restaurant = new Cooker.Restaurant(
-                new[] {(Kitchen) new ArmKitchen()},
-                new Bookshelf());
+            var restaurant = BuildTestRestaurant();
 
             Should.Throw<NotSupportedException>(async () => await restaurant.PlaceOrder(docket));
         }

@@ -5,13 +5,13 @@ namespace Cooker.Kitchens
 {
     public class Meal
     {
-        public Dictionary<ILineItem, IEdible> CookedRecipes { get; }
+        public Dictionary<ILineItem, ILineItemOutput> CookedRecipes { get; }
 
-        public Meal(Dictionary<ILineItem, IEdible> cookedRecipes)
+        public Meal(Dictionary<ILineItem, ILineItemOutput> cookedRecipes)
         {
             CookedRecipes = cookedRecipes;
         }
 
-        public IEdible this[ILineItem storage] => CookedRecipes[storage];
+        public ILineItemOutput this[ILineItem storage] => CookedRecipes[storage];
     }
 }

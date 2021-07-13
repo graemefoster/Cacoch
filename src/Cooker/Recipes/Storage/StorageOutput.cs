@@ -2,7 +2,7 @@
 
 namespace Cooker.Recipes.Storage
 {
-    public class StorageOutput : IEdible
+    public class StorageOutput : ILineItemOutput
     {
         public StorageOutput(string name)
         {
