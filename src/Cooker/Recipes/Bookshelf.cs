@@ -11,8 +11,8 @@ namespace Cooker.Recipes
             {
                 return new StorageCookBook(storage);
             }
-
             throw new NotSupportedException("Cannot build this recipe");
+
         }
 
     }

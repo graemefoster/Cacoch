@@ -50,6 +50,21 @@ namespace CookerTests
         }
 
         [Fact]
+        public void throws_on_unknown_dependency_properties()
+        {
+            var storage1 = new Storage("one");
+            var storage2 = new Storage("[one.DoesNotExist]-foofoo");
+            
+            var docket = new Docket(storage1, storage2);
+
+            var restaurant = new Cooker.Restaurant(
+                new[] {(Kitchen) new ArmKitchen()},
+                new Bookshelf());
+
+            Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(docket));
+        }
+
+        [Fact]
         public void can_detect_dependency_issues()
         {
             var storage1 = new Storage("one");
@@ -63,6 +78,24 @@ namespace CookerTests
 
             Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(docket));
 
+        }
+
+        [Fact]
+        public void cannot_build_unknown_items()
+        {
+            var unknown = new UnknownItem();
+            var docket = new Docket(unknown);
+
+            var restaurant = new Cooker.Restaurant(
+                new[] {(Kitchen) new ArmKitchen()},
+                new Bookshelf());
+
+            Should.Throw<NotSupportedException>(async () => await restaurant.PlaceOrder(docket));
+        }
+
+        class UnknownItem : ILineItem
+        {
+            public string Name => "Foo";
         }
     }
 }

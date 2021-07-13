@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 using Cooker.Recipes;
 using Cooker.Recipes.Storage;
 
@@ -18,33 +15,13 @@ namespace Cooker.Kitchens.AzureArm
 
         public bool CanCook(IDictionary<ILineItem, IEdible> edibles)
         {
-            var name = _lineItem.Name;
-            if (name.Contains("["))
-            {
-                var expression = name[(name.IndexOf("[", StringComparison.Ordinal) + 1)..name.LastIndexOf("]", StringComparison.Ordinal)]!;
-                var dependencyLineItem = expression.Split(".")[0];
-                return edibles.Keys.Any(x => x.Name == dependencyLineItem);
-            }
-            return true;
+            return DepedencyHelper.IsSatisfied(_lineItem.Name, edibles, out _);
         }
 
         public Recipe BuildCookingInstructions(IDictionary<ILineItem, IEdible> edibles)
         {
-            return new ArmRecipe(_lineItem, "", output => new StorageOutput(GetName(edibles)));
-        }
-
-        private string GetName(IDictionary<ILineItem, IEdible> edibles)
-        {
-            var name = _lineItem.Name;
-            if (name.Contains("["))
-            {
-                var expression = name[(name.IndexOf("[", StringComparison.Ordinal) + 1)..name.LastIndexOf("]", StringComparison.Ordinal)]!;
-                var dependencyLineItemName = expression.Split(".")[0];
-                var dependencyLineItem = edibles.Keys.Single(x => x.Name == dependencyLineItemName);
-                return _lineItem.Name.Replace($"[{expression}]", edibles[dependencyLineItem].Name);
-            }
-
-            return name;
+            DepedencyHelper.IsSatisfied(_lineItem.Name, edibles, out var name);
+            return new ArmRecipe(_lineItem, "", output => new StorageOutput(name!));
         }
     }
 }
