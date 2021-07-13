@@ -22,7 +22,7 @@ namespace CookerTests
 
             var restaurant = new Cooker.Restaurant(
                 new[] {(Kitchen) new ArmKitchen()},
-                new RecipeBook());
+                new Bookshelf());
 
             var meal = await restaurant.PlaceOrder(docket);
             var edible = (StorageOutput) meal[storage];
@@ -32,18 +32,37 @@ namespace CookerTests
 
 
         [Fact]
-        public void throws_exception_on_unknown_recipes()
+        public async Task can_work_out_dependencies()
         {
             var storage1 = new Storage("one");
-            var storage2 = new Storage("[storage1.Name]", storage1);
+            var storage2 = new Storage("[one.Name]-foofoo");
             
             var docket = new Docket(storage1, storage2);
 
             var restaurant = new Cooker.Restaurant(
                 new[] {(Kitchen) new ArmKitchen()},
-                new RecipeBook());
+                new Bookshelf());
 
-            Should.ThrowAsync<NotSupportedException>(async () => await restaurant.PlaceOrder(docket));
+            var meal = await restaurant.PlaceOrder(docket);
+            
+            meal[storage2].Name.ShouldBe("one-foofoo");
+
+        }
+
+        [Fact]
+        public void can_detect_dependency_issues()
+        {
+            var storage1 = new Storage("one");
+            var storage2 = new Storage("[storage1.Name]-foofoo");
+            
+            var docket = new Docket(storage1, storage2);
+
+            var restaurant = new Cooker.Restaurant(
+                new[] {(Kitchen) new ArmKitchen()},
+                new Bookshelf());
+
+            Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(docket));
+
         }
     }
 }

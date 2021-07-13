@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cooker.Kitchens;
@@ -8,27 +9,33 @@ namespace Cooker
 {
     public class Restaurant
     {
-        private readonly RecipeBook _recipeBook;
+        private readonly Bookshelf _bookshelf;
         private readonly IEnumerable<Kitchen> _stations;
 
         public Restaurant(
             IEnumerable<Kitchen> stations,
-            RecipeBook recipeBook)
+            Bookshelf bookshelf)
         {
-            _recipeBook = recipeBook;
+            _bookshelf = bookshelf;
             _stations = stations;
         }
 
 
         public async Task<Meal> PlaceOrder(Docket docket)
         {
-            var allRemainingRecipes= docket.LineItems.Select(x => _recipeBook.Lookup(x)).ToList();
+            var allRemainingCookbooks= docket.LineItems.Select(x => _bookshelf.GetCookbookFor(x)).ToList();
             var allBuiltRecipes = new Dictionary<ILineItem, IEdible>();
 
-            while (allRemainingRecipes.Any())
+            while (allRemainingCookbooks.Any())
             {
-                var nextBatches = await Task.WhenAll(_stations.Select(async x => await x.PrepareBatch(allRemainingRecipes, allBuiltRecipes)));
-                var newlyCooked = nextBatches.SelectMany(x => x.Keys).ToArray();
+                var readyToCook = allRemainingCookbooks.Where(x => x.CanCook(allBuiltRecipes)).ToArray();
+                if (readyToCook.Length == 0)
+                {
+                    throw new InvalidOperationException("Remaining recipes but not can be built. Suspected dependency issue");
+                }
+
+                var recipes = readyToCook.Select(x => x.BuildCookingInstructions(allBuiltRecipes));
+                var nextBatches = await Task.WhenAll(_stations.Select(async x => await x.CookNextRecipes(recipes)));
                 
                 foreach (var batch in nextBatches)
                 {
@@ -37,11 +44,7 @@ namespace Cooker
                         allBuiltRecipes.Add(edibleItem.Key, edibleItem.Value);
                     }
                 }
-
-                foreach (var cooked in newlyCooked)
-                {
-                    allRemainingRecipes.Remove(allRemainingRecipes.Single(x => x.LineItem == cooked));
-                }
+                allRemainingCookbooks.RemoveAll(readyToCook.Contains);
             }
 
             return new Meal(allBuiltRecipes);

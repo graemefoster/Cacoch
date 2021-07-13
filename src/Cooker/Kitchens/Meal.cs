@@ -7,7 +7,7 @@ namespace Cooker.Kitchens
     {
         public Dictionary<ILineItem, IEdible> CookedRecipes { get; }
 
-        public Meal(Dictionary<ILineItem,IEdible> cookedRecipes)
+        public Meal(Dictionary<ILineItem, IEdible> cookedRecipes)
         {
             CookedRecipes = cookedRecipes;
         }

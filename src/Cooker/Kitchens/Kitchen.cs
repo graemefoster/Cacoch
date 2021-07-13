@@ -11,10 +11,8 @@ namespace Cooker.Kitchens
         /// to give you an opportunity to take a bit from it
         /// </summary>
         /// <param name="recipes"></param>
-        /// <param name="cookedRecipes"></param>
         /// <returns></returns>
-        public abstract Task<Dictionary<ILineItem, IEdible>> PrepareBatch(
-            IEnumerable<Recipe> recipes,
-            IDictionary<ILineItem, IEdible> cookedRecipes);
+        public abstract Task<Dictionary<ILineItem, IEdible>> CookNextRecipes(
+            IEnumerable<Recipe> recipes);
     }
 }
