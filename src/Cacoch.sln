@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cacoch.Cli", "Cacoch.Cli\Ca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cacoch.Provider.AzureArm.Tests", "Cacoch.Provider.AzureArm.Tests\Cacoch.Provider.AzureArm.Tests.csproj", "{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cooker", "Cooker\Cooker.csproj", "{08CDFD7A-14EC-4F8A-B078-C4B50A6045E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CookerTests", "CookerTests\CookerTests.csproj", "{67EAB648-51C7-4DF1-97DA-6BF393C422A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C042BDEB-BA4D-4183-A64B-DD0F6F24F24C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08CDFD7A-14EC-4F8A-B078-C4B50A6045E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08CDFD7A-14EC-4F8A-B078-C4B50A6045E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08CDFD7A-14EC-4F8A-B078-C4B50A6045E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08CDFD7A-14EC-4F8A-B078-C4B50A6045E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67EAB648-51C7-4DF1-97DA-6BF393C422A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67EAB648-51C7-4DF1-97DA-6BF393C422A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67EAB648-51C7-4DF1-97DA-6BF393C422A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67EAB648-51C7-4DF1-97DA-6BF393C422A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
