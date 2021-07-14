@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cooker.Recipes;
 
-namespace Cooker.Kitchens.AzureArm
+namespace Cooker.Kitchens
 {
     public interface IRecipeBuilder
     {

@@ -1,16 +1,12 @@
-﻿using Cooker.Kitchens;
-
-namespace Cooker.Recipes.Storage
+﻿namespace Cooker.Recipes.Storage
 {
     public class StorageOutput : ILineItemOutput
     {
-        public StorageOutput(ILineItem input, string name)
+        public StorageOutput(string name)
         {
-            Input = input;
             Name = name;
         }
 
-        public ILineItem Input { get; }
         public string Name { get; }
     }
 }

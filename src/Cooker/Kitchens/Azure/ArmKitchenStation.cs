@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Cooker.Recipes;
 
-namespace Cooker.Kitchens.AzureArm
+namespace Cooker.Kitchens.Azure
 {
     public class ArmKitchenStation : KitchenStation
     {
-        public override Task<ILineItemOutput> CookRecipe(ILineItem item, IRecipe recipe)
+        public override Task<ILineItemOutput> CookRecipe(IRecipe recipe)
         {
             return Task.FromResult(((IArmRecipe)recipe).Output(new object()));
         }

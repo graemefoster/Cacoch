@@ -1,18 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cooker.Kitchens.AzureArm;
 using Cooker.Recipes;
 
 namespace Cooker.Kitchens
 {
     public class Kitchen
     {
-        private readonly IEnumerable<KitchenStation> _stations;
+        private readonly KitchenStation[] _stations;
 
-        public Kitchen(IEnumerable<KitchenStation> stations)
+        public Kitchen(KitchenStation[] stations)
         {
-            _stations = stations.ToArray();
+            _stations = stations.Union(new [] { new TwoStepKitchenStation(stations)}).ToArray();
         }
 
         /// <summary>
@@ -27,7 +26,7 @@ namespace Cooker.Kitchens
                     new
                     {
                         Input = x.Key,
-                        Output = _stations.Single(s => s.CanCook(x.Value)).CookRecipe(x.Key, x.Value)
+                        Output = _stations.Single(s => s.CanCook(x.Value)).CookRecipe(x.Value)
                     })
                 .ToArray();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cooker.Kitchens.AzureArm;
+using Cooker.Kitchens;
+using Cooker.Kitchens.Azure.RecipeBuilders;
 
 namespace Cooker.Recipes
 {
@@ -10,11 +11,11 @@ namespace Cooker.Recipes
         {
             if (lineItem is Storage.Storage storage)
             {
-                return new StorageTemplateRecipeBuilder(storage);
+                return new StorageRecipeBuilder(storage);
             }
             if (lineItem is Secrets.Secrets secrets)
             {
-                return new SecretsTemplateRecipeBuilder(secrets);
+                return new SecretsRecipeBuilder(secrets);
             }
             throw new NotSupportedException("Cannot build this recipe");
 

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Cooker.Kitchens;
-using Cooker.Kitchens.AzureArm;
+using Cooker.Kitchens.Azure;
 using Cooker.Recipes;
 using Cooker.Recipes.Secrets;
 using Cooker.Recipes.Storage;
