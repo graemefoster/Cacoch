@@ -1,10 +1,10 @@
 ﻿using Cooker.Kitchens;
 
-namespace Cooker.Recipes.Storage
+namespace Cooker.Recipes.Secrets
 {
-    public class StorageOutput : ILineItemOutput
+    public class SecretsOutput : ILineItemOutput
     {
-        public StorageOutput(ILineItem input, string name)
+        public SecretsOutput(ILineItem input, string name)
         {
             Input = input;
             Name = name;

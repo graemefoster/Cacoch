@@ -2,6 +2,5 @@
 {
     public interface ILineItemOutput
     {
-        string Name { get; }
     }
 }

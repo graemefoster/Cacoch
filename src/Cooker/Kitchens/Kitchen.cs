@@ -12,7 +12,7 @@ namespace Cooker.Kitchens
 
         public Kitchen(IEnumerable<KitchenStation> stations)
         {
-            _stations = stations;
+            _stations = stations.ToArray();
         }
 
         /// <summary>
@@ -20,19 +20,19 @@ namespace Cooker.Kitchens
         /// to give you an opportunity to take a bit from it
         /// </summary>
         public async Task<Dictionary<ILineItem, ILineItemOutput>> CookNextRecipes(
-            IDictionary<ILineItem, Recipe> allRecipes)
+            IDictionary<ILineItem, IRecipe> allRecipes)
         {
-            var stationOutputs = await Task.WhenAll(_stations.Select(station => station.CookNextRecipes(allRecipes)));
-            var mergedOutputs = new Dictionary<ILineItem, ILineItemOutput>();
-            foreach (var stationOutput in stationOutputs)
-            {
-                foreach (var itemOutput in stationOutput)
-                {
-                    mergedOutputs.Add(itemOutput.Key, itemOutput.Value);
-                }
-            }
+            var allCooks = allRecipes
+                .Select(x =>
+                    new
+                    {
+                        Input = x.Key,
+                        Output = _stations.Single(s => s.CanCook(x.Value)).CookRecipe(x.Key, x.Value)
+                    })
+                .ToArray();
 
-            return mergedOutputs;
+            await Task.WhenAll(allCooks.Select(x => x.Output));
+            return allCooks.ToDictionary(x => x.Input, x => x.Output.Result);
         }
     }
 }

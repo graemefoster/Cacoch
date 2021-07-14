@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Cooker.Kitchens;
 using Cooker.Kitchens.AzureArm;
 using Cooker.Recipes;
+using Cooker.Recipes.Secrets;
 using Cooker.Recipes.Storage;
 using Shouldly;
 using Xunit;
@@ -40,14 +41,28 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(docket);
 
-            meal[storage2].Name.ShouldBe("one-foofoo");
+            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo");
+        }
+
+        [Fact]
+        public async Task can_require_multi_steps()
+        {
+            var secrets1 = new Secrets("one");
+
+            var docket = new Docket(secrets1);
+
+            var restaurant = BuildTestRestaurant();
+
+            var meal = await restaurant.PlaceOrder(docket);
+
+            ((SecretsOutput)meal[secrets1]).Name.ShouldBe("one");
         }
 
         private static Cooker.Restaurant BuildTestRestaurant()
         {
             var restaurant = new Cooker.Restaurant(
                 new Kitchen(new[] {new ArmKitchenStation()}),
-                new Bookshelf());
+                new CookbookLibrary());
             return restaurant;
         }
 

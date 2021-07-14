@@ -20,8 +20,8 @@ namespace Cooker.Kitchens.AzureArm
         /// <summary>
         /// Create a recipe which will be used to cook the item
         /// </summary>
-        /// <param name="edibles"></param>
+        /// <param name="cooked"></param>
         /// <returns></returns>
-        Recipe BuildCookingInstructions(IDictionary<ILineItem, ILineItemOutput> edibles);
+        IRecipe CreateRecipe(IDictionary<ILineItem, ILineItemOutput> cooked);
     }
 }

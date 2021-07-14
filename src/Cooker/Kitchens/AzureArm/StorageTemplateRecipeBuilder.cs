@@ -4,10 +4,9 @@ using Cooker.Recipes.Storage;
 
 namespace Cooker.Kitchens.AzureArm
 {
-    public class StorageArmTemplateRecipeBuilder : IRecipeBuilder
+    public class StorageTemplateRecipeBuilder : IRecipeBuilder
     {
-
-        public StorageArmTemplateRecipeBuilder(Storage lineItem)
+        public StorageTemplateRecipeBuilder(Storage lineItem)
         {
             LineItem = lineItem;
         }
@@ -19,10 +18,10 @@ namespace Cooker.Kitchens.AzureArm
             return DepedencyHelper.IsSatisfied(LineItem.Name, edibles, out _);
         }
 
-        public Recipe BuildCookingInstructions(IDictionary<ILineItem, ILineItemOutput> edibles)
+        public IRecipe CreateRecipe(IDictionary<ILineItem, ILineItemOutput> cooked)
         {
-            DepedencyHelper.IsSatisfied(LineItem.Name, edibles, out var name);
-            return new ArmRecipe(LineItem, output => new StorageOutput(name!));
+            DepedencyHelper.IsSatisfied(LineItem.Name, cooked, out var name);
+            return new ArmRecipe<StorageOutput>(LineItem, output => new StorageOutput(LineItem, name!));
         }
     }
 }
