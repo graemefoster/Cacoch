@@ -1,6 +1,4 @@
-﻿using Cooker.Kitchens;
-
-namespace Cooker.Recipes
+﻿namespace Cooker.Ingredients
 {
     public abstract class LineItem<TOutput> : ILineItem where TOutput : ILineItemOutput
     {

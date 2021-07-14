@@ -22,7 +22,7 @@ namespace Cooker.Kitchens.Azure
             _resourceClient = resourceClient;
         }
 
-        public async Task<object> Execute(string template, Dictionary<string, object> parameters)
+        public async Task<object> Execute(string resourceGroup, string template, Dictionary<string, object> parameters)
         {
             var deployment = new Deployment(
                 new DeploymentProperties(DeploymentMode.Incremental,
@@ -45,9 +45,9 @@ namespace Cooker.Kitchens.Azure
                     }))
                 ));
 
-            var deploymentName = $"testrg-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss");
+            var deploymentName = $"{resourceGroup}-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss");
             var response = await _resourceClient.Deployments.CreateOrUpdateAsync(
-                "testrg",
+                resourceGroup,
                 deploymentName,
                 deployment).ConfigureAwait(false);
 

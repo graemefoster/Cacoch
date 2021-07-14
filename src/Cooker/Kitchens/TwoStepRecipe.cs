@@ -14,9 +14,9 @@ namespace Cooker.Kitchens
             _next = next;
         }
 
-        public async Task<IRecipe> Cook(KitchenStation station)
+        public async Task<IRecipe> Cook(Docket docket, KitchenStation station)
         {
-            return _next((TIntermediate)await station.CookRecipe(_initial));
+            return _next((TIntermediate)await station.CookRecipe(docket, _initial));
         }
 
         public IRecipe InitialStep => _initial;

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Cooker.Recipes;
+using Cooker.Ingredients;
 
 namespace Cooker.Kitchens
 {

@@ -1,4 +1,4 @@
-﻿namespace Cooker.Recipes.Storage
+﻿namespace Cooker.Ingredients.Storage
 {
     public class Storage : LineItem<StorageOutput>
     {

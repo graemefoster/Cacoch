@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Cooker.Recipes;
+using Cooker.Ingredients;
 
 namespace Cooker.Kitchens.Azure
 {
@@ -12,9 +12,9 @@ namespace Cooker.Kitchens.Azure
             _armRunner = armRunner;
         }
         
-        public override Task<ILineItemOutput> CookRecipe(IRecipe recipe)
+        public override Task<ILineItemOutput> CookRecipe(Docket docket, IRecipe recipe)
         {
-            return ((IArmRecipe)recipe).Execute(_armRunner);
+            return ((IArmRecipe)recipe).Execute(docket, _armRunner);
         }
 
         public override bool CanCook(IRecipe recipe)

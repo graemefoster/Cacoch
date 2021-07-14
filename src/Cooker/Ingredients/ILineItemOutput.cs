@@ -1,4 +1,4 @@
-﻿namespace Cooker.Recipes
+﻿namespace Cooker.Ingredients
 {
     public interface ILineItemOutput
     {

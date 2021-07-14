@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Cooker.Recipes
+namespace Cooker.Ingredients
 {
     static class DepedencyHelper
     {

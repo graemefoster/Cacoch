@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using Cooker.Recipes;
-using Cooker.Recipes.Storage;
+using Cooker.Ingredients;
+using Cooker.Ingredients.Storage;
 
 namespace Cooker.Kitchens.Azure.RecipeBuilders.Storage
 {
     public class StorageRecipeBuilder : IRecipeBuilder
     {
-        public StorageRecipeBuilder(Recipes.Storage.Storage lineItem)
+        public StorageRecipeBuilder(Ingredients.Storage.Storage lineItem)
         {
             LineItem = lineItem;
         }

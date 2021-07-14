@@ -1,5 +1,5 @@
 ﻿
-using Cooker.Recipes;
+using Cooker.Ingredients;
 
 namespace Cooker.Kitchens
 {

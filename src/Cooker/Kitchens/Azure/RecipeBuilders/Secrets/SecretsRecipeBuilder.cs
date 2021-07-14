@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using Cooker.Recipes;
-using Cooker.Recipes.Secrets;
+using Cooker.Ingredients;
+using Cooker.Ingredients.Secrets;
 
 namespace Cooker.Kitchens.Azure.RecipeBuilders.Secrets
 {
     public class SecretsRecipeBuilder : IRecipeBuilder
     {
-        public SecretsRecipeBuilder(Recipes.Secrets.Secrets lineItem)
+        public SecretsRecipeBuilder(Ingredients.Secrets.Secrets lineItem)
         {
             LineItem = lineItem;
         }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cooker.Recipes;
+using Cooker.Ingredients;
 
 namespace Cooker.Kitchens
 {
@@ -19,6 +19,7 @@ namespace Cooker.Kitchens
         /// to give you an opportunity to take a bit from it
         /// </summary>
         public async Task<Dictionary<ILineItem, ILineItemOutput>> CookNextRecipes(
+            Docket docket,
             IDictionary<ILineItem, IRecipe> allRecipes)
         {
             var allCooks = allRecipes
@@ -26,7 +27,7 @@ namespace Cooker.Kitchens
                     new
                     {
                         Input = x.Key,
-                        Output = _stations.Single(s => s.CanCook(x.Value)).CookRecipe(x.Value)
+                        Output = _stations.Single(s => s.CanCook(x.Value)).CookRecipe(docket, x.Value)
                     })
                 .ToArray();
 

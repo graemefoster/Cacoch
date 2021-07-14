@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cooker.Ingredients;
 using Cooker.Kitchens;
-using Cooker.Recipes;
 
 namespace Cooker
 {
@@ -45,7 +45,7 @@ namespace Cooker
                     throw new InvalidOperationException("Remaining recipes but not can be built. Suspected dependency issue");
                 }
 
-                var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(recipes));
+                var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(docket, recipes));
 
                 intermediateRecipes = new Dictionary<ILineItem, IRecipe>();
                 foreach (var batch in cooked)

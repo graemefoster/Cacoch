@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Cooker.Recipes;
+﻿using Cooker.Ingredients;
 
 namespace Cooker.Kitchens
 {
     public class Docket
     {
+        public string TableName { get; }
         public ILineItem[] LineItems { get; }
 
-        public Docket(params ILineItem[] lineItems)
+        public Docket(string tableName, params ILineItem[] lineItems)
         {
+            TableName = tableName;
             LineItems = lineItems;
         }
     }

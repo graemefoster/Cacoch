@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Cooker.Recipes;
+using Cooker.Ingredients;
 
 namespace Cooker.Kitchens
 {
@@ -13,11 +13,11 @@ namespace Cooker.Kitchens
             _allStations = allStations;
         }
         
-        public override async Task<ILineItemOutput> CookRecipe(IRecipe recipe)
+        public override async Task<ILineItemOutput> CookRecipe(Docket docket, IRecipe recipe)
         {
             var twoStepRecipe = (ITwoStepRecipe) recipe;
             var station = _allStations.Single(x => x.CanCook(twoStepRecipe.InitialStep));
-            return await twoStepRecipe.Cook(station);
+            return await twoStepRecipe.Cook(docket, station);
         }
 
         public override bool CanCook(IRecipe recipe)

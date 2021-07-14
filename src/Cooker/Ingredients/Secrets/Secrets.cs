@@ -1,4 +1,4 @@
-﻿namespace Cooker.Recipes.Secrets
+﻿namespace Cooker.Ingredients.Secrets
 {
     public class Secrets : LineItem<SecretsOutput>
     {

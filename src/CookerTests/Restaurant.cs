@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Cooker.Ingredients;
+using Cooker.Ingredients.Secrets;
+using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
 using Cooker.Kitchens.Azure;
-using Cooker.Recipes;
-using Cooker.Recipes.Secrets;
-using Cooker.Recipes.Storage;
 using Shouldly;
 using Xunit;
 
@@ -19,7 +18,7 @@ namespace CookerTests
             var name = "1234";
 
             var storage = new Storage(name, name);
-            var docket = new Docket(storage);
+            var docket = new Docket("Docket", storage);
 
             var restaurant = BuildTestRestaurant();
 
@@ -37,7 +36,7 @@ namespace CookerTests
             var secrets1 = new Secrets("secretsone", "[one.Name]-foofoo");
             var storage2 = new Storage("two", "[secretsone.Name]-foofoo");
 
-            var docket = new Docket(storage1, storage2, secrets1);
+            var docket = new Docket("Docket", storage1, storage2, secrets1);
 
             var restaurant = BuildTestRestaurant();
 
@@ -51,7 +50,7 @@ namespace CookerTests
             var storage1 = new Storage("one", "one");
             var storage2 = new Storage("two", "[one.Name]-foofoo");
 
-            var docket = new Docket(storage1, storage2);
+            var docket = new Docket("Docket", storage1, storage2);
 
             var restaurant = BuildTestRestaurant();
 
@@ -65,7 +64,7 @@ namespace CookerTests
         {
             var secrets1 = new Secrets("one", "one");
 
-            var docket = new Docket(secrets1);
+            var docket = new Docket("Docket", secrets1);
 
             var restaurant = BuildTestRestaurant();
 
@@ -89,7 +88,7 @@ namespace CookerTests
             var storage1 = new Storage("one", "one");
             var storage2 = new Storage("two", "[one.DoesNotExist]-foofoo");
 
-            var docket = new Docket(storage1, storage2);
+            var docket = new Docket("Docket", storage1, storage2);
 
             var restaurant = BuildTestRestaurant();
 
@@ -102,7 +101,7 @@ namespace CookerTests
             var storage1 = new Storage("one", "one");
             var storage2 = new Storage("two", "[storage1.Name]-foofoo");
 
-            var docket = new Docket(storage1, storage2);
+            var docket = new Docket("Docket", storage1, storage2);
 
             var restaurant = BuildTestRestaurant();
 
@@ -113,7 +112,7 @@ namespace CookerTests
         public void cannot_build_unknown_items()
         {
             var unknown = new UnknownItem();
-            var docket = new Docket(unknown);
+            var docket = new Docket("Docket", unknown);
 
             var restaurant = BuildTestRestaurant();
 
@@ -124,14 +123,6 @@ namespace CookerTests
         {
             public string Id => "Foo";
             public string DisplayName => "Foo";
-        }
-    }
-
-    internal class FakeArmRunner : IArmRunner
-    {
-        public Task<object> Execute(string template, Dictionary<string, object> parameters)
-        {
-            return Task.FromResult(new object());
         }
     }
 }

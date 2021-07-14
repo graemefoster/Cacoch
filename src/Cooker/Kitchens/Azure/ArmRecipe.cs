@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Cooker.Recipes;
+using Cooker.Ingredients;
 
 namespace Cooker.Kitchens.Azure
 {
@@ -17,14 +17,9 @@ namespace Cooker.Kitchens.Azure
             _outputBuilder = outputBuilder;
         }
 
-        public ILineItemOutput Output(object armOutputs)
+        public async Task<ILineItemOutput> Execute(Docket docket, IArmRunner armRunner)
         {
-            return _outputBuilder(armOutputs);
-        }
-
-        public async Task<ILineItemOutput> Execute(IArmRunner armRunner)
-        {
-            return _outputBuilder(await _arm.Execute(armRunner));
+            return _outputBuilder(await _arm.Execute(docket, armRunner));
         }
     }
 }
