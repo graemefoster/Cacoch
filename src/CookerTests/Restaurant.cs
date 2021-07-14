@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cooker.Kitchens;
 using Cooker.Kitchens.Azure;
@@ -75,8 +76,9 @@ namespace CookerTests
 
         private static Cooker.Restaurant BuildTestRestaurant()
         {
+            var runner = new FakeArmRunner();
             var restaurant = new Cooker.Restaurant(
-                new Kitchen(new[] {new ArmKitchenStation()}),
+                new Kitchen(new[] {new ArmKitchenStation(runner)}),
                 new CookbookLibrary());
             return restaurant;
         }
@@ -122,6 +124,14 @@ namespace CookerTests
         {
             public string Id => "Foo";
             public string DisplayName => "Foo";
+        }
+    }
+
+    internal class FakeArmRunner : IArmRunner
+    {
+        public Task<object> Execute(string template, Dictionary<string, object> parameters)
+        {
+            return Task.FromResult(new object());
         }
     }
 }

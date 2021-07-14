@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Cooker.Kitchens;
 using Cooker.Kitchens.Azure.RecipeBuilders;
+using Cooker.Kitchens.Azure.RecipeBuilders.Secrets;
+using Cooker.Kitchens.Azure.RecipeBuilders.Storage;
 
 namespace Cooker.Recipes
 {

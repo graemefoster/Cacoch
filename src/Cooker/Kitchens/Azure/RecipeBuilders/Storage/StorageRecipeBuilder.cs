@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using Cooker.Recipes;
-using Cooker.Recipes.Secrets;
+using Cooker.Recipes.Storage;
 
-namespace Cooker.Kitchens.Azure.RecipeBuilders
+namespace Cooker.Kitchens.Azure.RecipeBuilders.Storage
 {
-    public class SecretsRecipeBuilder : IRecipeBuilder
+    public class StorageRecipeBuilder : IRecipeBuilder
     {
-
-        public SecretsRecipeBuilder(Secrets lineItem)
+        public StorageRecipeBuilder(Recipes.Storage.Storage lineItem)
         {
             LineItem = lineItem;
         }
@@ -22,13 +21,11 @@ namespace Cooker.Kitchens.Azure.RecipeBuilders
         public IRecipe CreateRecipe(IDictionary<ILineItem, ILineItemOutput> cooked)
         {
             DepedencyHelper.IsSatisfied(LineItem.DisplayName, cooked, out var name);
-            
-            return new ArmRecipe<IntermediateOutput>(output => new IntermediateOutput())
-                .Chain(i => new ArmRecipe<SecretsOutput>(o => new SecretsOutput(name!)));
-        }
-
-        private class IntermediateOutput : ILineItemOutput
-        {
+            var armTemplate = typeof(StorageRecipeBuilder).GetResourceContents("Storage");
+            return new ArmRecipe<StorageOutput>(
+                new ArmDefinition(armTemplate,
+                    new Dictionary<string, object>()),
+                output => new StorageOutput(name!));
         }
     }
 }

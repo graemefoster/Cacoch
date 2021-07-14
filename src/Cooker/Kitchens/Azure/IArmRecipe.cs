@@ -1,9 +1,10 @@
-﻿using Cooker.Recipes;
+﻿using System.Threading.Tasks;
+using Cooker.Recipes;
 
 namespace Cooker.Kitchens.Azure
 {
     public interface IArmRecipe
     {
-        ILineItemOutput Output(object armOutputs);
+        Task<ILineItemOutput> Execute(IArmRunner armRunner);
     }
 }

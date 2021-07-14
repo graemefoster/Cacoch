@@ -5,9 +5,16 @@ namespace Cooker.Kitchens.Azure
 {
     public class ArmKitchenStation : KitchenStation
     {
+        private readonly IArmRunner _armRunner;
+
+        public ArmKitchenStation(IArmRunner armRunner)
+        {
+            _armRunner = armRunner;
+        }
+        
         public override Task<ILineItemOutput> CookRecipe(IRecipe recipe)
         {
-            return Task.FromResult(((IArmRecipe)recipe).Output(new object()));
+            return ((IArmRecipe)recipe).Execute(_armRunner);
         }
 
         public override bool CanCook(IRecipe recipe)
