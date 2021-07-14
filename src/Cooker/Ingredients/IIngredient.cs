@@ -1,6 +1,6 @@
 ﻿namespace Cooker.Ingredients
 {
-    public interface ILineItem
+    public interface IIngredient
     {
         string Id { get; }
         string DisplayName { get; }

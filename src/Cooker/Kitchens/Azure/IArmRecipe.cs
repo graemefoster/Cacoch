@@ -5,6 +5,6 @@ namespace Cooker.Kitchens.Azure
 {
     public interface IArmRecipe
     {
-        Task<ILineItemOutput> Execute(Docket docket, IArmRunner armRunner);
+        Task<ICookedIngredient> Execute(Docket docket, IArmRunner armRunner);
     }
 }

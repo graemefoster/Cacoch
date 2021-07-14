@@ -13,7 +13,7 @@ namespace Cooker.Kitchens
             _allStations = allStations;
         }
         
-        public override async Task<ILineItemOutput> CookRecipe(Docket docket, IRecipe recipe)
+        public override async Task<ICookedIngredient> CookRecipe(Docket docket, IRecipe recipe)
         {
             var twoStepRecipe = (ITwoStepRecipe) recipe;
             var station = _allStations.Single(x => x.CanCook(twoStepRecipe.InitialStep));

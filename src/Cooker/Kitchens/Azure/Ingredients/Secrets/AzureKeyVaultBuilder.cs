@@ -2,25 +2,25 @@
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 
-namespace Cooker.Kitchens.Azure.RecipeBuilders.Secrets
+namespace Cooker.Kitchens.Azure.Ingredients.Secrets
 {
-    public class SecretsRecipeBuilder : IRecipeBuilder
+    public class AzureKeyVaultBuilder : IIngredientBuilder
     {
-        public SecretsRecipeBuilder(Ingredients.Secrets.Secrets lineItem)
+        public AzureKeyVaultBuilder(Cooker.Ingredients.Secrets.Secrets ingredient)
         {
-            LineItem = lineItem;
+            Ingredient = ingredient;
         }
 
-        public ILineItem LineItem { get; }
+        public IIngredient Ingredient { get; }
 
-        public bool CanCook(IDictionary<ILineItem, ILineItemOutput> edibles)
+        public bool CanCook(IDictionary<IIngredient, ICookedIngredient> edibles)
         {
-            return DepedencyHelper.IsSatisfied(LineItem.DisplayName, edibles, out _);
+            return DepedencyHelper.IsSatisfied(Ingredient.DisplayName, edibles, out _);
         }
 
-        public IRecipe CreateRecipe(IDictionary<ILineItem, ILineItemOutput> cooked)
+        public IRecipe CreateRecipe(IDictionary<IIngredient, ICookedIngredient> cooked)
         {
-            DepedencyHelper.IsSatisfied(LineItem.DisplayName, cooked, out var name);
+            DepedencyHelper.IsSatisfied(Ingredient.DisplayName, cooked, out var name);
 
             return new ArmRecipe<IntermediateOutput>(
                     new ArmDefinition(
@@ -35,7 +35,7 @@ namespace Cooker.Kitchens.Azure.RecipeBuilders.Secrets
                         o => new SecretsOutput(name!)));
         }
 
-        private class IntermediateOutput : ILineItemOutput
+        private class IntermediateOutput : ICookedIngredient
         {
         }
     }

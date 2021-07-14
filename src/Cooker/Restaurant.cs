@@ -24,15 +24,15 @@ namespace Cooker
         public async Task<Meal> PlaceOrder(Docket docket)
         {
             var allRemainingInstructions= docket.LineItems.Select(x => _cookbookLibrary.GetCookbookFor(x)).ToList();
-            var cookedRecipes = new Dictionary<ILineItem, ILineItemOutput>();
-            var intermediateRecipes = new Dictionary<ILineItem, IRecipe>();
+            var cookedRecipes = new Dictionary<IIngredient, ICookedIngredient>();
+            var intermediateRecipes = new Dictionary<IIngredient, IRecipe>();
 
             while (allRemainingInstructions.Any() || intermediateRecipes.Any())
             {
                 var recipes = 
                     allRemainingInstructions
                         .Where(x => x.CanCook(cookedRecipes))
-                        .Select(x => new {x.LineItem, Instructions = x.CreateRecipe(cookedRecipes) })
+                        .Select(x => new {LineItem = x.Ingredient, Instructions = x.CreateRecipe(cookedRecipes) })
                         .ToDictionary(x => x.LineItem, x => x.Instructions);
 
                 foreach (var intermediateRecipe in intermediateRecipes)
@@ -47,7 +47,7 @@ namespace Cooker
 
                 var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(docket, recipes));
 
-                intermediateRecipes = new Dictionary<ILineItem, IRecipe>();
+                intermediateRecipes = new Dictionary<IIngredient, IRecipe>();
                 foreach (var batch in cooked)
                 {
                     foreach (var edibleItem in batch)
@@ -62,7 +62,7 @@ namespace Cooker
                         }
                     }
                 }
-                allRemainingInstructions.RemoveAll(rb => recipes.Keys.Contains(rb.LineItem));
+                allRemainingInstructions.RemoveAll(rb => recipes.Keys.Contains(rb.Ingredient));
             }
 
             return new Meal(cookedRecipes);

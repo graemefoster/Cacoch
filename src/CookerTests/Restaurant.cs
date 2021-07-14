@@ -119,7 +119,7 @@ namespace CookerTests
             Should.Throw<NotSupportedException>(async () => await restaurant.PlaceOrder(docket));
         }
 
-        class UnknownItem : ILineItem
+        class UnknownItem : IIngredient
         {
             public string Id => "Foo";
             public string DisplayName => "Foo";

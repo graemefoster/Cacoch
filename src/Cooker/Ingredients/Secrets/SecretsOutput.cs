@@ -1,6 +1,6 @@
 ﻿namespace Cooker.Ingredients.Secrets
 {
-    public class SecretsOutput : ILineItemOutput
+    public class SecretsOutput : ICookedIngredient
     {
         public SecretsOutput(string name)
         {

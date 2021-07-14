@@ -1,21 +1,21 @@
 ﻿using System;
 using Cooker.Kitchens;
-using Cooker.Kitchens.Azure.RecipeBuilders.Secrets;
-using Cooker.Kitchens.Azure.RecipeBuilders.Storage;
+using Cooker.Kitchens.Azure.Ingredients.Secrets;
+using Cooker.Kitchens.Azure.Ingredients.Storage;
 
 namespace Cooker.Ingredients
 {
     public class CookbookLibrary
     {
-        public IRecipeBuilder GetCookbookFor(ILineItem lineItem)
+        public IIngredientBuilder GetCookbookFor(IIngredient ingredient)
         {
-            if (lineItem is Storage.Storage storage)
+            if (ingredient is Storage.Storage storage)
             {
-                return new StorageRecipeBuilder(storage);
+                return new StorageIngredientBuilder(storage);
             }
-            if (lineItem is Secrets.Secrets secrets)
+            if (ingredient is Secrets.Secrets secrets)
             {
-                return new SecretsRecipeBuilder(secrets);
+                return new AzureKeyVaultBuilder(secrets);
             }
             throw new NotSupportedException("Cannot build this recipe");
 

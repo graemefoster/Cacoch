@@ -5,7 +5,7 @@ namespace Cooker.Kitchens
 {
     public abstract class KitchenStation
     {
-        public abstract Task<ILineItemOutput> CookRecipe(Docket docket, IRecipe recipe);
+        public abstract Task<ICookedIngredient> CookRecipe(Docket docket, IRecipe recipe);
         public abstract bool CanCook(IRecipe recipe);
     }
 }

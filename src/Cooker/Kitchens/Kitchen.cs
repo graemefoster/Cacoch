@@ -18,9 +18,9 @@ namespace Cooker.Kitchens
         /// Build what you can from the recipes that need preparing. Anything already cooked is provided to you
         /// to give you an opportunity to take a bit from it
         /// </summary>
-        public async Task<Dictionary<ILineItem, ILineItemOutput>> CookNextRecipes(
+        public async Task<Dictionary<IIngredient, ICookedIngredient>> CookNextRecipes(
             Docket docket,
-            IDictionary<ILineItem, IRecipe> allRecipes)
+            IDictionary<IIngredient, IRecipe> allRecipes)
         {
             var allCooks = allRecipes
                 .Select(x =>

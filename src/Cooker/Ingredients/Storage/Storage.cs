@@ -1,6 +1,6 @@
 ﻿namespace Cooker.Ingredients.Storage
 {
-    public class Storage : LineItem<StorageOutput>
+    public class Storage : Ingredient
     {
         public Storage(string id, string displayName) : base(id, displayName)
         {

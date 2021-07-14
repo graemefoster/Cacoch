@@ -12,7 +12,7 @@ namespace Cooker.Kitchens.Azure
             _armRunner = armRunner;
         }
         
-        public override Task<ILineItemOutput> CookRecipe(Docket docket, IRecipe recipe)
+        public override Task<ICookedIngredient> CookRecipe(Docket docket, IRecipe recipe)
         {
             return ((IArmRecipe)recipe).Execute(docket, _armRunner);
         }

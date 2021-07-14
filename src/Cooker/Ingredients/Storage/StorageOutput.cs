@@ -1,6 +1,6 @@
 ﻿namespace Cooker.Ingredients.Storage
 {
-    public class StorageOutput : ILineItemOutput
+    public class StorageOutput : ICookedIngredient
     {
         public StorageOutput(string name)
         {

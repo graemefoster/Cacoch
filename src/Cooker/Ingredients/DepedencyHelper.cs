@@ -6,7 +6,7 @@ namespace Cooker.Ingredients
 {
     static class DepedencyHelper
     {
-        public static bool IsSatisfied(string value, IDictionary<ILineItem, ILineItemOutput> edibles, out string? prop)
+        public static bool IsSatisfied(string value, IDictionary<IIngredient, ICookedIngredient> edibles, out string? prop)
         {
             if (value.Contains("["))
             {
