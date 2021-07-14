@@ -17,7 +17,7 @@ namespace CookerTests
         {
             var name = "1234";
 
-            var storage = new Storage(name);
+            var storage = new Storage(name, name);
             var docket = new Docket(storage);
 
             var restaurant = BuildTestRestaurant();
@@ -30,10 +30,25 @@ namespace CookerTests
 
 
         [Fact]
+        public async Task can_work_out_complex_dependency_chain()
+        {
+            var storage1 = new Storage("one", "one");
+            var secrets1 = new Secrets("secretsone", "[one.Name]-foofoo");
+            var storage2 = new Storage("two", "[secretsone.Name]-foofoo");
+
+            var docket = new Docket(storage1, storage2, secrets1);
+
+            var restaurant = BuildTestRestaurant();
+
+            var meal = await restaurant.PlaceOrder(docket);
+
+            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo-foofoo");
+        }
+        [Fact]
         public async Task can_work_out_dependencies()
         {
-            var storage1 = new Storage("one");
-            var storage2 = new Storage("[one.Name]-foofoo");
+            var storage1 = new Storage("one", "one");
+            var storage2 = new Storage("two", "[one.Name]-foofoo");
 
             var docket = new Docket(storage1, storage2);
 
@@ -45,9 +60,9 @@ namespace CookerTests
         }
 
         [Fact]
-        public async Task can_require_multi_steps()
+        public async Task can_have_multi_steps()
         {
-            var secrets1 = new Secrets("one");
+            var secrets1 = new Secrets("one", "one");
 
             var docket = new Docket(secrets1);
 
@@ -69,8 +84,8 @@ namespace CookerTests
         [Fact]
         public void throws_on_unknown_dependency_properties()
         {
-            var storage1 = new Storage("one");
-            var storage2 = new Storage("[one.DoesNotExist]-foofoo");
+            var storage1 = new Storage("one", "one");
+            var storage2 = new Storage("two", "[one.DoesNotExist]-foofoo");
 
             var docket = new Docket(storage1, storage2);
 
@@ -82,8 +97,8 @@ namespace CookerTests
         [Fact]
         public void can_detect_dependency_issues()
         {
-            var storage1 = new Storage("one");
-            var storage2 = new Storage("[storage1.Name]-foofoo");
+            var storage1 = new Storage("one", "one");
+            var storage2 = new Storage("two", "[storage1.Name]-foofoo");
 
             var docket = new Docket(storage1, storage2);
 
@@ -105,7 +120,8 @@ namespace CookerTests
 
         class UnknownItem : ILineItem
         {
-            public string Name => "Foo";
+            public string Id => "Foo";
+            public string DisplayName => "Foo";
         }
     }
 }

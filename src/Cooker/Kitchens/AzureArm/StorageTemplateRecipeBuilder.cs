@@ -15,12 +15,12 @@ namespace Cooker.Kitchens.AzureArm
 
         public bool CanCook(IDictionary<ILineItem, ILineItemOutput> edibles)
         {
-            return DepedencyHelper.IsSatisfied(LineItem.Name, edibles, out _);
+            return DepedencyHelper.IsSatisfied(LineItem.DisplayName, edibles, out _);
         }
 
         public IRecipe CreateRecipe(IDictionary<ILineItem, ILineItemOutput> cooked)
         {
-            DepedencyHelper.IsSatisfied(LineItem.Name, cooked, out var name);
+            DepedencyHelper.IsSatisfied(LineItem.DisplayName, cooked, out var name);
             return new ArmRecipe<StorageOutput>(LineItem, output => new StorageOutput(LineItem, name!));
         }
     }

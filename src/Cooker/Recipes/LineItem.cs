@@ -4,11 +4,13 @@ namespace Cooker.Recipes
 {
     public abstract class LineItem<TOutput> : ILineItem where TOutput : ILineItemOutput
     {
-        public string Name { get; }
+        public string Id { get; }
+        public string DisplayName { get; }
 
-        protected LineItem(string name)
+        protected LineItem(string id, string displayName)
         {
-            Name = name;
+            Id = id;
+            DisplayName = displayName;
         }
     }
 }

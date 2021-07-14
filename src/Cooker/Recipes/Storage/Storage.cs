@@ -2,7 +2,7 @@
 {
     public class Storage : LineItem<StorageOutput>
     {
-        public Storage(string name) : base(name)
+        public Storage(string id, string displayName) : base(id, displayName)
         {
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cooker.Kitchens;
 
 namespace Cooker.Recipes
 {
@@ -15,13 +14,14 @@ namespace Cooker.Recipes
                 var expressionParts = expression.Split(".");
                 
                 var dependencyLineItem = expressionParts[0];
-                var edible = edibles.Keys.SingleOrDefault(x => x.Name == dependencyLineItem);
-                if (edible == null)
+                var lineItem = edibles.Keys.SingleOrDefault(x => x.Id == dependencyLineItem);
+                if (lineItem == null)
                 {
                     prop = null;
                     return false;
                 }
 
+                var edible = edibles[lineItem];
                 var propertyInfo = edible.GetType().GetProperty(expressionParts[1]);
                 if (propertyInfo == null)
                 {

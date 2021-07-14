@@ -2,6 +2,7 @@
 {
     public interface ILineItem
     {
-        string Name { get; }
+        string Id { get; }
+        string DisplayName { get; }
     }
 }
