@@ -5,14 +5,14 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Storage
 {
-    public class AzureStorageBuilder : IIngredientBuilder
+    public class AzureStorageBuilder : IIngredientBuilder<Cooker.Ingredients.Storage.Storage>
     {
         public AzureStorageBuilder(Cooker.Ingredients.Storage.Storage ingredient)
         {
             Ingredient = ingredient;
         }
 
-        public IIngredient Ingredient { get; }
+        public Cooker.Ingredients.Storage.Storage Ingredient { get; }
 
 
         public IRecipe CreateRecipe(IDictionary<IIngredient, ICookedIngredient> cooked)

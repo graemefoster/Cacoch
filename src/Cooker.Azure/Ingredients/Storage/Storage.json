@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "storageAccountType": {
@@ -44,9 +44,10 @@
         "count": "[length(parameters('containers'))]",
         "name": "containerCopy"
       },
-      "name": "[concat(parameters('storageAccountName'), '/default/', parameters('containers')[copyIndex()])]",
+      "name": "[concat(parameters('storageAccountName'), '/default/', if(greater(length(parameters('containers')), 0), parameters('containers')[copyIndex()], 'dummycontainer'))]",
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2021-02-01",
+      "dependsOn" : ["[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"],
       "properties": {
         "publicAccess": "None"
       }
@@ -56,9 +57,10 @@
         "count": "[length(parameters('queues'))]",
         "name": "queueCopy"
       },
-      "name": "[concat(parameters('storageAccountName'), '/default/', parameters('queues')[copyIndex()])]",
+      "name": "[concat(parameters('storageAccountName'), '/default/', if(greater(length(parameters('queues')), 0), parameters('queues')[copyIndex()], 'dummyqueue'))]",
       "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
       "apiVersion": "2021-02-01",
+      "dependsOn" : ["[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"],
       "properties": {
         "publicAccess": "None"
       }
@@ -68,9 +70,10 @@
         "count": "[length(parameters('tables'))]",
         "name": "tableCopy"
       },
-      "name": "[concat(parameters('storageAccountName'), '/default/', parameters('tables')[copyIndex()])]",
+      "name": "[concat(parameters('storageAccountName'), '/default/', if(greater(length(parameters('tables')), 0), parameters('tables')[copyIndex()], 'dummytable'))]",
       "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
       "apiVersion": "2021-02-01",
+      "dependsOn" : ["[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"],
       "properties": {
         "publicAccess": "None"
       }

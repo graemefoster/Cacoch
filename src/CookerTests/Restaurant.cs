@@ -20,7 +20,7 @@ namespace CookerTests
         {
             var name = "1234";
 
-            var storage = new Storage(name, name);
+            var storage = new Storage(name, name, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
             var docket = new Docket("Docket", storage);
 
             var restaurant = BuildTestRestaurant();
@@ -35,9 +35,9 @@ namespace CookerTests
         [Fact]
         public async Task can_work_out_complex_dependency_chain()
         {
-            var storage1 = new Storage("one", "one");
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
             var secrets1 = new Secrets("secretsone", "[one.Name]-foofoo");
-            var storage2 = new Storage("two", "[secretsone.Name]-foofoo");
+            var storage2 = new Storage("two", "[secretsone.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2, secrets1);
 
@@ -51,8 +51,8 @@ namespace CookerTests
         [Fact]
         public async Task can_work_out_dependencies()
         {
-            var storage1 = new Storage("one", "one");
-            var storage2 = new Storage("two", "[one.Name]-foofoo");
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage2 = new Storage("two", "[one.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2);
 
@@ -82,10 +82,10 @@ namespace CookerTests
             var runner = new FakeArmRunner();
             var restaurant = new Cooker.Restaurant(
                 new Kitchen(new KitchenStation[] {new ArmKitchenStation(runner)}),
-                new CookbookLibrary(new Dictionary<Type, Func<IIngredient, IIngredientBuilder>>()
+                new CookbookLibrary(new Dictionary<Type, Type>
                 {
-                    {typeof(Secrets), i => new AzureKeyVaultBuilder((Secrets)i)},
-                    {typeof(Storage), i => new AzureStorageBuilder((Storage)i)},
+                    {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
+                    {typeof(Storage), typeof(AzureStorageBuilder)},
                 }));
             return restaurant;
         }
@@ -93,8 +93,8 @@ namespace CookerTests
         [Fact]
         public void throws_on_unknown_dependency_properties()
         {
-            var storage1 = new Storage("one", "one");
-            var storage2 = new Storage("two", "[one.DoesNotExist]-foofoo");
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage2 = new Storage("two", "[one.DoesNotExist]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2);
 
@@ -106,8 +106,8 @@ namespace CookerTests
         [Fact]
         public void can_detect_dependency_issues()
         {
-            var storage1 = new Storage("one", "one");
-            var storage2 = new Storage("two", "[storage1.Name]-foofoo");
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage2 = new Storage("two", "[storage1.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2);
 

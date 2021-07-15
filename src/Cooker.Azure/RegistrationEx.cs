@@ -26,12 +26,12 @@ namespace Cooker.Azure
             });
 
             services.RegisterCooker(
-                new Dictionary<Type, Func<IIngredient, IIngredientBuilder>>
-            {
-                {typeof(Secrets), i => new AzureKeyVaultBuilder((Secrets) i)},
-                {typeof(Storage), i => new AzureStorageBuilder((Storage) i)},
-            });
-            
+                new Dictionary<Type, Type>
+                {
+                    {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
+                    {typeof(Storage), typeof(AzureStorageBuilder)},
+                });
+
             services.AddSingleton<IArmRunner, AzureResourceManagerArmRunner>();
             services.AddSingleton<KitchenStation, ArmKitchenStation>();
 

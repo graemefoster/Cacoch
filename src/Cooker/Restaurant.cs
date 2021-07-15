@@ -23,7 +23,11 @@ namespace Cooker
 
         public async Task<Meal> PlaceOrder(Docket docket)
         {
-            var allRemainingInstructions = docket.LineItems.Select(x => _cookbookLibrary.GetCookbookFor(x)).ToList();
+            var allRemainingInstructions =
+                docket.LineItems.Select(x => new CookState(
+                        _cookbookLibrary.GetCookbookFor(x), x))
+                    .ToList();
+
             var cookedRecipes = new Dictionary<IIngredient, ICookedIngredient>();
             var intermediateRecipes = new Dictionary<IIngredient, IRecipe>();
 
@@ -32,7 +36,8 @@ namespace Cooker
                 var recipes =
                     allRemainingInstructions
                         .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
-                        .Select(x => new {LineItem = x.Ingredient, Instructions = x.CreateRecipe(cookedRecipes)})
+                        .Select(x => new
+                            {LineItem = x.Ingredient, Instructions = x.Builder.CreateRecipe(cookedRecipes)})
                         .ToDictionary(x => x.LineItem, x => x.Instructions);
 
                 foreach (var intermediateRecipe in intermediateRecipes)
@@ -63,11 +68,24 @@ namespace Cooker
                         }
                     }
                 }
-
                 allRemainingInstructions.RemoveAll(rb => recipes.Keys.Contains(rb.Ingredient));
+
             }
 
             return new Meal(cookedRecipes);
+        }
+
+        private class CookState
+        {
+            public CookState(IIngredientBuilder builder, IIngredient ingredient)
+            {
+                Builder = builder;
+                Ingredient = ingredient;
+            }
+
+            public IIngredientBuilder Builder { get; }
+            public IIngredient Ingredient { get; }
+            public bool Cooked { get; set; }
         }
     }
 }

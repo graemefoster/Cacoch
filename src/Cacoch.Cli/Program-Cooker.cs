@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Cooker;
 using Cooker.Azure;
 using Cooker.Ingredients.Storage;
@@ -27,7 +28,12 @@ namespace Cacoch.Cli
             {
                 var restaurant = host.Services.GetRequiredService<Restaurant>();
                 var docket = new Docket("cacochtest",
-                    new Storage("storageone", "Storage One"));
+                    new Storage(
+                        "storageone",
+                        "Storage One",
+                        Array.Empty<string>(),
+                        Array.Empty<string>(),
+                        new[] {"my-container"}));
 
                 var meal = await restaurant.PlaceOrder(docket);
 

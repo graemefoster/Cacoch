@@ -9,7 +9,7 @@ namespace Cooker
     public static class RegistrationEx
     {
         public static void RegisterCooker(this IServiceCollection services,
-            Dictionary<Type, Func<IIngredient, IIngredientBuilder>> cookbooks)
+            Dictionary<Type, Type> cookbooks)
         {
             services.AddSingleton<Restaurant>();
             services.AddSingleton<Kitchen>();

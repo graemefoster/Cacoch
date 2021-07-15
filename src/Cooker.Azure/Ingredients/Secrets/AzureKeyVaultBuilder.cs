@@ -5,14 +5,14 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Secrets
 {
-    public class AzureKeyVaultBuilder : IIngredientBuilder
+    public class AzureKeyVaultBuilder : IIngredientBuilder<Cooker.Ingredients.Secrets.Secrets>
     {
         public AzureKeyVaultBuilder(Cooker.Ingredients.Secrets.Secrets ingredient)
         {
             Ingredient = ingredient;
         }
 
-        public IIngredient Ingredient { get; }
+        public Cooker.Ingredients.Secrets.Secrets Ingredient { get; }
 
 
         public IRecipe CreateRecipe(IDictionary<IIngredient, ICookedIngredient> cooked)
