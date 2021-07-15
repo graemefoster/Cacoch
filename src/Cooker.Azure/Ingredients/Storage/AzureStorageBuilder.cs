@@ -20,7 +20,13 @@ namespace Cooker.Azure.Ingredients.Storage
             var armTemplate = typeof(AzureStorageBuilder).GetResourceContents("Storage");
             return new ArmRecipe<StorageOutput>(
                 new ArmDefinition(armTemplate,
-                    new Dictionary<string, object>()),
+                    new Dictionary<string, object>()
+                    {
+                        {"storageAccountName", Ingredient.Id},
+                        {"tables", Ingredient.Tables},
+                        {"queues", Ingredient.Queues},
+                        {"containers", Ingredient.Containers}
+                    }),
                 output => new StorageOutput(Ingredient.DisplayName));
         }
     }

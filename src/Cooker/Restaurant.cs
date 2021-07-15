@@ -23,26 +23,27 @@ namespace Cooker
 
         public async Task<Meal> PlaceOrder(Docket docket)
         {
-            var allRemainingInstructions= docket.LineItems.Select(x => _cookbookLibrary.GetCookbookFor(x)).ToList();
+            var allRemainingInstructions = docket.LineItems.Select(x => _cookbookLibrary.GetCookbookFor(x)).ToList();
             var cookedRecipes = new Dictionary<IIngredient, ICookedIngredient>();
             var intermediateRecipes = new Dictionary<IIngredient, IRecipe>();
 
             while (allRemainingInstructions.Any() || intermediateRecipes.Any())
             {
-                var recipes = 
+                var recipes =
                     allRemainingInstructions
                         .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
-                        .Select(x => new {LineItem = x.Ingredient, Instructions = x.CreateRecipe(cookedRecipes) })
+                        .Select(x => new {LineItem = x.Ingredient, Instructions = x.CreateRecipe(cookedRecipes)})
                         .ToDictionary(x => x.LineItem, x => x.Instructions);
 
                 foreach (var intermediateRecipe in intermediateRecipes)
                 {
                     recipes.Add(intermediateRecipe.Key, intermediateRecipe.Value);
                 }
-                
+
                 if (!recipes.Any())
                 {
-                    throw new InvalidOperationException("Remaining recipes but not can be built. Suspected dependency issue");
+                    throw new InvalidOperationException(
+                        "Remaining recipes but not can be built. Suspected dependency issue");
                 }
 
                 var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(docket, recipes));
@@ -62,6 +63,7 @@ namespace Cooker
                         }
                     }
                 }
+
                 allRemainingInstructions.RemoveAll(rb => recipes.Keys.Contains(rb.Ingredient));
             }
 

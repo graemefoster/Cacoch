@@ -9,9 +9,9 @@ namespace Cooker.Kitchens
     {
         private readonly KitchenStation[] _stations;
 
-        public Kitchen(KitchenStation[] stations)
+        public Kitchen(IEnumerable<KitchenStation> stations)
         {
-            _stations = stations.Union(new [] { new TwoStepKitchenStation(stations)}).ToArray();
+            _stations = stations.Union(new [] { new TwoStepKitchenStation(stations.ToArray())}).ToArray();
         }
 
         /// <summary>
