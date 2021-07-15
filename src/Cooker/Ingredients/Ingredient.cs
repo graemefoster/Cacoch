@@ -6,7 +6,7 @@ namespace Cooker.Ingredients
     {
         public string Id { get; }
         public string DisplayName { get; protected set; }
-        public abstract bool CanCook(IDictionary<IIngredient, ICookedIngredient> edibles);
+        public abstract bool PrepareForCook(IDictionary<IIngredient, ICookedIngredient> edibles);
 
         protected Ingredient(string id, string displayName)
         {

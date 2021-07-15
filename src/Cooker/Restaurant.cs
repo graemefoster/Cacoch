@@ -31,7 +31,7 @@ namespace Cooker
             {
                 var recipes = 
                     allRemainingInstructions
-                        .Where(x => x.Ingredient.CanCook(cookedRecipes))
+                        .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
                         .Select(x => new {LineItem = x.Ingredient, Instructions = x.CreateRecipe(cookedRecipes) })
                         .ToDictionary(x => x.LineItem, x => x.Instructions);
 

@@ -9,7 +9,7 @@ namespace Cooker.Ingredients.Storage
         }
         
         
-        public override bool CanCook(IDictionary<IIngredient, ICookedIngredient> edibles)
+        public override bool PrepareForCook(IDictionary<IIngredient, ICookedIngredient> edibles)
         {
             var satisfied = false;
             if (DepedencyHelper.IsSatisfied(DisplayName, edibles, out var displayName))

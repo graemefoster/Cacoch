@@ -132,7 +132,7 @@ namespace CookerTests
             public string Id => "Foo";
             public string DisplayName => "Foo";
 
-            public bool CanCook(IDictionary<IIngredient, ICookedIngredient> edibles)
+            public bool PrepareForCook(IDictionary<IIngredient, ICookedIngredient> edibles)
             {
                 return true;
             }
