@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cooker", "Cooker\Cooker.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CookerTests", "CookerTests\CookerTests.csproj", "{67EAB648-51C7-4DF1-97DA-6BF393C422A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cooker.Azure", "Cooker.Azure\Cooker.Azure.csproj", "{4BDF7FE5-F7B6-459A-AF86-4702B2186259}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{67EAB648-51C7-4DF1-97DA-6BF393C422A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67EAB648-51C7-4DF1-97DA-6BF393C422A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67EAB648-51C7-4DF1-97DA-6BF393C422A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BDF7FE5-F7B6-459A-AF86-4702B2186259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BDF7FE5-F7B6-459A-AF86-4702B2186259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BDF7FE5-F7B6-459A-AF86-4702B2186259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BDF7FE5-F7B6-459A-AF86-4702B2186259}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

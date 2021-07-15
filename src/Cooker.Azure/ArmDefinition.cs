@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Cooker.Kitchens;
 
-namespace Cooker.Kitchens.Azure
+namespace Cooker.Azure
 {
     public class ArmDefinition
     {

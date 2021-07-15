@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Cooker.Ingredients;
+using Cooker.Kitchens;
 
-namespace Cooker.Kitchens.Azure
+namespace Cooker.Azure
 {
     public class ArmKitchenStation : KitchenStation
     {

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Ingredients\Storage\Link.json" />
+      <EmbeddedResource Include="Ingredients\Storage\Storage.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Cooker\Cooker.csproj" />
+    </ItemGroup>
+
+</Project>

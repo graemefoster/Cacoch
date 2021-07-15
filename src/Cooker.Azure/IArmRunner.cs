@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Cooker.Kitchens.Azure
+namespace Cooker.Azure
 {
     public interface IArmRunner
     {

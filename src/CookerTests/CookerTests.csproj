@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Cooker.Azure\Cooker.Azure.csproj" />
       <ProjectReference Include="..\Cooker\Cooker.csproj" />
     </ItemGroup>
 

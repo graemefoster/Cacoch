@@ -6,14 +6,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <EmbeddedResource Include="Kitchens\Azure\Ingredients\Storage\Link.json" />
       <None Remove="Kitchens\Azure\RecipeBuilders\Storage\Storage.json" />
-      <EmbeddedResource Include="Kitchens\Azure\Ingredients\Storage\Storage.json" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Azure.Management.ResourceManager" Version="3.13.1-preview" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Kitchens\Azure" />
     </ItemGroup>
 
 </Project>

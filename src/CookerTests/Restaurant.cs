@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Cooker.Azure;
+using Cooker.Azure.Ingredients.Secrets;
+using Cooker.Azure.Ingredients.Storage;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
-using Cooker.Kitchens.Azure;
 using Shouldly;
 using Xunit;
 
@@ -13,7 +16,7 @@ namespace CookerTests
     public class Restaurant
     {
         [Fact]
-        public async Task can_build_recipe()
+        public async Task can_build_an_order()
         {
             var name = "1234";
 
@@ -42,8 +45,9 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(docket);
 
-            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo-foofoo");
+            ((StorageOutput) meal[storage2]).Name.ShouldBe("one-foofoo-foofoo");
         }
+
         [Fact]
         public async Task can_work_out_dependencies()
         {
@@ -56,7 +60,7 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(docket);
 
-            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo");
+            ((StorageOutput) meal[storage2]).Name.ShouldBe("one-foofoo");
         }
 
         [Fact]
@@ -70,15 +74,19 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(docket);
 
-            ((SecretsOutput)meal[secrets1]).Name.ShouldBe("one");
+            ((SecretsOutput) meal[secrets1]).Name.ShouldBe("one");
         }
 
         private static Cooker.Restaurant BuildTestRestaurant()
         {
             var runner = new FakeArmRunner();
             var restaurant = new Cooker.Restaurant(
-                new Kitchen(new[] {new ArmKitchenStation(runner)}),
-                new CookbookLibrary());
+                new Kitchen(new KitchenStation[] {new ArmKitchenStation(runner)}),
+                new CookbookLibrary(new Dictionary<Type, Func<IIngredient, IIngredientBuilder>>()
+                {
+                    {typeof(Secrets), i => new AzureKeyVaultBuilder((Secrets)i)},
+                    {typeof(Storage), i => new AzureStorageBuilder((Storage)i)},
+                }));
             return restaurant;
         }
 
@@ -123,6 +131,11 @@ namespace CookerTests
         {
             public string Id => "Foo";
             public string DisplayName => "Foo";
+
+            public bool CanCook(IDictionary<IIngredient, ICookedIngredient> edibles)
+            {
+                return true;
+            }
         }
     }
 }

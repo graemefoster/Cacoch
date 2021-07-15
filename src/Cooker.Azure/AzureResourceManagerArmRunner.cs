@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cooker.Kitchens;
 using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Azure.Management.ResourceManager.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace Cooker.Kitchens.Azure
+namespace Cooker.Azure
 {
-    class AzureResourceManagerArmRunner : IArmRunner
+    internal class AzureResourceManagerArmRunner : IArmRunner
     {
         private readonly ILogger<AzureResourceManagerArmRunner> _logger;
         private readonly ResourceManagementClient _resourceClient;

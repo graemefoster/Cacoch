@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Cooker.Ingredients;
+using Cooker.Kitchens;
 
-namespace Cooker.Kitchens.Azure
+namespace Cooker.Azure
 {
     public class ArmRecipe<TOutput> : Recipe<TOutput>, IArmRecipe where TOutput: ICookedIngredient
     {

@@ -1,8 +1,7 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 
-namespace Cooker.Kitchens.Azure
+namespace Cooker.Azure
 {
     public static class ResourceEx
     {

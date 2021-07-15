@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
+using Cooker.Kitchens;
 
-namespace Cooker.Kitchens.Azure.Ingredients.Secrets
+namespace Cooker.Azure.Ingredients.Secrets
 {
     public class AzureKeyVaultBuilder : IIngredientBuilder
     {
@@ -13,15 +14,9 @@ namespace Cooker.Kitchens.Azure.Ingredients.Secrets
 
         public IIngredient Ingredient { get; }
 
-        public bool CanCook(IDictionary<IIngredient, ICookedIngredient> edibles)
-        {
-            return DepedencyHelper.IsSatisfied(Ingredient.DisplayName, edibles, out _);
-        }
 
         public IRecipe CreateRecipe(IDictionary<IIngredient, ICookedIngredient> cooked)
         {
-            DepedencyHelper.IsSatisfied(Ingredient.DisplayName, cooked, out var name);
-
             return new ArmRecipe<IntermediateOutput>(
                     new ArmDefinition(
                         "",
@@ -32,7 +27,7 @@ namespace Cooker.Kitchens.Azure.Ingredients.Secrets
                         new ArmDefinition(
                             "",
                             new Dictionary<string, object>()),
-                        o => new SecretsOutput(name!)));
+                        o => new SecretsOutput(Ingredient.DisplayName)));
         }
 
         private class IntermediateOutput : ICookedIngredient
