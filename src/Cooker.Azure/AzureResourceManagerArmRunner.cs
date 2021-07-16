@@ -46,7 +46,8 @@ namespace Cooker.Azure
                     }))
                 ));
 
-            var deploymentName = $"{resourceGroup}-" + DateTimeOffset.Now.ToString("yyyy-MM-dd-HH-mm-ss");
+            var random = Guid.NewGuid().ToString().Substring(0, 4);
+            var deploymentName = $"{resourceGroup}-" + DateTimeOffset.Now.ToString($"yyyy-MM-dd-HH-mm-ss-{random}");
             var response = await _resourceClient.Deployments.CreateOrUpdateAsync(
                 resourceGroup,
                 deploymentName,

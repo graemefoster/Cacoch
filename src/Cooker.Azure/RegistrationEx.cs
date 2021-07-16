@@ -5,7 +5,6 @@ using Azure.Core;
 using Azure.Identity;
 using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Azure.Ingredients.Storage;
-using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
@@ -33,7 +32,9 @@ namespace Cooker.Azure
                 });
 
             services.AddSingleton<IArmRunner, AzureResourceManagerArmRunner>();
+            services.AddSingleton<ISecretSdk, AzureKeyVaultSecretSdk>();
             services.AddSingleton<KitchenStation, ArmKitchenStation>();
+            services.AddSingleton<KitchenStation, AzureSdkKitchenStation>();
 
             services.AddSingleton(sp => new ResourceManagementClient(new TokenCredentials(
                 tokenCredential.GetToken(new TokenRequestContext(new[]

@@ -6,6 +6,6 @@ namespace Cooker.Azure
 {
     public interface IArmRecipe
     {
-        Task<ICookedIngredient> Execute(Docket docket, IArmRunner armRunner);
+            Task<ICookedIngredient> Execute(Docket docket, IArmRunner armRunner);
     }
 }

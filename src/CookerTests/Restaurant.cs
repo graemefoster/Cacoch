@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.Security.KeyVault.Secrets;
 using Cooker.Azure;
 using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Azure.Ingredients.Storage;
@@ -35,9 +36,11 @@ namespace CookerTests
         [Fact]
         public async Task can_work_out_complex_dependency_chain()
         {
-            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
             var secrets1 = new Secrets("secretsone", "[one.Name]-foofoo");
-            var storage2 = new Storage("two", "[secretsone.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage2 = new Storage("two", "[secretsone.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2, secrets1);
 
@@ -51,8 +54,10 @@ namespace CookerTests
         [Fact]
         public async Task can_work_out_dependencies()
         {
-            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
-            var storage2 = new Storage("two", "[one.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
+            var storage2 = new Storage("two", "[one.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2);
 
@@ -80,8 +85,14 @@ namespace CookerTests
         private static Cooker.Restaurant BuildTestRestaurant()
         {
             var runner = new FakeArmRunner();
+            var secretSdk = new FakeSecretSdk();
+
             var restaurant = new Cooker.Restaurant(
-                new Kitchen(new KitchenStation[] {new ArmKitchenStation(runner)}),
+                new Kitchen(new KitchenStation[]
+                {
+                    new ArmKitchenStation(runner),
+                    new AzureSdkKitchenStation(secretSdk)
+                }),
                 new CookbookLibrary(new Dictionary<Type, Type>
                 {
                     {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
@@ -93,8 +104,10 @@ namespace CookerTests
         [Fact]
         public void throws_on_unknown_dependency_properties()
         {
-            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
-            var storage2 = new Storage("two", "[one.DoesNotExist]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
+            var storage2 = new Storage("two", "[one.DoesNotExist]-foofoo", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2);
 
@@ -106,8 +119,10 @@ namespace CookerTests
         [Fact]
         public void can_detect_dependency_issues()
         {
-            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
-            var storage2 = new Storage("two", "[storage1.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            var storage1 = new Storage("one", "one", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
+            var storage2 = new Storage("two", "[storage1.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(),
+                Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2);
 
@@ -136,6 +151,15 @@ namespace CookerTests
             {
                 return true;
             }
+        }
+    }
+
+    internal class FakeSecretSdk : ISecretSdk
+    {
+        public Task<ICookedIngredient> Execute<TOutput>(Func<SecretClient, TOutput> action)
+            where TOutput : ICookedIngredient
+        {
+            return Task.FromResult((ICookedIngredient) default(TOutput)!);
         }
     }
 }

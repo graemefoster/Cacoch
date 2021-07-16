@@ -4,7 +4,7 @@ namespace Cooker.Kitchens
 {
     public static class RecipeEx
     {
-        public static Recipe<TOutput> Chain<TIntermediate, TOutput>(
+        public static Recipe<TOutput> Then<TIntermediate, TOutput>(
             this Recipe<TIntermediate> initial,
             Func<TIntermediate, Recipe<TOutput>> next)
         {
