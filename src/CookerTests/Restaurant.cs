@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure.Security.KeyVault.Secrets;
+using Cooker;
 using Cooker.Azure;
 using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Azure.Ingredients.Storage;
@@ -97,8 +98,17 @@ namespace CookerTests
                 {
                     {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
                     {typeof(Storage), typeof(AzureStorageBuilder)},
-                }));
+                }),
+                new TestContextBuilder());
             return restaurant;
+        }
+
+        private class TestContextBuilder : IPlatformContextBuilder
+        {
+            public Task<IPlatformContext> Build(Docket docket)
+            {
+                return Task.FromResult((IPlatformContext)new AzurePlatformContext());
+            }
         }
 
         [Fact]

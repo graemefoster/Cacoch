@@ -10,19 +10,24 @@ namespace Cooker
     public class Restaurant
     {
         private readonly CookbookLibrary _cookbookLibrary;
+        private readonly IPlatformContextBuilder _platformContextBuilder;
         private readonly Kitchen _kitchen;
 
         public Restaurant(
             Kitchen kitchen,
-            CookbookLibrary cookbookLibrary)
+            CookbookLibrary cookbookLibrary,
+            IPlatformContextBuilder platformContextBuilder)
         {
             _cookbookLibrary = cookbookLibrary;
+            _platformContextBuilder = platformContextBuilder;
             _kitchen = kitchen;
         }
 
 
         public async Task<Meal> PlaceOrder(Docket docket)
         {
+            var context = await _platformContextBuilder.Build(docket);
+            
             var allRemainingInstructions =
                 docket.LineItems.Select(x => new CookState(
                         _cookbookLibrary.GetCookbookFor(x), x))
@@ -37,7 +42,7 @@ namespace Cooker
                     allRemainingInstructions
                         .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
                         .Select(x => new
-                            {LineItem = x.Ingredient, Instructions = x.Builder.CreateRecipe(cookedRecipes)})
+                            {LineItem = x.Ingredient, Instructions = x.Builder.CreateRecipe(context, cookedRecipes)})
                         .ToDictionary(x => x.LineItem, x => x.Instructions);
 
                 foreach (var intermediateRecipe in intermediateRecipes)

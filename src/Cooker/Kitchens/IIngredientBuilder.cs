@@ -17,8 +17,9 @@ namespace Cooker.Kitchens
         /// <summary>
         /// Create a recipe which will be used to cook the item
         /// </summary>
+        /// <param name="platformContext"></param>
         /// <param name="cooked"></param>
         /// <returns></returns>
-        IRecipe CreateRecipe(IDictionary<IIngredient, ICookedIngredient> cooked);
+        IRecipe CreateRecipe(IPlatformContext platformContext, IDictionary<IIngredient, ICookedIngredient> cooked);
     }
 }
