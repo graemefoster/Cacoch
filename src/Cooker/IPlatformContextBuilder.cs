@@ -3,8 +3,8 @@ using Cooker.Kitchens;
 
 namespace Cooker
 {
-    public interface IPlatformContextBuilder
+    public interface IPlatformContextBuilder<TContext> where TContext: IPlatformContext
     {
-        Task<IPlatformContext> Build(Docket docket);
+        Task<TContext> Build(Docket docket);
     }
 }

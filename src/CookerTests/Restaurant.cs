@@ -83,18 +83,18 @@ namespace CookerTests
             ((SecretsOutput) meal[secrets1]).Name.ShouldBe("one");
         }
 
-        private static Cooker.Restaurant BuildTestRestaurant()
+        private static Restaurant<AzurePlatformContext> BuildTestRestaurant()
         {
             var runner = new FakeArmRunner();
             var secretSdk = new FakeSecretSdk();
 
-            var restaurant = new Cooker.Restaurant(
+            var restaurant = new Restaurant<AzurePlatformContext>(
                 new Kitchen(new KitchenStation[]
                 {
                     new ArmKitchenStation(runner),
                     new AzureSdkKitchenStation(secretSdk)
                 }),
-                new CookbookLibrary(new Dictionary<Type, Type>
+                new CookbookLibrary<AzurePlatformContext>(new Dictionary<Type, Type>
                 {
                     {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
                     {typeof(Storage), typeof(AzureStorageBuilder)},
@@ -103,11 +103,11 @@ namespace CookerTests
             return restaurant;
         }
 
-        private class TestContextBuilder : IPlatformContextBuilder
+        private class TestContextBuilder : IPlatformContextBuilder<AzurePlatformContext>
         {
-            public Task<IPlatformContext> Build(Docket docket)
+            public Task<AzurePlatformContext> Build(Docket docket)
             {
-                return Task.FromResult((IPlatformContext)new AzurePlatformContext());
+                return Task.FromResult(new AzurePlatformContext());
             }
         }
 

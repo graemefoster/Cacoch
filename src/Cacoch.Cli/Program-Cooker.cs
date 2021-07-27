@@ -26,7 +26,7 @@ namespace Cacoch.Cli
 
             using (var _ = host.Services.CreateScope())
             {
-                var restaurant = host.Services.GetRequiredService<Restaurant>();
+                var restaurant = host.Services.GetRequiredService<IRestaurant>();
                 var docket = new Docket("cacochtest",
                     new Storage(
                         "storageone",

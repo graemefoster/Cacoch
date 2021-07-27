@@ -24,7 +24,7 @@ namespace Cooker.Azure
             {
             });
 
-            services.RegisterCooker(
+            services.RegisterCooker<AzurePlatformContext>(
                 new Dictionary<Type, Type>
                 {
                     {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
@@ -35,7 +35,7 @@ namespace Cooker.Azure
             services.AddSingleton<ISecretSdk, AzureKeyVaultSecretSdk>();
             services.AddSingleton<KitchenStation, ArmKitchenStation>();
             services.AddSingleton<KitchenStation, AzureSdkKitchenStation>();
-            services.AddSingleton<IPlatformContextBuilder, AzurePlatformContextBuilder>();
+            services.AddSingleton<IPlatformContextBuilder<AzurePlatformContext>, AzurePlatformContextBuilder>();
 
             services.AddSingleton(sp => new ResourceManagementClient(new TokenCredentials(
                 tokenCredential.GetToken(new TokenRequestContext(new[]

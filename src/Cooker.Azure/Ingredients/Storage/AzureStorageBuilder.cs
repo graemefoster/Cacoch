@@ -5,18 +5,18 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Storage
 {
-    public class AzureStorageBuilder : IIngredientBuilder<Cooker.Ingredients.Storage.Storage>
+    public class AzureStorageBuilder : IIngredientBuilder<AzurePlatformContext>
     {
         public AzureStorageBuilder(Cooker.Ingredients.Storage.Storage ingredient)
         {
             Ingredient = ingredient;
         }
 
-        public Cooker.Ingredients.Storage.Storage Ingredient { get; }
+        private Cooker.Ingredients.Storage.Storage Ingredient { get; }
 
 
         public IRecipe CreateRecipe(
-            IPlatformContext platformContext,
+            AzurePlatformContext platformContext,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
             var armTemplate = typeof(AzureStorageBuilder).GetResourceContents("Storage");

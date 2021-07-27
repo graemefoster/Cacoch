@@ -3,11 +3,11 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure
 {
-    class AzurePlatformContextBuilder : IPlatformContextBuilder
+    class AzurePlatformContextBuilder : IPlatformContextBuilder<AzurePlatformContext>
     {
-        public Task<IPlatformContext> Build(Docket docket)
+        public Task<AzurePlatformContext> Build(Docket docket)
         {
-            return Task.FromResult((IPlatformContext) new AzurePlatformContext());
+            return Task.FromResult(new AzurePlatformContext());
         }
     }
 }

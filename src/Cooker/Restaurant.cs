@@ -7,16 +7,16 @@ using Cooker.Kitchens;
 
 namespace Cooker
 {
-    public class Restaurant
+    public class Restaurant<TContext> : IRestaurant where TContext : IPlatformContext
     {
-        private readonly CookbookLibrary _cookbookLibrary;
-        private readonly IPlatformContextBuilder _platformContextBuilder;
+        private readonly CookbookLibrary<TContext> _cookbookLibrary;
+        private readonly IPlatformContextBuilder<TContext> _platformContextBuilder;
         private readonly Kitchen _kitchen;
 
         public Restaurant(
             Kitchen kitchen,
-            CookbookLibrary cookbookLibrary,
-            IPlatformContextBuilder platformContextBuilder)
+            CookbookLibrary<TContext> cookbookLibrary,
+            IPlatformContextBuilder<TContext> platformContextBuilder)
         {
             _cookbookLibrary = cookbookLibrary;
             _platformContextBuilder = platformContextBuilder;
@@ -27,10 +27,13 @@ namespace Cooker
         public async Task<Meal> PlaceOrder(Docket docket)
         {
             var context = await _platformContextBuilder.Build(docket);
-            
+
             var allRemainingInstructions =
-                docket.LineItems.Select(x => new CookState(
-                        _cookbookLibrary.GetCookbookFor(x), x))
+                docket.LineItems.Select(x => new
+                    {
+                        Cookbook = _cookbookLibrary.GetCookbookFor(x),
+                        Ingredient = x
+                    })
                     .ToList();
 
             var cookedRecipes = new Dictionary<IIngredient, ICookedIngredient>();
@@ -42,7 +45,7 @@ namespace Cooker
                     allRemainingInstructions
                         .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
                         .Select(x => new
-                            {LineItem = x.Ingredient, Instructions = x.Builder.CreateRecipe(context, cookedRecipes)})
+                            {LineItem = x.Ingredient, Instructions = x.Cookbook.CreateRecipe(context, cookedRecipes)})
                         .ToDictionary(x => x.LineItem, x => x.Instructions);
 
                 foreach (var intermediateRecipe in intermediateRecipes)
@@ -73,23 +76,23 @@ namespace Cooker
                         }
                     }
                 }
-                allRemainingInstructions.RemoveAll(rb => recipes.Keys.Contains(rb.Ingredient));
 
+                allRemainingInstructions.RemoveAll(rb => recipes.Keys.Contains(rb.Ingredient));
             }
 
             return new Meal(cookedRecipes);
         }
 
-        private class CookState
-        {
-            public CookState(IIngredientBuilder builder, IIngredient ingredient)
-            {
-                Builder = builder;
-                Ingredient = ingredient;
-            }
-
-            public IIngredientBuilder Builder { get; }
-            public IIngredient Ingredient { get; }
-        }
+        // private class CookState
+        // {
+        //     public CookState(IIngredientBuilder builder, IIngredient ingredient)
+        //     {
+        //         Builder = builder;
+        //         Ingredient = ingredient;
+        //     }
+        //
+        //     public IIngredientBuilder Builder { get; }
+        //     public IIngredient Ingredient { get; }
+        // }
     }
 }

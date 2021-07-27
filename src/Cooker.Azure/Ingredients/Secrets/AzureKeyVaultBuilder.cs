@@ -8,18 +8,18 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Secrets
 {
-    public class AzureKeyVaultBuilder : IIngredientBuilder<Cooker.Ingredients.Secrets.Secrets>
+    public class AzureKeyVaultBuilder : IIngredientBuilder<AzurePlatformContext>
     {
         public AzureKeyVaultBuilder(Cooker.Ingredients.Secrets.Secrets ingredient)
         {
             Ingredient = ingredient;
         }
 
-        public Cooker.Ingredients.Secrets.Secrets Ingredient { get; }
+        private Cooker.Ingredients.Secrets.Secrets Ingredient { get; }
 
 
         public IRecipe CreateRecipe(
-            IPlatformContext platformContext,
+            AzurePlatformContext platformContext,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
             return

@@ -4,7 +4,7 @@ using Cooker.Kitchens;
 
 namespace Cooker.Ingredients
 {
-    public class CookbookLibrary
+    public class CookbookLibrary<TPlatformContext> where TPlatformContext: IPlatformContext
     {
         private readonly IDictionary<Type, Type> _ingredientBuilders;
 
@@ -13,11 +13,11 @@ namespace Cooker.Ingredients
             _ingredientBuilders = ingredientBuilders;
         }
 
-        public IIngredientBuilder GetCookbookFor<T>(T ingredient) where T : IIngredient
+        public IIngredientBuilder<TPlatformContext> GetCookbookFor<T>(T ingredient) where T : IIngredient
         {
             if (_ingredientBuilders.TryGetValue(ingredient.GetType(), out var builderType))
             {
-                return (IIngredientBuilder) Activator.CreateInstance(
+                return (IIngredientBuilder<TPlatformContext>) Activator.CreateInstance(
                     builderType,
                     ingredient)!;
             }
