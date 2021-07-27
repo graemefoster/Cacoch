@@ -18,7 +18,8 @@ namespace Cooker.Azure.Ingredients.Secrets
         public Cooker.Ingredients.Secrets.Secrets Ingredient { get; }
 
 
-        public IRecipe CreateRecipe(IPlatformContext platformContext,
+        public IRecipe CreateRecipe(
+            IPlatformContext platformContext,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
             return

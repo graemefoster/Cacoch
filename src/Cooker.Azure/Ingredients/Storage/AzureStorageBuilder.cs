@@ -15,7 +15,8 @@ namespace Cooker.Azure.Ingredients.Storage
         public Cooker.Ingredients.Storage.Storage Ingredient { get; }
 
 
-        public IRecipe CreateRecipe(IPlatformContext platformContext,
+        public IRecipe CreateRecipe(
+            IPlatformContext platformContext,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
             var armTemplate = typeof(AzureStorageBuilder).GetResourceContents("Storage");

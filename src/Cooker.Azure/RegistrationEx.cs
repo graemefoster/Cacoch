@@ -35,6 +35,7 @@ namespace Cooker.Azure
             services.AddSingleton<ISecretSdk, AzureKeyVaultSecretSdk>();
             services.AddSingleton<KitchenStation, ArmKitchenStation>();
             services.AddSingleton<KitchenStation, AzureSdkKitchenStation>();
+            services.AddSingleton<IPlatformContextBuilder, AzurePlatformContextBuilder>();
 
             services.AddSingleton(sp => new ResourceManagementClient(new TokenCredentials(
                 tokenCredential.GetToken(new TokenRequestContext(new[]
