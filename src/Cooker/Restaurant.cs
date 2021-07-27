@@ -90,7 +90,6 @@ namespace Cooker
 
             public IIngredientBuilder Builder { get; }
             public IIngredient Ingredient { get; }
-            public bool Cooked { get; set; }
         }
     }
 }
