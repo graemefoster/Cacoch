@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using Azure.Core;
 using Azure.Identity;
+using Azure.ResourceManager.Resources;
 using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Azure.Ingredients.Storage;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
-using Microsoft.Azure.Management.ResourceManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Microsoft.Rest;
 
 namespace Cooker.Azure
 {
@@ -20,10 +17,6 @@ namespace Cooker.Azure
         public static void RegisterAzureCooker(
             this IServiceCollection services)
         {
-            var tokenCredential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions()
-            {
-            });
-
             services.RegisterCooker<AzurePlatformContext>(
                 new Dictionary<Type, Type>
                 {
@@ -32,20 +25,14 @@ namespace Cooker.Azure
                 });
 
             services.AddSingleton<IArmRunner, AzureResourceManagerArmRunner>();
-            services.AddSingleton<ISecretSdk, AzureKeyVaultSecretSdk>();
+            services.AddSingleton<IAzureResourcesSdk, AzureResourcesSdk>();
             services.AddSingleton<KitchenStation, ArmKitchenStation>();
             services.AddSingleton<KitchenStation, AzureSdkKitchenStation>();
             services.AddSingleton<IPlatformContextBuilder<AzurePlatformContext>, AzurePlatformContextBuilder>();
 
-            services.AddSingleton(sp => new ResourceManagementClient(new TokenCredentials(
-                tokenCredential.GetToken(new TokenRequestContext(new[]
-                {
-                    "https://management.core.windows.net/.default"
-                }), CancellationToken.None).Token
-            ))
-            {
-                SubscriptionId = sp.GetRequiredService<IOptions<AzureCookerSettings>>().Value.SubscriptionId
-            });
+            services.AddSingleton(sp => new ResourcesManagementClient(
+                sp.GetRequiredService<IOptions<AzureCookerSettings>>().Value.SubscriptionId,
+                new DefaultAzureCredential()));
         }
     }
 }

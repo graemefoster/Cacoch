@@ -7,16 +7,16 @@ namespace Cooker.Azure
 {
     public class AzureSdkKitchenStation : KitchenStation
     {
-        private readonly ISecretSdk _secretSdk;
+        private readonly IAzureResourcesSdk _azureResourcesSdk;
 
-        public AzureSdkKitchenStation(ISecretSdk secretSdk)
+        public AzureSdkKitchenStation(IAzureResourcesSdk azureResourcesSdk)
         {
-            _secretSdk = secretSdk;
+            _azureResourcesSdk = azureResourcesSdk;
         }
         
         public override Task<ICookedIngredient> CookRecipe(Docket docket, IRecipe recipe)
         {
-            return ((ISecretRecipe)recipe).Execute(docket, _secretSdk);
+            return ((ISecretRecipe)recipe).Execute(docket, _azureResourcesSdk);
         }
 
         public override bool CanCook(IRecipe recipe)

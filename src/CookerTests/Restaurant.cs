@@ -86,7 +86,7 @@ namespace CookerTests
         private static Restaurant<AzurePlatformContext> BuildTestRestaurant()
         {
             var runner = new FakeArmRunner();
-            var secretSdk = new FakeSecretSdk();
+            var secretSdk = new FakeAzureResourcesSdk();
 
             var restaurant = new Restaurant<AzurePlatformContext>(
                 new Kitchen(new KitchenStation[]
@@ -164,7 +164,7 @@ namespace CookerTests
         }
     }
 
-    internal class FakeSecretSdk : ISecretSdk
+    internal class FakeAzureResourcesSdk : IAzureResourcesSdk
     {
         public Task<ICookedIngredient> Execute<TOutput>(Func<SecretClient, TOutput> action)
             where TOutput : ICookedIngredient

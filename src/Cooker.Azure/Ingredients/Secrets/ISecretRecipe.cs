@@ -6,6 +6,6 @@ namespace Cooker.Azure.Ingredients.Secrets
 {
     public interface ISecretRecipe
     {
-        Task<ICookedIngredient> Execute(Docket docket, ISecretSdk sdk);
+        Task<ICookedIngredient> Execute(Docket docket, IAzureResourcesSdk sdk);
     }
 }

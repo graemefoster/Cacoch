@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.ResourceManager.Resources;
 using Azure.Security.KeyVault.Secrets;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
@@ -40,14 +41,14 @@ namespace Cooker.Azure.Ingredients.Secrets
 
     public class AzureSecretSdkRecipe<TOutput> : Recipe<TOutput>, ISecretRecipe where TOutput : ICookedIngredient
     {
-        private readonly Func<SecretClient, TOutput> _action;
+        private readonly Func<ResourcesManagementClient, TOutput> _action;
 
-        public AzureSecretSdkRecipe(Func<SecretClient, TOutput> action)
+        public AzureSecretSdkRecipe(Func<ResourcesManagementClient, TOutput> action)
         {
             _action = action;
         }
 
-        public Task<ICookedIngredient> Execute(Docket docket, ISecretSdk sdk)
+        public Task<ICookedIngredient> Execute(Docket docket, IAzureResourcesSdk sdk)
         {
             return sdk.Execute(_action);
         }
