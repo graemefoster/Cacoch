@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.ResourceManager.Resources;
 using Azure.Security.KeyVault.Secrets;
 using Cooker;
 using Cooker.Azure;
@@ -166,7 +167,7 @@ namespace CookerTests
 
     internal class FakeAzureResourcesSdk : IAzureResourcesSdk
     {
-        public Task<ICookedIngredient> Execute<TOutput>(Func<SecretClient, TOutput> action)
+        public Task<ICookedIngredient> Execute<TOutput>(Func<ResourcesManagementClient, TOutput> action)
             where TOutput : ICookedIngredient
         {
             return Task.FromResult((ICookedIngredient) default(TOutput)!);
