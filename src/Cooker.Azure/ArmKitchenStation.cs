@@ -4,7 +4,7 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure
 {
-    public class ArmKitchenStation : KitchenStation
+    public class ArmKitchenStation : KitchenStation<AzurePlatformContext>
     {
         private readonly IArmRunner _armRunner;
 
@@ -12,10 +12,11 @@ namespace Cooker.Azure
         {
             _armRunner = armRunner;
         }
-        
-        public override Task<ICookedIngredient> CookRecipe(Docket docket, IRecipe recipe)
+
+        public override Task<ICookedIngredient> CookRecipe(AzurePlatformContext platformContext, Docket docket,
+            IRecipe recipe)
         {
-            return ((IArmRecipe)recipe).Execute(docket, _armRunner);
+            return ((IArmRecipe) recipe).Execute(platformContext, docket, _armRunner);
         }
 
         public override bool CanCook(IRecipe recipe)

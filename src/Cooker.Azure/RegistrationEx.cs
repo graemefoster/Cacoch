@@ -26,8 +26,8 @@ namespace Cooker.Azure
 
             services.AddSingleton<IArmRunner, AzureResourceManagerArmRunner>();
             services.AddSingleton<IAzureResourcesSdk, AzureResourcesSdk>();
-            services.AddSingleton<KitchenStation, ArmKitchenStation>();
-            services.AddSingleton<KitchenStation, AzureSdkKitchenStation>();
+            services.AddSingleton<KitchenStation<AzurePlatformContext>, ArmKitchenStation>();
+            services.AddSingleton<KitchenStation<AzurePlatformContext>, AzureSdkKitchenStation>();
             services.AddSingleton<IPlatformContextBuilder<AzurePlatformContext>, AzurePlatformContextBuilder>();
 
             services.AddSingleton(sp => new ResourcesManagementClient(

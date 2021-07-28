@@ -4,8 +4,8 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Secrets
 {
-    public interface ISecretRecipe
+    public interface ISecretRecipe<TContext> where TContext: IPlatformContext
     {
-        Task<ICookedIngredient> Execute(Docket docket, IAzureResourcesSdk sdk);
+        Task<ICookedIngredient> Execute(TContext context, Docket docket, IAzureResourcesSdk sdk);
     }
 }

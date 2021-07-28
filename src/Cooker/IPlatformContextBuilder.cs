@@ -5,6 +5,6 @@ namespace Cooker
 {
     public interface IPlatformContextBuilder<TContext> where TContext: IPlatformContext
     {
-        Task<TContext> Build(Docket docket);
+        Task<TContext> Build(Docket docket, PlatformEnvironment platformEnvironment);
     }
 }

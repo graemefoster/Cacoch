@@ -5,7 +5,7 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure
 {
-    public class ArmRecipe<TOutput> : Recipe<TOutput>, IArmRecipe where TOutput: ICookedIngredient
+    public class ArmRecipe<TOutput> : Recipe<AzurePlatformContext, TOutput>, IArmRecipe where TOutput: ICookedIngredient
     {
         private readonly ArmDefinition _arm;
         private readonly Func<object, TOutput> _outputBuilder;
@@ -18,9 +18,9 @@ namespace Cooker.Azure
             _outputBuilder = outputBuilder;
         }
 
-        public async Task<ICookedIngredient> Execute(Docket docket, IArmRunner armRunner)
+        public async Task<ICookedIngredient> Execute(AzurePlatformContext platformContext, Docket docket, IArmRunner armRunner)
         {
-            return _outputBuilder(await _arm.Execute(docket, armRunner));
+            return _outputBuilder(await _arm.Execute(platformContext, docket, armRunner));
         }
     }
 }

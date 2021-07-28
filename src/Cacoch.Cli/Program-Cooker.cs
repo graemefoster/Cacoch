@@ -41,7 +41,7 @@ namespace Cacoch.Cli
                         Array.Empty<string>(),
                         new[] {"my-container-2"}));
 
-                var meal = await restaurant.PlaceOrder(docket);
+                var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
 
                 // await builder!.Deploy(
                 //     new Manifest(

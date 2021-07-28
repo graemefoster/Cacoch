@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Azure.ResourceManager.Resources;
-using Azure.Security.KeyVault.Secrets;
 using Cooker.Ingredients;
 
 namespace Cooker.Azure.Ingredients.Secrets
 {
     public interface IAzureResourcesSdk
     {
-        Task<ICookedIngredient> Execute<TOutput>(Func<ResourcesManagementClient,TOutput> action) where TOutput : ICookedIngredient;
+        Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext, Func<AzurePlatformContext, ResourcesManagementClient,TOutput> action) where TOutput : ICookedIngredient;
     }
 
     class AzureResourcesSdk : IAzureResourcesSdk
@@ -19,9 +18,9 @@ namespace Cooker.Azure.Ingredients.Secrets
         {
             _sdk = sdk;
         }
-        public async Task<ICookedIngredient> Execute<TOutput>(Func<ResourcesManagementClient, TOutput> action) where TOutput : ICookedIngredient
+        public async Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext, Func<AzurePlatformContext, ResourcesManagementClient, TOutput> action) where TOutput : ICookedIngredient
         {
-            return action(_sdk);
+            return action(platformContext, _sdk);
         }
     }
 }

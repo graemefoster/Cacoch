@@ -5,6 +5,6 @@ namespace Cooker
 {
     public interface IRestaurant
     {
-        Task<Meal> PlaceOrder(Docket docket);
+        Task<Meal> PlaceOrder(PlatformEnvironment environment, Docket docket);
     }
 }

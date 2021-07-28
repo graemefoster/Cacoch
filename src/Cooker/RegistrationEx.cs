@@ -13,7 +13,7 @@ namespace Cooker
             Dictionary<Type, Type> cookbooks) where TPlatformContext: IPlatformContext
         {
             services.AddSingleton<IRestaurant, Restaurant<TPlatformContext>>();
-            services.AddSingleton<Kitchen>();
+            services.AddSingleton<Kitchen<TPlatformContext>>();
             services.AddSingleton(new CookbookLibrary<TPlatformContext>(cookbooks));
         }
     }

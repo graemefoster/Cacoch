@@ -5,13 +5,13 @@ using Cooker.Ingredients;
 
 namespace Cooker.Kitchens
 {
-    public class Kitchen
+    public class Kitchen<TContext> where TContext: IPlatformContext
     {
-        private readonly KitchenStation[] _stations;
+        private readonly KitchenStation<TContext>[] _stations;
 
-        public Kitchen(IEnumerable<KitchenStation> stations)
+        public Kitchen(IEnumerable<KitchenStation<TContext>> stations)
         {
-            _stations = stations.Union(new [] { new TwoStepKitchenStation(stations.ToArray())}).ToArray();
+            _stations = stations.Union(new [] { new TwoStepKitchenStation<TContext>(stations.ToArray())}).ToArray();
         }
 
         /// <summary>
@@ -19,6 +19,7 @@ namespace Cooker.Kitchens
         /// to give you an opportunity to take a bit from it
         /// </summary>
         public async Task<Dictionary<IIngredient, ICookedIngredient>> CookNextRecipes(
+            TContext context,
             Docket docket,
             IDictionary<IIngredient, IRecipe> allRecipes)
         {
@@ -27,7 +28,7 @@ namespace Cooker.Kitchens
                     new
                     {
                         Input = x.Key,
-                        Output = _stations.Single(s => s.CanCook(x.Value)).CookRecipe(docket, x.Value)
+                        Output = _stations.Single(s => s.CanCook(x.Value)).CookRecipe(context, docket, x.Value)
                     })
                 .ToArray();
 

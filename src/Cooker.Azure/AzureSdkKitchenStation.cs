@@ -5,7 +5,7 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure
 {
-    public class AzureSdkKitchenStation : KitchenStation
+    public class AzureSdkKitchenStation : KitchenStation<AzurePlatformContext>
     {
         private readonly IAzureResourcesSdk _azureResourcesSdk;
 
@@ -13,15 +13,16 @@ namespace Cooker.Azure
         {
             _azureResourcesSdk = azureResourcesSdk;
         }
-        
-        public override Task<ICookedIngredient> CookRecipe(Docket docket, IRecipe recipe)
+
+        public override Task<ICookedIngredient> CookRecipe(AzurePlatformContext platformContext, Docket docket,
+            IRecipe recipe)
         {
-            return ((ISecretRecipe)recipe).Execute(docket, _azureResourcesSdk);
+            return ((ISecretRecipe<AzurePlatformContext>) recipe).Execute(platformContext, docket, _azureResourcesSdk);
         }
 
         public override bool CanCook(IRecipe recipe)
         {
-            return recipe is ISecretRecipe;
+            return recipe is ISecretRecipe<AzurePlatformContext>;
         }
     }
 }

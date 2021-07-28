@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure.ResourceManager.Resources;
-using Azure.Security.KeyVault.Secrets;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 using Cooker.Kitchens;
@@ -25,12 +24,13 @@ namespace Cooker.Azure.Ingredients.Secrets
         {
             return
                 new AzureSecretSdkRecipe<IntermediateOutput>(
-                        client => new IntermediateOutput())
-                    .Then(i => new ArmRecipe<SecretsOutput>(
-                        new ArmDefinition(
-                            "",
-                            new Dictionary<string, object>()),
-                        o => new SecretsOutput(Ingredient.DisplayName))
+                        (_, _) => new IntermediateOutput())
+                    .Then(i =>
+                        new ArmRecipe<SecretsOutput>(
+                            new ArmDefinition(
+                                "",
+                                new Dictionary<string, object>()),
+                            o => new SecretsOutput(Ingredient.DisplayName))
                     );
         }
 
@@ -39,18 +39,20 @@ namespace Cooker.Azure.Ingredients.Secrets
         }
     }
 
-    public class AzureSecretSdkRecipe<TOutput> : Recipe<TOutput>, ISecretRecipe where TOutput : ICookedIngredient
+    public class AzureSecretSdkRecipe<TOutput> : Recipe<AzurePlatformContext, TOutput>,
+        ISecretRecipe<AzurePlatformContext>
+        where TOutput : ICookedIngredient
     {
-        private readonly Func<ResourcesManagementClient, TOutput> _action;
+        private readonly Func<AzurePlatformContext, ResourcesManagementClient, TOutput> _action;
 
-        public AzureSecretSdkRecipe(Func<ResourcesManagementClient, TOutput> action)
+        public AzureSecretSdkRecipe(Func<AzurePlatformContext, ResourcesManagementClient, TOutput> action)
         {
             _action = action;
         }
 
-        public Task<ICookedIngredient> Execute(Docket docket, IAzureResourcesSdk sdk)
+        public Task<ICookedIngredient> Execute(AzurePlatformContext context, Docket docket, IAzureResourcesSdk sdk)
         {
-            return sdk.Execute(_action);
+            return sdk.Execute(context, _action);
         }
     }
 }

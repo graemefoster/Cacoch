@@ -15,9 +15,9 @@ namespace Cooker.Azure
             _parameters = parameters;
         }
 
-        public Task<object> Execute(Docket docket, IArmRunner armRunner)
+        public Task<object> Execute(AzurePlatformContext azurePlatformContext, Docket docket, IArmRunner armRunner)
         {
-            return armRunner.Execute(docket.TableName, _template, _parameters);
+            return armRunner.Execute(azurePlatformContext.ResourceGroupName, _template, _parameters);
         }
     }
 }

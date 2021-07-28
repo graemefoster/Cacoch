@@ -5,9 +5,9 @@ namespace Cooker.Azure
 {
     class AzurePlatformContextBuilder : IPlatformContextBuilder<AzurePlatformContext>
     {
-        public Task<AzurePlatformContext> Build(Docket docket)
+        public Task<AzurePlatformContext> Build(Docket docket, PlatformEnvironment platformEnvironment)
         {
-            return Task.FromResult(new AzurePlatformContext());
+            return Task.FromResult(new AzurePlatformContext(docket, platformEnvironment));
         }
     }
 }

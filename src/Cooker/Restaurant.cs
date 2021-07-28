@@ -11,13 +11,13 @@ namespace Cooker
     {
         private readonly CookbookLibrary<TContext> _cookbookLibrary;
         private readonly IPlatformContextBuilder<TContext> _platformContextBuilder;
-        private readonly Kitchen _kitchen;
+        private readonly Kitchen<TContext> _kitchen;
         
         private record IngredientAndCookbook(IIngredient Ingredient, IRecipeBuilder<TContext> Cookbook);
         private record IngredientAndRecipe(IIngredient Ingredient, IRecipe Recipe);
 
         public Restaurant(
-            Kitchen kitchen,
+            Kitchen<TContext> kitchen,
             CookbookLibrary<TContext> cookbookLibrary,
             IPlatformContextBuilder<TContext> platformContextBuilder)
         {
@@ -27,9 +27,9 @@ namespace Cooker
         }
 
 
-        public async Task<Meal> PlaceOrder(Docket docket)
+        public async Task<Meal> PlaceOrder(PlatformEnvironment platformEnvironment, Docket docket)
         {
-            var context = await _platformContextBuilder.Build(docket);
+            var context = await _platformContextBuilder.Build(docket, platformEnvironment);
 
             var allRemainingInstructions =
                 docket.LineItems.Select(x => new IngredientAndCookbook(x, _cookbookLibrary.GetCookbookFor(x)))
@@ -53,7 +53,7 @@ namespace Cooker
                         "Remaining recipes but not can be built. Suspected dependency issue");
                 }
 
-                var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(docket, recipesReadyForCooking));
+                var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(context, docket, recipesReadyForCooking));
 
                 twoStageReceipesBeingCooked = new List<IngredientAndRecipe>();
                 foreach (var batch in cooked)

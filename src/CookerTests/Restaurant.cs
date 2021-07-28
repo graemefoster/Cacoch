@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure.ResourceManager.Resources;
-using Azure.Security.KeyVault.Secrets;
 using Cooker;
 using Cooker.Azure;
 using Cooker.Azure.Ingredients.Secrets;
@@ -28,10 +27,15 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant();
 
-            var meal = await restaurant.PlaceOrder(docket);
+            var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
             var edible = (StorageOutput) meal[storage];
 
             edible.Name.ShouldBe(name);
+        }
+
+        private static PlatformEnvironment GetTestEnvironment()
+        {
+            return new PlatformEnvironment("dev", "Development");
         }
 
 
@@ -48,7 +52,7 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant();
 
-            var meal = await restaurant.PlaceOrder(docket);
+            var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
             ((StorageOutput) meal[storage2]).Name.ShouldBe("one-foofoo-foofoo");
         }
@@ -65,7 +69,7 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant();
 
-            var meal = await restaurant.PlaceOrder(docket);
+            var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
             ((StorageOutput) meal[storage2]).Name.ShouldBe("one-foofoo");
         }
@@ -79,7 +83,7 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant();
 
-            var meal = await restaurant.PlaceOrder(docket);
+            var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
             ((SecretsOutput) meal[secrets1]).Name.ShouldBe("one");
         }
@@ -90,11 +94,12 @@ namespace CookerTests
             var secretSdk = new FakeAzureResourcesSdk();
 
             var restaurant = new Restaurant<AzurePlatformContext>(
-                new Kitchen(new KitchenStation[]
-                {
-                    new ArmKitchenStation(runner),
-                    new AzureSdkKitchenStation(secretSdk)
-                }),
+                new Kitchen<AzurePlatformContext>(
+                    new KitchenStation<AzurePlatformContext>[]
+                    {
+                        new ArmKitchenStation(runner),
+                        new AzureSdkKitchenStation(secretSdk)
+                    }),
                 new CookbookLibrary<AzurePlatformContext>(new Dictionary<Type, Type>
                 {
                     {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
@@ -106,9 +111,9 @@ namespace CookerTests
 
         private class TestContextBuilder : IPlatformContextBuilder<AzurePlatformContext>
         {
-            public Task<AzurePlatformContext> Build(Docket docket)
+            public Task<AzurePlatformContext> Build(Docket docket, PlatformEnvironment platformEnvironment)
             {
-                return Task.FromResult(new AzurePlatformContext());
+                return Task.FromResult(new AzurePlatformContext(docket, platformEnvironment));
             }
         }
 
@@ -124,7 +129,7 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant();
 
-            Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(docket));
+            Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(GetTestEnvironment(), docket));
         }
 
         [Fact]
@@ -139,7 +144,7 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant();
 
-            Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(docket));
+            Should.Throw<InvalidOperationException>(async () => await restaurant.PlaceOrder(GetTestEnvironment(), docket));
         }
 
         [Fact]
@@ -150,7 +155,7 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant();
 
-            Should.Throw<NotSupportedException>(async () => await restaurant.PlaceOrder(docket));
+            Should.Throw<NotSupportedException>(async () => await restaurant.PlaceOrder(GetTestEnvironment(), docket));
         }
 
         class UnknownItem : IIngredient
@@ -167,8 +172,7 @@ namespace CookerTests
 
     internal class FakeAzureResourcesSdk : IAzureResourcesSdk
     {
-        public Task<ICookedIngredient> Execute<TOutput>(Func<ResourcesManagementClient, TOutput> action)
-            where TOutput : ICookedIngredient
+        public Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext, Func<AzurePlatformContext, ResourcesManagementClient, TOutput> action) where TOutput : ICookedIngredient
         {
             return Task.FromResult((ICookedIngredient) default(TOutput)!);
         }
