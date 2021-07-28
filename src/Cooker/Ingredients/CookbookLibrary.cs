@@ -13,11 +13,11 @@ namespace Cooker.Ingredients
             _ingredientBuilders = ingredientBuilders;
         }
 
-        public IIngredientBuilder<TPlatformContext> GetCookbookFor<T>(T ingredient) where T : IIngredient
+        public IRecipeBuilder<TPlatformContext> GetCookbookFor<T>(T ingredient) where T : IIngredient
         {
             if (_ingredientBuilders.TryGetValue(ingredient.GetType(), out var builderType))
             {
-                return (IIngredientBuilder<TPlatformContext>) Activator.CreateInstance(
+                return (IRecipeBuilder<TPlatformContext>) Activator.CreateInstance(
                     builderType,
                     ingredient)!;
             }

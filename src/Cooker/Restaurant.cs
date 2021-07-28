@@ -12,6 +12,9 @@ namespace Cooker
         private readonly CookbookLibrary<TContext> _cookbookLibrary;
         private readonly IPlatformContextBuilder<TContext> _platformContextBuilder;
         private readonly Kitchen _kitchen;
+        
+        private record IngredientAndCookbook(IIngredient Ingredient, IRecipeBuilder<TContext> Cookbook);
+        private record IngredientAndRecipe(IIngredient Ingredient, IRecipe Recipe);
 
         public Restaurant(
             Kitchen kitchen,
@@ -29,46 +32,37 @@ namespace Cooker
             var context = await _platformContextBuilder.Build(docket);
 
             var allRemainingInstructions =
-                docket.LineItems.Select(x => new
-                    {
-                        Cookbook = _cookbookLibrary.GetCookbookFor(x),
-                        Ingredient = x
-                    })
+                docket.LineItems.Select(x => new IngredientAndCookbook(x, _cookbookLibrary.GetCookbookFor(x)))
                     .ToList();
 
             var cookedRecipes = new Dictionary<IIngredient, ICookedIngredient>();
-            var intermediateRecipes = new Dictionary<IIngredient, IRecipe>();
+            var twoStageReceipesBeingCooked = new List<IngredientAndRecipe>();
 
-            while (allRemainingInstructions.Any() || intermediateRecipes.Any())
+            while (allRemainingInstructions.Any() || twoStageReceipesBeingCooked.Any())
             {
-                var recipes =
-                    allRemainingInstructions
-                        .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
-                        .Select(x => new
-                            {LineItem = x.Ingredient, Instructions = x.Cookbook.CreateRecipe(context, cookedRecipes)})
-                        .ToDictionary(x => x.LineItem, x => x.Instructions);
+                var recipesReadyForCooking = CreateRecipesThatAreReadyForCooking(allRemainingInstructions, cookedRecipes, context);
 
-                foreach (var intermediateRecipe in intermediateRecipes)
+                foreach (var intermediateRecipe in twoStageReceipesBeingCooked)
                 {
-                    recipes.Add(intermediateRecipe.Key, intermediateRecipe.Value);
+                    recipesReadyForCooking.Add(intermediateRecipe.Ingredient, intermediateRecipe.Recipe);
                 }
 
-                if (!recipes.Any())
+                if (!recipesReadyForCooking.Any())
                 {
                     throw new InvalidOperationException(
                         "Remaining recipes but not can be built. Suspected dependency issue");
                 }
 
-                var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(docket, recipes));
+                var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(docket, recipesReadyForCooking));
 
-                intermediateRecipes = new Dictionary<IIngredient, IRecipe>();
+                twoStageReceipesBeingCooked = new List<IngredientAndRecipe>();
                 foreach (var batch in cooked)
                 {
                     foreach (var edibleItem in batch)
                     {
                         if (edibleItem.Value is IRecipe edibleRecipe)
                         {
-                            intermediateRecipes.Add(edibleItem.Key, edibleRecipe);
+                            twoStageReceipesBeingCooked.Add(new IngredientAndRecipe(edibleItem.Key, edibleRecipe));
                         }
                         else
                         {
@@ -77,22 +71,21 @@ namespace Cooker
                     }
                 }
 
-                allRemainingInstructions.RemoveAll(rb => recipes.Keys.Contains(rb.Ingredient));
+                allRemainingInstructions.RemoveAll(rb => recipesReadyForCooking.Keys.Contains(rb.Ingredient));
             }
 
             return new Meal(cookedRecipes);
         }
 
-        // private class CookState
-        // {
-        //     public CookState(IIngredientBuilder builder, IIngredient ingredient)
-        //     {
-        //         Builder = builder;
-        //         Ingredient = ingredient;
-        //     }
-        //
-        //     public IIngredientBuilder Builder { get; }
-        //     public IIngredient Ingredient { get; }
-        // }
+        private static Dictionary<IIngredient, IRecipe> CreateRecipesThatAreReadyForCooking(
+            List<IngredientAndCookbook> allRemainingInstructions, 
+            Dictionary<IIngredient, ICookedIngredient> cookedRecipes, 
+            TContext context)
+        {
+            return allRemainingInstructions
+                .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
+                .Select(x => new IngredientAndRecipe(x.Ingredient, x.Cookbook.CreateRecipe(context, cookedRecipes)))
+                .ToDictionary(x => x.Ingredient, x => x.Recipe);
+        }
     }
 }

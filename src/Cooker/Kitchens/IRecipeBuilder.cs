@@ -12,7 +12,7 @@ namespace Cooker.Kitchens
     //     T Ingredient { get; }
     // }
 
-    public interface IIngredientBuilder<TContext>
+    public interface IRecipeBuilder<TContext>
         where TContext : IPlatformContext
     {
         /// <summary>

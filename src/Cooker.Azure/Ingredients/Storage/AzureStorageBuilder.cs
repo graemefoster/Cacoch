@@ -5,7 +5,7 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Storage
 {
-    public class AzureStorageBuilder : IIngredientBuilder<AzurePlatformContext>
+    public class AzureStorageBuilder : IRecipeBuilder<AzurePlatformContext>
     {
         public AzureStorageBuilder(Cooker.Ingredients.Storage.Storage ingredient)
         {

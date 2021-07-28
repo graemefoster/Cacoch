@@ -9,7 +9,7 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Secrets
 {
-    public class AzureKeyVaultBuilder : IIngredientBuilder<AzurePlatformContext>
+    public class AzureKeyVaultBuilder : IRecipeBuilder<AzurePlatformContext>
     {
         public AzureKeyVaultBuilder(Cooker.Ingredients.Secrets.Secrets ingredient)
         {
