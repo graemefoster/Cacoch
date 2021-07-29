@@ -12,8 +12,9 @@ namespace Cooker
         private readonly CookbookLibrary<TContext> _cookbookLibrary;
         private readonly IPlatformContextBuilder<TContext> _platformContextBuilder;
         private readonly Kitchen<TContext> _kitchen;
-        
+
         private record IngredientAndCookbook(IIngredient Ingredient, IRecipeBuilder<TContext> Cookbook);
+
         private record IngredientAndRecipe(IIngredient Ingredient, IRecipe Recipe);
 
         public Restaurant(
@@ -32,7 +33,9 @@ namespace Cooker
             var context = await _platformContextBuilder.Build(docket, platformEnvironment);
 
             var allRemainingInstructions =
-                docket.LineItems.Select(x => new IngredientAndCookbook(x, _cookbookLibrary.GetCookbookFor(x)))
+                docket.LineItems
+                    .Select(x => x.BuildIngredient())
+                    .Select(x => new IngredientAndCookbook(x, _cookbookLibrary.GetCookbookFor(x)))
                     .ToList();
 
             var cookedRecipes = new Dictionary<IIngredient, ICookedIngredient>();
@@ -40,7 +43,8 @@ namespace Cooker
 
             while (allRemainingInstructions.Any() || twoStageReceipesBeingCooked.Any())
             {
-                var recipesReadyForCooking = CreateRecipesThatAreReadyForCooking(allRemainingInstructions, cookedRecipes, context);
+                var recipesReadyForCooking =
+                    CreateRecipesThatAreReadyForCooking(allRemainingInstructions, cookedRecipes, context);
 
                 foreach (var intermediateRecipe in twoStageReceipesBeingCooked)
                 {
@@ -74,12 +78,12 @@ namespace Cooker
                 allRemainingInstructions.RemoveAll(rb => recipesReadyForCooking.Keys.Contains(rb.Ingredient));
             }
 
-            return new Meal(cookedRecipes);
+            return new Meal(cookedRecipes.ToDictionary(x => x.Key.OriginalIngredientData, x => x.Value));
         }
 
         private static Dictionary<IIngredient, IRecipe> CreateRecipesThatAreReadyForCooking(
-            List<IngredientAndCookbook> allRemainingInstructions, 
-            Dictionary<IIngredient, ICookedIngredient> cookedRecipes, 
+            List<IngredientAndCookbook> allRemainingInstructions,
+            Dictionary<IIngredient, ICookedIngredient> cookedRecipes,
             TContext context)
         {
             return allRemainingInstructions

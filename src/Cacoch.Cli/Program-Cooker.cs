@@ -28,13 +28,13 @@ namespace Cacoch.Cli
             {
                 var restaurant = host.Services.GetRequiredService<IRestaurant>();
                 var docket = new Docket("cacochtest",
-                    new Storage(
+                    new StorageData(
                         "storageone",
                         "Storage One",
                         Array.Empty<string>(),
                         Array.Empty<string>(),
                         new[] {"my-container"}),
-                    new Storage(
+                    new StorageData(
                         "storagetwo",
                         "Storage Two",
                         Array.Empty<string>(),

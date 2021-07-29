@@ -5,9 +5,9 @@ namespace Cooker.Kitchens
     public class Docket
     {
         public string TableName { get; }
-        public IIngredient[] LineItems { get; }
+        public IngredientData[] LineItems { get; }
 
-        public Docket(string tableName, params IIngredient[] lineItems)
+        public Docket(string tableName, params IngredientData[] lineItems)
         {
             TableName = tableName;
             LineItems = lineItems;

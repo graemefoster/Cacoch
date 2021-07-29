@@ -4,6 +4,7 @@ namespace Cooker.Ingredients
 {
     public interface IIngredient
     {
+        IngredientData OriginalIngredientData { get; }
         string Id { get; }
         string DisplayName { get; }
 

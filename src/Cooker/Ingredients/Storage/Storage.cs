@@ -2,18 +2,26 @@
 
 namespace Cooker.Ingredients.Storage
 {
+    public record StorageData(
+        string Id,
+        string DisplayName,
+        string[] Tables,
+        string[] Queues,
+        string[] Containers) : IngredientData(Id, DisplayName)
+    {
+        public override IIngredient BuildIngredient()
+        {
+            return new Storage(this);
+        }
+    }
+
     public class Storage : Ingredient
     {
-        public Storage(
-            string id,
-            string displayName,
-            string[] tables,
-            string[] queues,
-            string[] containers) : base(id, displayName)
+        internal Storage(StorageData data) : base(data)
         {
-            Tables = tables;
-            Queues = queues;
-            Containers = containers;
+            Tables = data.Tables;
+            Queues = data.Queues;
+            Containers = data.Containers;
         }
 
         public string[] Tables { get; }

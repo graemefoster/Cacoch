@@ -2,12 +2,19 @@
 
 namespace Cooker.Ingredients.Secrets
 {
+    public record SecretsData(string Id, string Name) : IngredientData(Id, Name)
+    {
+        public override IIngredient BuildIngredient()
+        {
+            return new Secrets(this);
+        }
+    }
+    
     public class Secrets : Ingredient
     {
-        public Secrets(string id, string displayName) : base(id, displayName)
+        internal Secrets(SecretsData secretsData) : base(secretsData)
         {
         }
-
 
         public override bool PrepareForCook(IDictionary<IIngredient, ICookedIngredient> edibles)
         {
