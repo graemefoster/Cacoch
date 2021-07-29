@@ -104,8 +104,8 @@ namespace CookerTests
                     }),
                 new CookbookLibrary<AzurePlatformContext>(new Dictionary<Type, Type>
                 {
-                    {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
-                    {typeof(Storage), typeof(AzureStorageBuilder)},
+                    {typeof(SecretsIngredient), typeof(AzureKeyVaultBuilder)},
+                    {typeof(StorageIngredient), typeof(AzureStorageBuilder)},
                 }),
                 new TestContextBuilder());
             return restaurant;

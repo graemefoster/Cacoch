@@ -20,8 +20,8 @@ namespace Cooker.Azure
             services.RegisterCooker<AzurePlatformContext>(
                 new Dictionary<Type, Type>
                 {
-                    {typeof(Secrets), typeof(AzureKeyVaultBuilder)},
-                    {typeof(Storage), typeof(AzureStorageBuilder)},
+                    {typeof(SecretsIngredient), typeof(AzureKeyVaultBuilder)},
+                    {typeof(StorageIngredient), typeof(AzureStorageBuilder)},
                 });
 
             services.AddSingleton<IArmRunner, AzureResourceManagerArmRunner>();

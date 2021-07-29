@@ -2,9 +2,9 @@
 
 namespace Cooker.Ingredients.Secrets
 {
-    public class Secrets : Ingredient
+    public class SecretsIngredient : Ingredient
     {
-        internal Secrets(SecretsData secretsData) : base(secretsData)
+        internal SecretsIngredient(SecretsData secretsData) : base(secretsData)
         {
         }
 

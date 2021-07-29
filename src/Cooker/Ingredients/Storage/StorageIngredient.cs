@@ -2,9 +2,9 @@
 
 namespace Cooker.Ingredients.Storage
 {
-    public class Storage : Ingredient
+    public class StorageIngredient : Ingredient
     {
-        internal Storage(StorageData data) : base(data)
+        internal StorageIngredient(StorageData data) : base(data)
         {
             Tables = data.Tables;
             Queues = data.Queues;

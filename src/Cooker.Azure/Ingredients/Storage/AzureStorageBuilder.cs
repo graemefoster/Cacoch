@@ -7,12 +7,12 @@ namespace Cooker.Azure.Ingredients.Storage
 {
     public class AzureStorageBuilder : IRecipeBuilder<AzurePlatformContext>
     {
-        public AzureStorageBuilder(Cooker.Ingredients.Storage.Storage ingredient)
+        public AzureStorageBuilder(Cooker.Ingredients.Storage.StorageIngredient ingredient)
         {
             Ingredient = ingredient;
         }
 
-        private Cooker.Ingredients.Storage.Storage Ingredient { get; }
+        private Cooker.Ingredients.Storage.StorageIngredient Ingredient { get; }
 
 
         public IRecipe CreateRecipe(

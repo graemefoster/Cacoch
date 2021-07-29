@@ -10,12 +10,12 @@ namespace Cooker.Azure.Ingredients.Secrets
 {
     public class AzureKeyVaultBuilder : IRecipeBuilder<AzurePlatformContext>
     {
-        public AzureKeyVaultBuilder(Cooker.Ingredients.Secrets.Secrets ingredient)
+        public AzureKeyVaultBuilder(Cooker.Ingredients.Secrets.SecretsIngredient ingredient)
         {
             Ingredient = ingredient;
         }
 
-        private Cooker.Ingredients.Secrets.Secrets Ingredient { get; }
+        private Cooker.Ingredients.Secrets.SecretsIngredient Ingredient { get; }
 
 
         public IRecipe CreateRecipe(
