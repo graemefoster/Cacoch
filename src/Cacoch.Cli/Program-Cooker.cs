@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Configuration;
 using System.Threading.Tasks;
 using Cooker;
 using Cooker.Azure;
+using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +19,7 @@ namespace Cacoch.Cli
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hb, svc) =>
                 {
-                    svc.RegisterAzureCooker();
-                    svc.Configure<AzureCookerSettings>(hb.Configuration.GetSection("Cacoch"));
+                    svc.RegisterAzureCooker(hb.Configuration);
                 })
                 .ConfigureLogging(lb => lb.AddSerilog()).Build();
 
@@ -34,12 +35,10 @@ namespace Cacoch.Cli
                         Array.Empty<string>(),
                         Array.Empty<string>(),
                         new[] {"my-container"}),
-                    new StorageData(
-                        "storagetwo",
-                        "Storage Two",
-                        Array.Empty<string>(),
-                        Array.Empty<string>(),
-                        new[] {"my-container-2"}));
+                    new SecretsData(
+                        "grfsecretone1",
+                        "grfsecretone1",
+                        new[] {"secret-one"}));
 
                 var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
 

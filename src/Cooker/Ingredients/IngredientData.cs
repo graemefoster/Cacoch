@@ -1,4 +1,5 @@
-﻿namespace Cooker.Ingredients
+﻿
+namespace Cooker.Ingredients
 {
     public abstract record IngredientData(string Id, string DisplayName)
     {

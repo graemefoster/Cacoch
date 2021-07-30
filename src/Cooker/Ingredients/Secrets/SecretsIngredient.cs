@@ -6,7 +6,10 @@ namespace Cooker.Ingredients.Secrets
     {
         internal SecretsIngredient(SecretsData secretsData) : base(secretsData)
         {
+            RequiredSecrets = secretsData.Secrets;
         }
+
+        public string[] RequiredSecrets { get; }
 
         public override bool PrepareForCook(IDictionary<IIngredient, ICookedIngredient> edibles)
         {

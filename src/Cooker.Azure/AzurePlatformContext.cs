@@ -7,17 +7,24 @@ namespace Cooker.Azure
 {
     public class AzurePlatformContext : IPlatformContext
     {
-        private readonly string _randomness;
+        private readonly AzureCookerSettings _settings;
 
-        public AzurePlatformContext(Docket docket, PlatformEnvironment environment)
+        public AzurePlatformContext(
+            Docket docket,
+            AzureCookerSettings settings,
+            PlatformEnvironment environment)
         {
-            _randomness = Convert.ToBase64String(SHA512
+            _settings = settings;
+            
+            Randomness = Convert.ToBase64String(SHA512
                 .Create()
                 .ComputeHash(Encoding.UTF8.GetBytes(docket.TableName)))[..5];
 
             ResourceGroupName = string.Format($"{docket.TableName}-{environment.Slug}");
         }
-        
+
         public string ResourceGroupName { get; }
+        public string Randomness { get; }
+        public string DeploymentPrincipalId => _settings.DeploymentPrincipalId;
     }
 }

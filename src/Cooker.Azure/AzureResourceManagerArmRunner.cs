@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Resources.Models;
 using Cooker.Kitchens;
 using Microsoft.Extensions.Logging;
@@ -13,17 +12,17 @@ namespace Cooker.Azure
     internal class AzureResourceManagerArmRunner : IArmRunner
     {
         private readonly ILogger<AzureResourceManagerArmRunner> _logger;
-        private readonly ResourcesManagementClient _resourceClient;
+        private readonly IAzureSdkProvider _resourceClient;
 
         public AzureResourceManagerArmRunner(
-            ResourcesManagementClient resourceClient,
+            IAzureSdkProvider resourceClient,
             ILogger<AzureResourceManagerArmRunner> logger)
         {
             _logger = logger;
             _resourceClient = resourceClient;
         }
 
-        public async Task<object> Execute(string resourceGroup, string template, Dictionary<string, object> parameters)
+        public async Task<object> Execute(string resourceGroup, string friendlyName, string template, Dictionary<string, object> parameters)
         {
             var deployment = new Deployment(
                 new DeploymentProperties(DeploymentMode.Incremental)
@@ -48,16 +47,17 @@ namespace Cooker.Azure
                 }
             );
 
-            var random = Guid.NewGuid().ToString().Substring(0, 4);
-            var deploymentName = $"{resourceGroup}-" + DateTimeOffset.Now.ToString($"yyyy-MM-dd-HH-mm-ss-{random}");
-            var deploymentTask = await _resourceClient.Deployments.StartCreateOrUpdateAsync(
+            var deploymentName = $"{resourceGroup}-{friendlyName}-{DateTimeOffset.Now.ToString($"yyyy-MM-dd-HH-mm-ss")}";
+            var resourceClient = _resourceClient.GetResourcesManagementClient();
+
+            _logger.LogDebug("Beginning ARM deployment {DeploymentName}", deploymentName);
+            var deploymentTask = await resourceClient.Deployments.StartCreateOrUpdateAsync(
                 resourceGroup,
                 deploymentName,
                 deployment).ConfigureAwait(false);
 
-            var response = await deploymentTask.WaitForCompletionResponseAsync();
-            _logger.LogDebug("Finished deployment {DeploymentName}", deploymentName);
-
+            await deploymentTask.WaitForCompletionResponseAsync();
+            _logger.LogDebug("Finished ARM deployment {DeploymentName}", deploymentName);
             return deploymentTask.Value.Properties.Outputs;
         }
     }

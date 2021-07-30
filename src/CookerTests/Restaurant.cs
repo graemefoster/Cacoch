@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Azure.ResourceManager.Resources;
 using Cooker;
 using Cooker.Azure;
 using Cooker.Azure.Ingredients.Secrets;
@@ -26,7 +25,7 @@ namespace CookerTests
                 Array.Empty<string>());
             var docket = new Docket("Docket", storage);
 
-            var restaurant = BuildTestRestaurant();
+            var restaurant = BuildTestRestaurant(out _);
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
             var edible = (StorageOutput) meal[storage];
@@ -45,14 +44,16 @@ namespace CookerTests
         {
             var storage1 = new StorageData("one", "one", Array.Empty<string>(), Array.Empty<string>(),
                 Array.Empty<string>());
-            var secrets1 = new SecretsData("secretsone", "[one.Name]-foofoo");
+            var secrets1 = new SecretsData("secretsone", "[one.Name]-foofoo", new[] {"secret-one"});
             var storage2 = new StorageData("two", "[secretsone.Name]-foofoo", Array.Empty<string>(),
                 Array.Empty<string>(),
                 Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2, secrets1);
 
-            var restaurant = BuildTestRestaurant();
+            var restaurant = BuildTestRestaurant(out var sdk);
+
+            sdk.Seed(new AzureKeyVaultBuilder.ExistingSecretsOutput(Array.Empty<string>()));
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
@@ -69,7 +70,7 @@ namespace CookerTests
 
             var docket = new Docket("Docket", storage1, storage2);
 
-            var restaurant = BuildTestRestaurant();
+            var restaurant = BuildTestRestaurant(out _);
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
@@ -79,28 +80,29 @@ namespace CookerTests
         [Fact]
         public async Task can_have_multi_steps()
         {
-            var secrets1 = new SecretsData("one", "one");
+            var secrets1 = new SecretsData("one", "one", new[] {"secret-one"});
 
             var docket = new Docket("Docket", secrets1);
 
-            var restaurant = BuildTestRestaurant();
+            var restaurant = BuildTestRestaurant(out var sdk);
+            sdk.Seed(new AzureKeyVaultBuilder.ExistingSecretsOutput(Array.Empty<string>()));
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
             ((SecretsOutput) meal[secrets1]).Name.ShouldBe("one");
         }
 
-        private static Restaurant<AzurePlatformContext> BuildTestRestaurant()
+        private static Restaurant<AzurePlatformContext> BuildTestRestaurant(out FakeAzureResourcesSdk sdk)
         {
             var runner = new FakeArmRunner();
-            var secretSdk = new FakeAzureResourcesSdk();
+            sdk = new FakeAzureResourcesSdk();
 
             var restaurant = new Restaurant<AzurePlatformContext>(
                 new Kitchen<AzurePlatformContext>(
                     new KitchenStation<AzurePlatformContext>[]
                     {
                         new ArmKitchenStation(runner),
-                        new AzureSdkKitchenStation(secretSdk)
+                        new AzureSdkKitchenStation(sdk)
                     }),
                 new CookbookLibrary<AzurePlatformContext>(new Dictionary<Type, Type>
                 {
@@ -108,6 +110,7 @@ namespace CookerTests
                     {typeof(StorageIngredient), typeof(AzureStorageBuilder)},
                 }),
                 new TestContextBuilder());
+            
             return restaurant;
         }
 
@@ -115,7 +118,11 @@ namespace CookerTests
         {
             public Task<AzurePlatformContext> Build(Docket docket, PlatformEnvironment platformEnvironment)
             {
-                return Task.FromResult(new AzurePlatformContext(docket, platformEnvironment));
+                return Task.FromResult(
+                    new AzurePlatformContext(
+                        docket,
+                        new AzureCookerSettings(),
+                        platformEnvironment));
             }
         }
 
@@ -130,7 +137,7 @@ namespace CookerTests
 
             var docket = new Docket("Docket", storage1, storage2);
 
-            var restaurant = BuildTestRestaurant();
+            var restaurant = BuildTestRestaurant(out _);
 
             Should.Throw<InvalidOperationException>(async () =>
                 await restaurant.PlaceOrder(GetTestEnvironment(), docket));
@@ -147,7 +154,7 @@ namespace CookerTests
 
             var docket = new Docket("Docket", storage1, storage2);
 
-            var restaurant = BuildTestRestaurant();
+            var restaurant = BuildTestRestaurant(out _);
 
             Should.Throw<InvalidOperationException>(async () =>
                 await restaurant.PlaceOrder(GetTestEnvironment(), docket));
@@ -159,7 +166,7 @@ namespace CookerTests
             var unknown = new UnknownItem("1", "Name");
             var docket = new Docket("Docket", unknown);
 
-            var restaurant = BuildTestRestaurant();
+            var restaurant = BuildTestRestaurant(out _);
 
             Should.Throw<NotSupportedException>(async () => await restaurant.PlaceOrder(GetTestEnvironment(), docket));
         }
@@ -194,10 +201,17 @@ namespace CookerTests
 
     internal class FakeAzureResourcesSdk : IAzureResourcesSdk
     {
-        public Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext,
-            Func<AzurePlatformContext, ResourcesManagementClient, TOutput> action) where TOutput : ICookedIngredient
+        private Stack<object> _stack = new Stack<object>();
+        
+        public void Seed(object obj)
         {
-            return Task.FromResult((ICookedIngredient) default(TOutput)!);
+            _stack.Push(obj);
+        }
+        
+        public Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext,
+            Func<AzurePlatformContext, IAzureSdkProvider, Task<TOutput>> action) where TOutput : ICookedIngredient
+        {
+            return Task.FromResult((ICookedIngredient)_stack.Pop()!);
         }
     }
 }

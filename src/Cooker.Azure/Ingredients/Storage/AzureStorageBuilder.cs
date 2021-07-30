@@ -7,24 +7,27 @@ namespace Cooker.Azure.Ingredients.Storage
 {
     public class AzureStorageBuilder : IRecipeBuilder<AzurePlatformContext>
     {
-        public AzureStorageBuilder(Cooker.Ingredients.Storage.StorageIngredient ingredient)
+        public AzureStorageBuilder(StorageIngredient ingredient)
         {
             Ingredient = ingredient;
         }
 
-        private Cooker.Ingredients.Storage.StorageIngredient Ingredient { get; }
+        private StorageIngredient Ingredient { get; }
 
 
         public IRecipe CreateRecipe(
             AzurePlatformContext platformContext,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
+            var storageName = (Ingredient.Id + platformContext.Randomness).ToLowerInvariant();
             var armTemplate = typeof(AzureStorageBuilder).GetResourceContents("Storage");
             return new ArmRecipe<StorageOutput>(
-                new ArmDefinition(armTemplate,
+                new ArmDefinition(
+                    $"storage-{Ingredient.Id}",
+                    armTemplate,
                     new Dictionary<string, object>()
                     {
-                        {"storageAccountName", Ingredient.Id},
+                        {"storageAccountName", storageName},
                         {"tables", Ingredient.Tables},
                         {"queues", Ingredient.Queues},
                         {"containers", Ingredient.Containers}

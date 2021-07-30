@@ -4,28 +4,29 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <UserSecretsId>Cacoch.Cli-9f21f871-678e-4388-97d9-4e74282f3e10</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Azure.Identity" Version="1.4.0" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-      <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+        <PackageReference Include="Azure.Identity" Version="1.4.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0"/>
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="appsettings.json" />
-      <Content Include="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="appsettings.local.json" Condition="Exists('appsettings.local.json')" />
-      <Content Include="appsettings.local.json" Condition="Exists('appsettings.local.json')">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
+        <None Remove="appsettings.json"/>
+        <Content Include="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <None Remove="appsettings.Development.json"/>
+        <Content Include="appsettings.Development.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Cooker.Azure\Cooker.Azure.csproj" />
-      <ProjectReference Include="..\Cooker\Cooker.csproj" />
+        <ProjectReference Include="..\Cooker.Azure\Cooker.Azure.csproj"/>
+        <ProjectReference Include="..\Cooker\Cooker.csproj"/>
     </ItemGroup>
 
 </Project>

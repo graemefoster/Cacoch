@@ -7,20 +7,6 @@ namespace Cooker.Azure.Ingredients.Secrets
 {
     public interface IAzureResourcesSdk
     {
-        Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext, Func<AzurePlatformContext, ResourcesManagementClient,TOutput> action) where TOutput : ICookedIngredient;
-    }
-
-    class AzureResourcesSdk : IAzureResourcesSdk
-    {
-        private readonly ResourcesManagementClient _sdk;
-
-        public AzureResourcesSdk(ResourcesManagementClient sdk)
-        {
-            _sdk = sdk;
-        }
-        public async Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext, Func<AzurePlatformContext, ResourcesManagementClient, TOutput> action) where TOutput : ICookedIngredient
-        {
-            return action(platformContext, _sdk);
-        }
+        Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext, Func<AzurePlatformContext, IAzureSdkProvider, Task<TOutput>> action) where TOutput : ICookedIngredient;
     }
 }
