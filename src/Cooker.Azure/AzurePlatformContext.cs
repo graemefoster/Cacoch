@@ -20,7 +20,7 @@ namespace Cooker.Azure
                 .Create()
                 .ComputeHash(Encoding.UTF8.GetBytes(docket.TableName)))[..5];
 
-            ResourceGroupName = string.Format($"{docket.TableName}-{environment.Slug}");
+            ResourceGroupName = string.Format($"{docket.TableName}-{environment.ShortName}");
         }
 
         public string ResourceGroupName { get; }
