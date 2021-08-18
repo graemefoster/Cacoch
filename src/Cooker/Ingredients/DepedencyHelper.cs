@@ -7,8 +7,14 @@ namespace Cooker.Ingredients
 {
     internal static class DepedencyHelper
     {
-        public static bool IsSatisfied(string value, IDictionary<IIngredient, ICookedIngredient> edibles, out string? prop)
+        public static bool IsSatisfied(string? value, IDictionary<IIngredient, ICookedIngredient> edibles, out string? prop)
         {
+            if (value == null)
+            {
+                prop = null;
+                return true;
+            }
+            
             if (value.Contains("["))
             {
                 var expression = value[(value.IndexOf("[", StringComparison.Ordinal) + 1)..value.LastIndexOf("]", StringComparison.Ordinal)]!;
@@ -51,6 +57,7 @@ namespace Cooker.Ingredients
                 }
 
                 prop = value.Replace($"[{expression}]", Convert.ToString(context));
+                
                 return true;
             }
 

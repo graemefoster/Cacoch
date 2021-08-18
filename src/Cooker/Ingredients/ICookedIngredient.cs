@@ -2,6 +2,5 @@
 {
     public interface ICookedIngredient
     {
-        string? PlatformId { get; }
     }
 }

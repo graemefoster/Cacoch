@@ -58,7 +58,7 @@ namespace Cooker.Azure.Ingredients.Secrets
                                     {
                                         "secrets", new
                                         {
-                                            array = Ingredient.RequiredSecrets
+                                            array = Ingredient.TypedIngredientData.Secrets
                                                 .Except(i.ExistingSecrets)
                                                 .Select(x => new
                                                     { name = x, value = $"{Guid.NewGuid()}-{Guid.NewGuid()}" })
@@ -72,9 +72,9 @@ namespace Cooker.Azure.Ingredients.Secrets
                             {
                                 var vaultUrl = (string)o["vaultUrl"];
                                 return new SecretsOutput(
+                                    Ingredient.TypedIngredientData,
                                     (string)o["resourceId"],
-                                    Ingredient.DisplayName,
-                                    Ingredient.RequiredSecrets.ToDictionary(x => x, x => $"{vaultUrl}secrets/{x}"));
+                                    Ingredient.TypedIngredientData.Secrets.ToDictionary(x => x, x => $"{vaultUrl}secrets/{x}"));
                             })
                     );
         }

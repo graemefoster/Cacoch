@@ -4,7 +4,6 @@ using Cooker.Azure.KitchenStations.Arm;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Link;
 using Cooker.Ingredients.Secrets;
-using Cooker.Ingredients.WebApp;
 using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Link
@@ -38,7 +37,7 @@ namespace Cooker.Azure.Ingredients.Link
                         { "requestorPrincipalId", ((IHaveRuntimeIdentity)Ingredient.From!).Identity },
                         { "roleId", GetRole(Ingredient.To!, Ingredient.TypedIngredientData.Access) }
                     }),
-                output => new EmptyOutput(""));
+                output => new EmptyOutput());
         }
 
         private string GetRole(ICookedIngredient ingredientTo, LinkAccess access)

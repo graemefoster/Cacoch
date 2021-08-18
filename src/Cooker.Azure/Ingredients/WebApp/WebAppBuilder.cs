@@ -2,7 +2,6 @@
 using System.Linq;
 using Cooker.Azure.KitchenStations.Arm;
 using Cooker.Ingredients;
-using Cooker.Ingredients.Storage;
 using Cooker.Ingredients.WebApp;
 using Cooker.Kitchens;
 using Microsoft.Extensions.Options;
@@ -36,7 +35,7 @@ namespace Cooker.Azure.Ingredients.WebApp
                     {
                         { "name", webAppName },
                         {
-                            "appSettings", Ingredient.Configuration.Select(x => new
+                            "appSettings", Ingredient.TypedIngredientData.Configuration.Select(x => new
                             {
                                 name = x.Key,
                                 value = x.Value
@@ -48,8 +47,7 @@ namespace Cooker.Azure.Ingredients.WebApp
                         },
                     }),
                 output => new WebAppOutput(
-                    (string)output["resourceId"],
-                    webAppName,
+                    Ingredient.TypedIngredientData,
                     (string)output["servicePrincipalId"]
                 ));
         }

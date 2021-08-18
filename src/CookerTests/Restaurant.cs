@@ -33,7 +33,7 @@ namespace CookerTests
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
             var edible = (StorageOutput)meal[storage];
 
-            edible.Name.ShouldBe(name);
+            edible.Data.DisplayName.ShouldBe(name);
         }
 
         private static PlatformEnvironment GetTestEnvironment()
@@ -47,8 +47,8 @@ namespace CookerTests
         {
             var storage1 = new StorageData("one", "one", Array.Empty<string>(), Array.Empty<string>(),
                 Array.Empty<string>());
-            var secrets1 = new SecretsData("secretsone", "[one.Name]-foofoo", new[] { "secret-one" });
-            var storage2 = new StorageData("two", "[secretsone.Name]-foofoo", Array.Empty<string>(),
+            var secrets1 = new SecretsData("secretsone", "[one.Data.DisplayName]-foofoo", new[] { "secret-one" });
+            var storage2 = new StorageData("two", "[secretsone.Data.DisplayName]-foofoo", Array.Empty<string>(),
                 Array.Empty<string>(),
                 Array.Empty<string>());
 
@@ -63,7 +63,7 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
-            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo-foofoo");
+            ((StorageOutput)meal[storage2]).Data.DisplayName.ShouldBe("one-foofoo-foofoo");
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace CookerTests
         {
             var storage1 = new StorageData("one", "one", Array.Empty<string>(), Array.Empty<string>(),
                 Array.Empty<string>());
-            var storage2 = new StorageData("two", "[one.Name]-foofoo", Array.Empty<string>(), Array.Empty<string>(),
+            var storage2 = new StorageData("two", "[one.Data.DisplayName]-foofoo", Array.Empty<string>(), Array.Empty<string>(),
                 Array.Empty<string>());
 
             var docket = new Docket("Docket", storage1, storage2);
@@ -82,7 +82,7 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
-            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo");
+            ((StorageOutput)meal[storage2]).Data.DisplayName.ShouldBe("one-foofoo");
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
-            ((SecretsOutput)meal[secrets1]).Name.ShouldBe("one");
+            ((SecretsOutput)meal[secrets1]).Data.DisplayName.ShouldBe("one");
         }
 
         private static Restaurant<AzurePlatformContext> BuildTestRestaurant(
