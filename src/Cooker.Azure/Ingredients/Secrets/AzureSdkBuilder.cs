@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Azure.ResourceManager.KeyVault;
-using Azure.ResourceManager.Resources;
 using Azure.Security.KeyVault.Secrets;
 using Cooker.Azure.KitchenStations.Arm;
 using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 using Cooker.Kitchens;
-using Microsoft.Extensions.Azure;
 
 namespace Cooker.Azure.Ingredients.Secrets
 {
-    public class AzureKeyVaultBuilder : IRecipeBuilder<AzurePlatformContext>
+    public class AzureSdkBuilder : IRecipeBuilder<AzurePlatformContext>
     {
-        public AzureKeyVaultBuilder(SecretsIngredient ingredient)
+        public AzureSdkBuilder(SecretsIngredient ingredient)
         {
             Ingredient = ingredient;
         }
@@ -55,7 +52,7 @@ namespace Cooker.Azure.Ingredients.Secrets
                         new ArmRecipe<SecretsOutput>(
                             new ArmDefinition(
                                 $"secrets-{Ingredient.Id}",
-                                typeof(AzureKeyVaultBuilder).GetResourceContents("Secrets"),
+                                typeof(AzureSdkBuilder).GetResourceContents("Secrets"),
                                 new Dictionary<string, object>()
                                 {
                                     {

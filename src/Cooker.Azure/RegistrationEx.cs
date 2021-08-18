@@ -28,7 +28,7 @@ namespace Cooker.Azure
             services.RegisterCooker<AzurePlatformContext>(
                 new Dictionary<Type, Type>
                 {
-                    {typeof(SecretsIngredient), typeof(AzureKeyVaultBuilder)},
+                    {typeof(SecretsIngredient), typeof(AzureSdkBuilder)},
                     {typeof(StorageIngredient), typeof(AzureStorageBuilder)},
                 });
 
