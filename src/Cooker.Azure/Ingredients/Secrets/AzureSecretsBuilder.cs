@@ -58,7 +58,7 @@ namespace Cooker.Azure.Ingredients.Secrets
                                     {
                                         "secrets", new
                                         {
-                                            array = Ingredient.TypedIngredientData.Secrets
+                                            array = Ingredient.TypedIngredientData!.Secrets
                                                 .Except(i.ExistingSecrets)
                                                 .Select(x => new
                                                     { name = x, value = $"{Guid.NewGuid()}-{Guid.NewGuid()}" })

@@ -24,7 +24,7 @@ namespace Cooker.Azure.Ingredients.Link
             AzurePlatformContext platformContext,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
-            var linkName = $"{Ingredient.TypedIngredientData.FromResource}-{Ingredient.TypedIngredientData.Access}-{Ingredient.TypedIngredientData.ToResource}-{platformContext.Randomness}";
+            var linkName = $"{Ingredient.TypedIngredientData!.FromResource}-{Ingredient.TypedIngredientData.Access}-{Ingredient.TypedIngredientData.ToResource}-{platformContext.Randomness}";
             var template = typeof(LinkBuilder).GetResourceContents("Link");
             return new ArmRecipe<EmptyOutput>(
                 new ArmDefinition(

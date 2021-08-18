@@ -6,7 +6,6 @@ namespace Cooker.Ingredients
     {
         IngredientData OriginalIngredientData { get; }
         string Id { get; }
-        string DisplayName { get; }
 
         /// <summary>
         /// Opportunity to evaluate any expressions in incoming properties

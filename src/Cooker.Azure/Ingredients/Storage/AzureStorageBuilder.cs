@@ -29,7 +29,7 @@ namespace Cooker.Azure.Ingredients.Storage
                     new Dictionary<string, object>()
                     {
                         { "storageAccountName", storageName },
-                        { "tables", Ingredient.TypedIngredientData.Tables },
+                        { "tables", Ingredient.TypedIngredientData!.Tables },
                         { "queues", Ingredient.TypedIngredientData.Queues },
                         { "containers", Ingredient.TypedIngredientData.Containers }
                     }),

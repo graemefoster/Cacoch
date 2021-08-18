@@ -1,15 +1,13 @@
 ﻿using System.Collections.Generic;
-using Cooker.Ingredients.WebApp;
 
 namespace Cooker.Ingredients
 {
     public abstract class Ingredient<T> : IIngredient where T : IngredientData
     {
         protected T OriginalTypedIngredientData { get; }
-        public T TypedIngredientData { get; protected set; }
+        public T? TypedIngredientData { get; protected set; }
         public IngredientData OriginalIngredientData { get; }
         public string Id { get; }
-        public string DisplayName { get; }
 
         /// <summary>
         /// Implementors should use this as a hook to evaluate expressions provided in parameters.
@@ -32,7 +30,6 @@ namespace Cooker.Ingredients
         {
             OriginalTypedIngredientData = ingredientData;
             Id = ingredientData.Id;
-            DisplayName = ingredientData.DisplayName;
             OriginalIngredientData = ingredientData;
         }
     }
