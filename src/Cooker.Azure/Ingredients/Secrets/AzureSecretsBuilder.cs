@@ -10,9 +10,9 @@ using Cooker.Kitchens;
 
 namespace Cooker.Azure.Ingredients.Secrets
 {
-    public class AzureSdkBuilder : IRecipeBuilder<AzurePlatformContext>
+    public class AzureSecretsBuilder : IRecipeBuilder<AzurePlatformContext>
     {
-        public AzureSdkBuilder(SecretsIngredient ingredient)
+        public AzureSecretsBuilder(SecretsIngredient ingredient)
         {
             Ingredient = ingredient;
         }
@@ -52,7 +52,7 @@ namespace Cooker.Azure.Ingredients.Secrets
                         new ArmRecipe<SecretsOutput>(
                             new ArmDefinition(
                                 $"secrets-{Ingredient.Id}",
-                                typeof(AzureSdkBuilder).GetResourceContents("Secrets"),
+                                typeof(AzureSecretsBuilder).GetResourceContents("Secrets"),
                                 new Dictionary<string, object>()
                                 {
                                     {

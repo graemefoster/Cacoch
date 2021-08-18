@@ -2,8 +2,9 @@
 
 namespace Cooker.Ingredients
 {
-    public abstract class Ingredient : IIngredient
+    public abstract class Ingredient<T> : IIngredient where T: IngredientData
     {
+        public T TypedIngredientData { get; }
         public IngredientData OriginalIngredientData { get; }
         public string Id { get; }
         public string DisplayName { get; protected set; }
@@ -16,11 +17,12 @@ namespace Cooker.Ingredients
         /// <returns>True if ready to cook. False if not.</returns>
         public abstract bool PrepareForCook(IDictionary<IIngredient, ICookedIngredient> edibles);
 
-        protected Ingredient(IngredientData ingredientData)
+        protected Ingredient(T ingredientData)
         {
-            OriginalIngredientData = ingredientData;
+            TypedIngredientData = ingredientData;
             Id = ingredientData.Id;
             DisplayName = ingredientData.DisplayName;
+            OriginalIngredientData = ingredientData;
         }
     }
 }

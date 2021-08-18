@@ -33,9 +33,7 @@ namespace Cooker.Azure.Ingredients.WebApp
                     new Dictionary<string, object>()
                     {
                         { "name", webAppName },
-                        { "serverFarmId", _settings.Value.PlatformAppServicePlans[Ingredient.OriginalIngredientData.C] },
-                        { "queues", Ingredient.Queues },
-                        { "containers", Ingredient.Containers }
+                        { "serverFarmId", _settings.Value.PlatformAppServicePlans[Ingredient.TypedIngredientData.Classification] },
                     }),
                 output => new StorageOutput(Ingredient.DisplayName));
         }

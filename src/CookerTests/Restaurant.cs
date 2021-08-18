@@ -55,7 +55,7 @@ namespace CookerTests
 
             var restaurant = BuildTestRestaurant(out var sdk);
 
-            sdk.Seed(new AzureSdkBuilder.ExistingSecretsOutput(Array.Empty<string>()));
+            sdk.Seed(new AzureSecretsBuilder.ExistingSecretsOutput(Array.Empty<string>()));
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
@@ -87,7 +87,7 @@ namespace CookerTests
             var docket = new Docket("Docket", secrets1);
 
             var restaurant = BuildTestRestaurant(out var sdk);
-            sdk.Seed(new AzureSdkBuilder.ExistingSecretsOutput(Array.Empty<string>()));
+            sdk.Seed(new AzureSecretsBuilder.ExistingSecretsOutput(Array.Empty<string>()));
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
@@ -108,7 +108,7 @@ namespace CookerTests
                     }),
                 new CookbookLibrary<AzurePlatformContext>(new Dictionary<Type, Type>
                 {
-                    {typeof(SecretsIngredient), typeof(AzureSdkBuilder)},
+                    {typeof(SecretsIngredient), typeof(AzureSecretsBuilder)},
                     {typeof(StorageIngredient), typeof(AzureStorageBuilder)},
                 }),
                 new TestContextBuilder());

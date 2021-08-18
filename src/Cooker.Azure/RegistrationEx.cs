@@ -1,18 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Configuration;
+using System.Linq;
 using Azure.Identity;
 using Cooker.Azure.Ingredients.Secrets;
-using Cooker.Azure.Ingredients.Storage;
 using Cooker.Azure.KitchenStations.Arm;
 using Cooker.Azure.KitchenStations.Sdk;
+using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
-using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-
 
 namespace Cooker.Azure
 {
@@ -24,14 +20,26 @@ namespace Cooker.Azure
         {
             var configurationSection = configuration.GetSection("AzureSettings");
             services.Configure<AzureCookerSettings>(configurationSection);
-            
-            services.RegisterCooker<AzurePlatformContext>(
-                new Dictionary<Type, Type>
-                {
-                    {typeof(SecretsIngredient), typeof(AzureSdkBuilder)},
-                    {typeof(StorageIngredient), typeof(AzureStorageBuilder)},
-                });
 
+            var ingredients = typeof(SecretsIngredient)
+                .Assembly
+                .GetTypes()
+                .Where(x => x.IsAssignableTo(typeof(IIngredient)))
+                .Where(x => !x.IsAbstract)
+                .ToDictionary(
+                    x => x,
+                    x => typeof(RegistrationEx)
+                        .Assembly
+                        .GetTypes()
+                        .Where(b => b.IsAssignableTo(typeof(IRecipeBuilder<AzurePlatformContext>)))
+                        .Single(b => b.GetConstructors()
+                            .Any(c => 
+                                c.GetParameters()
+                                    .Any(p => p.ParameterType == x)))
+                );
+
+
+            services.RegisterCooker<AzurePlatformContext>(ingredients);
             services.AddSingleton<IArmRunner, AzureResourceManagerArmRunner>();
             services.AddSingleton<IAzureResourcesSdk, AzureResourcesSdk>();
             services.AddSingleton<KitchenStation<AzurePlatformContext>, ArmKitchenStation>();
