@@ -1,25 +1,35 @@
-  {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-      "name": { "type": "string" },
-      "serverFarmId": { "type": "string" }
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string"
     },
-    "resources": [
+    "serverFarmId": {
+      "type": "string"
+    }
+  },
+  "resources": [
     {
-        "type": "Microsoft.Web/sites",
-        "apiVersion": "2020-06-01",
-        "name": "[parameters('name')]",
-        "location": "[resourceGroup().location]",
-        "identity": {
-          "type": "SystemAssigned"
-        },
-        "properties": {
-          "serverFarmId": "[parameters('serverFarmId')]",
-          "siteConfig": {
-            "linuxFxVersion": "DOTNETCORE|5.0"
-          }
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('name')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[parameters('serverFarmId')]",
+        "siteConfig": {
+          "linuxFxVersion": "DOTNETCORE|5.0"
         }
       }
-  ]
+    }
+  ],
+  "outputs": {
+    "servicePrincipalId": {
+      "type": "string",
+      "value": "[reference(parameters('name'), '2021-02-01', 'Full').identity.principalId]"
+    }
+  }
 }

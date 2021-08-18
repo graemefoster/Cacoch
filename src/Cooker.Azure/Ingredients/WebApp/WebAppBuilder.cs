@@ -39,7 +39,7 @@ namespace Cooker.Azure.Ingredients.WebApp
                             _settings.Value.PlatformAppServicePlans[Ingredient.TypedIngredientData.Classification]
                         },
                     }),
-                output => new WebAppOutput(Ingredient.DisplayName));
+                output => new WebAppOutput((string)output["servicePrincipalId"]));
         }
     }
 }

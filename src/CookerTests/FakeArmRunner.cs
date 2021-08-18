@@ -7,9 +7,10 @@ namespace CookerTests
 {
     internal class FakeArmRunner : IArmRunner
     {
-        public Task<object> Execute(string resourceGroup, string friendlyName, string template, Dictionary<string, object> parameters)
+        public Task<IDictionary<string, object>> Execute(string resourceGroup, string friendlyName, string template,
+            Dictionary<string, object> parameters)
         {
-            return Task.FromResult(new object());
+            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>());
         }
     }
 }
