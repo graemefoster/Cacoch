@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Cooker.Ingredients
 {
-    static class DepedencyHelper
+    internal static class DepedencyHelper
     {
         public static bool IsSatisfied(string value, IDictionary<IIngredient, ICookedIngredient> edibles, out string? prop)
         {
@@ -15,6 +16,7 @@ namespace Cooker.Ingredients
                 
                 var dependencyLineItem = expressionParts[0];
                 var lineItem = edibles.Keys.SingleOrDefault(x => x.Id == dependencyLineItem);
+                
                 if (lineItem == null)
                 {
                     prop = null;
@@ -22,13 +24,33 @@ namespace Cooker.Ingredients
                 }
 
                 var edible = edibles[lineItem];
-                var propertyInfo = edible.GetType().GetProperty(expressionParts[1]);
-                if (propertyInfo == null)
+                object? context = edible;
+                foreach (var part in expressionParts.Skip(1))
                 {
-                    throw new InvalidOperationException($"Failed to resolve property on expression {expression}");
+                    if (context == null)
+                    {
+                        throw new ArgumentException(
+                            $"Failed to resolve expression {expression} against output {lineItem.Id}");
+                    }
+                    
+                    if (context is IDictionary dictionary)
+                    {
+                        context = dictionary[part];
+                    }
+                    else
+                    {
+                        var propertyInfo = context.GetType().GetProperty(part);
+                        if (propertyInfo == null)
+                        {
+                            throw new InvalidOperationException(
+                                $"Failed to resolve property on expression {expression}");
+                        }
+
+                        context = propertyInfo.GetValue(context);
+                    }
                 }
 
-                prop = value.Replace($"[{expression}]", Convert.ToString(propertyInfo.GetValue(edible!)));
+                prop = value.Replace($"[{expression}]", Convert.ToString(context));
                 return true;
             }
 

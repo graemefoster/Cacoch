@@ -27,7 +27,8 @@ namespace CookerTests
                 Array.Empty<string>());
             var docket = new Docket("Docket", storage);
 
-            var restaurant = BuildTestRestaurant(out _);
+            var restaurant = BuildTestRestaurant(out _, out var armRunner);
+            armRunner.Seed(new { resourceId = "" });
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
             var edible = (StorageOutput)meal[storage];
@@ -53,9 +54,12 @@ namespace CookerTests
 
             var docket = new Docket("Docket", storage1, storage2, secrets1);
 
-            var restaurant = BuildTestRestaurant(out var sdk);
+            var restaurant = BuildTestRestaurant(out var sdk, out var armRunner);
 
             sdk.Seed(new AzureSecretsBuilder.ExistingSecretsOutput(Array.Empty<string>()));
+            armRunner.Seed(new { resourceId = "" });
+            armRunner.Seed(new { resourceId = "", vaultUrl = "https://somewhere.com/" });
+            armRunner.Seed(new { resourceId = "" });
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
@@ -72,7 +76,9 @@ namespace CookerTests
 
             var docket = new Docket("Docket", storage1, storage2);
 
-            var restaurant = BuildTestRestaurant(out _);
+            var restaurant = BuildTestRestaurant(out _, out var armRunner);
+            armRunner.Seed(new { resourceId = "" });
+            armRunner.Seed(new { resourceId = "" });
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
@@ -86,7 +92,8 @@ namespace CookerTests
 
             var docket = new Docket("Docket", secrets1);
 
-            var restaurant = BuildTestRestaurant(out var sdk);
+            var restaurant = BuildTestRestaurant(out var sdk, out var armRunner);
+            armRunner.Seed(new { resourceId = "", vaultUrl = "https://somewhere.com/" });
             sdk.Seed(new AzureSecretsBuilder.ExistingSecretsOutput(Array.Empty<string>()));
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
@@ -94,16 +101,18 @@ namespace CookerTests
             ((SecretsOutput)meal[secrets1]).Name.ShouldBe("one");
         }
 
-        private static Restaurant<AzurePlatformContext> BuildTestRestaurant(out FakeAzureResourcesSdk sdk)
+        private static Restaurant<AzurePlatformContext> BuildTestRestaurant(
+            out FakeAzureResourcesSdk sdk,
+            out FakeArmRunner armRunner)
         {
-            var runner = new FakeArmRunner();
+            armRunner = new FakeArmRunner();
             sdk = new FakeAzureResourcesSdk();
 
             var restaurant = new Restaurant<AzurePlatformContext>(
                 new Kitchen<AzurePlatformContext>(
                     new KitchenStation<AzurePlatformContext>[]
                     {
-                        new ArmKitchenStation(runner),
+                        new ArmKitchenStation(armRunner),
                         new AzureSdkKitchenStation(sdk)
                     }),
                 new CookbookLibrary<AzurePlatformContext>(
@@ -141,7 +150,7 @@ namespace CookerTests
 
             var docket = new Docket("Docket", storage1, storage2);
 
-            var restaurant = BuildTestRestaurant(out _);
+            var restaurant = BuildTestRestaurant(out _, out _);
 
             Should.Throw<InvalidOperationException>(async () =>
                 await restaurant.PlaceOrder(GetTestEnvironment(), docket));
@@ -158,7 +167,7 @@ namespace CookerTests
 
             var docket = new Docket("Docket", storage1, storage2);
 
-            var restaurant = BuildTestRestaurant(out _);
+            var restaurant = BuildTestRestaurant(out _, out _);
 
             Should.Throw<InvalidOperationException>(async () =>
                 await restaurant.PlaceOrder(GetTestEnvironment(), docket));
@@ -170,7 +179,7 @@ namespace CookerTests
             var unknown = new UnknownItem("1", "Name");
             var docket = new Docket("Docket", unknown);
 
-            var restaurant = BuildTestRestaurant(out _);
+            var restaurant = BuildTestRestaurant(out _, out _);
 
             Should.Throw<NotSupportedException>(async () => await restaurant.PlaceOrder(GetTestEnvironment(), docket));
         }

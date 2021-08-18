@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Cooker.Azure.KitchenStations.Arm;
 using Cooker.Ingredients;
+using Cooker.Ingredients.Link;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.WebApp;
 using Cooker.Kitchens;

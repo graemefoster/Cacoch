@@ -7,17 +7,29 @@ namespace Cooker.Ingredients.WebApp
         internal WebAppIngredient(WebAppData data) : base(data)
         {
         }
+        
+        public Dictionary<string, string> Configuration { get;private set; }
 
         public override bool PrepareForCook(IDictionary<IIngredient, ICookedIngredient> edibles)
         {
-            var satisfied = false;
-            if (DepedencyHelper.IsSatisfied(DisplayName, edibles, out var displayName))
+            if (!DepedencyHelper.IsSatisfied(DisplayName, edibles, out var displayName))
             {
-                DisplayName = displayName!;
-                satisfied = true;
+                return false;
+            }
+            DisplayName = displayName!;
+
+            Configuration = new Dictionary<string, string>();
+            foreach (var config in base.TypedIngredientData.Configuration)
+            {
+                if (!DepedencyHelper.IsSatisfied(config.Value, edibles, out var configValue))
+                {
+                    return false;
+                }
+
+                Configuration.Add(config.Key, configValue!);
             }
 
-            return satisfied;
+            return true;
         }
     }
 }

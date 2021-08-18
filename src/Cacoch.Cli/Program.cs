@@ -46,7 +46,8 @@ namespace Cacoch.Cli
                             "Public",
                             new Dictionary<string, string>()
                             {
-                                ["setting1"] = "hello-world"
+                                ["setting1"] = "hello-world",
+                                ["setting2"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone1.SecretUrls.secret-one])"
                             },
                             new[]
                             {

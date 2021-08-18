@@ -1,4 +1,4 @@
-﻿namespace Cooker.Ingredients.WebApp
+﻿namespace Cooker.Ingredients
 {
     public interface IHaveRuntimeIdentity
     {

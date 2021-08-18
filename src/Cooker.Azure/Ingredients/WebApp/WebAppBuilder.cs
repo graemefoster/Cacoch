@@ -36,7 +36,7 @@ namespace Cooker.Azure.Ingredients.WebApp
                     {
                         { "name", webAppName },
                         {
-                            "appSettings", Ingredient.TypedIngredientData.Configuration.Select(x => new
+                            "appSettings", Ingredient.Configuration.Select(x => new
                             {
                                 name = x.Key,
                                 value = x.Value

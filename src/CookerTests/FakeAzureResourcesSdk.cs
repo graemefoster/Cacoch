@@ -10,7 +10,7 @@ namespace CookerTests
 {
     internal class FakeAzureResourcesSdk : IAzureResourcesSdk
     {
-        private Stack<object> _stack = new Stack<object>();
+        private readonly Stack<object> _stack = new Stack<object>();
         
         public void Seed(object obj)
         {

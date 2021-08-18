@@ -68,7 +68,14 @@ namespace Cooker.Azure.Ingredients.Secrets
                                     { "vaultName", vaultName },
                                     { "secretsOfficerPrincipalId", platformContext.DeploymentPrincipalId }
                                 }),
-                            o => new SecretsOutput((string)o["resourceId"], Ingredient.DisplayName))
+                            o =>
+                            {
+                                var vaultUrl = (string)o["vaultUrl"];
+                                return new SecretsOutput(
+                                    (string)o["resourceId"],
+                                    Ingredient.DisplayName,
+                                    Ingredient.RequiredSecrets.ToDictionary(x => x, x => $"{vaultUrl}secrets/{x}"));
+                            })
                     );
         }
 
