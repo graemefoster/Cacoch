@@ -61,14 +61,14 @@ namespace Cooker.Azure.Ingredients.Secrets
                                             array = Ingredient.RequiredSecrets
                                                 .Except(i.ExistingSecrets)
                                                 .Select(x => new
-                                                    {name = x, value = $"{Guid.NewGuid()}-{Guid.NewGuid()}"})
+                                                    { name = x, value = $"{Guid.NewGuid()}-{Guid.NewGuid()}" })
                                                 .ToArray()
                                         }
                                     },
-                                    {"vaultName", vaultName},
-                                    {"secretsOfficerPrincipalId", platformContext.DeploymentPrincipalId }
+                                    { "vaultName", vaultName },
+                                    { "secretsOfficerPrincipalId", platformContext.DeploymentPrincipalId }
                                 }),
-                            o => new SecretsOutput(Ingredient.DisplayName))
+                            o => new SecretsOutput((string)o["resourceId"], Ingredient.DisplayName))
                     );
         }
 
@@ -80,6 +80,8 @@ namespace Cooker.Azure.Ingredients.Secrets
             {
                 ExistingSecrets = existingSecrets;
             }
+
+            public string? PlatformId { get; }
         }
     }
 }

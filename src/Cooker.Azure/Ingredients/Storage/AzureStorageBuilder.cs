@@ -28,12 +28,14 @@ namespace Cooker.Azure.Ingredients.Storage
                     armTemplate,
                     new Dictionary<string, object>()
                     {
-                        {"storageAccountName", storageName},
-                        {"tables", Ingredient.Tables},
-                        {"queues", Ingredient.Queues},
-                        {"containers", Ingredient.Containers}
+                        { "storageAccountName", storageName },
+                        { "tables", Ingredient.Tables },
+                        { "queues", Ingredient.Queues },
+                        { "containers", Ingredient.Containers }
                     }),
-                output => new StorageOutput(Ingredient.DisplayName));
+                output => new StorageOutput(
+                    (string)output["resourceId"],
+                    Ingredient.DisplayName));
         }
     }
 }

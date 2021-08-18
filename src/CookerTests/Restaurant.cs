@@ -30,7 +30,7 @@ namespace CookerTests
             var restaurant = BuildTestRestaurant(out _);
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
-            var edible = (StorageOutput) meal[storage];
+            var edible = (StorageOutput)meal[storage];
 
             edible.Name.ShouldBe(name);
         }
@@ -46,7 +46,7 @@ namespace CookerTests
         {
             var storage1 = new StorageData("one", "one", Array.Empty<string>(), Array.Empty<string>(),
                 Array.Empty<string>());
-            var secrets1 = new SecretsData("secretsone", "[one.Name]-foofoo", new[] {"secret-one"});
+            var secrets1 = new SecretsData("secretsone", "[one.Name]-foofoo", new[] { "secret-one" });
             var storage2 = new StorageData("two", "[secretsone.Name]-foofoo", Array.Empty<string>(),
                 Array.Empty<string>(),
                 Array.Empty<string>());
@@ -59,7 +59,7 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
-            ((StorageOutput) meal[storage2]).Name.ShouldBe("one-foofoo-foofoo");
+            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo-foofoo");
         }
 
         [Fact]
@@ -76,13 +76,13 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
-            ((StorageOutput) meal[storage2]).Name.ShouldBe("one-foofoo");
+            ((StorageOutput)meal[storage2]).Name.ShouldBe("one-foofoo");
         }
 
         [Fact]
         public async Task can_have_multi_steps()
         {
-            var secrets1 = new SecretsData("one", "one", new[] {"secret-one"});
+            var secrets1 = new SecretsData("one", "one", new[] { "secret-one" });
 
             var docket = new Docket("Docket", secrets1);
 
@@ -91,7 +91,7 @@ namespace CookerTests
 
             var meal = await restaurant.PlaceOrder(GetTestEnvironment(), docket);
 
-            ((SecretsOutput) meal[secrets1]).Name.ShouldBe("one");
+            ((SecretsOutput)meal[secrets1]).Name.ShouldBe("one");
         }
 
         private static Restaurant<AzurePlatformContext> BuildTestRestaurant(out FakeAzureResourcesSdk sdk)
@@ -114,7 +114,7 @@ namespace CookerTests
                         throw new NotSupportedException();
                     }),
                 new TestContextBuilder());
-            
+
             return restaurant;
         }
 
@@ -177,9 +177,9 @@ namespace CookerTests
 
         record UnknownItem(string Id, string DisplayName) : IngredientData(Id, DisplayName)
         {
-            public override IIngredient BuildIngredient()
+            public override IEnumerable<IIngredient> GatherIngredients()
             {
-                return new UnknownIngredient(this);
+                yield return new UnknownIngredient(this);
             }
 
             class UnknownIngredient : IIngredient

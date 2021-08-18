@@ -34,19 +34,19 @@ namespace Cooker
 
             var allRemainingInstructions =
                 docket.LineItems
-                    .Select(x => x.BuildIngredient())
+                    .SelectMany(x => x.GatherIngredients())
                     .Select(x => new IngredientAndCookbook(x, _cookbookLibrary.GetCookbookFor(x)))
                     .ToList();
 
             var cookedRecipes = new Dictionary<IIngredient, ICookedIngredient>();
-            var twoStageReceipesBeingCooked = new List<IngredientAndRecipe>();
+            var twoStageRecipesBeingCooked = new List<IngredientAndRecipe>();
 
-            while (allRemainingInstructions.Any() || twoStageReceipesBeingCooked.Any())
+            while (allRemainingInstructions.Any() || twoStageRecipesBeingCooked.Any())
             {
                 var recipesReadyForCooking =
                     CreateRecipesThatAreReadyForCooking(allRemainingInstructions, cookedRecipes, context);
 
-                foreach (var intermediateRecipe in twoStageReceipesBeingCooked)
+                foreach (var intermediateRecipe in twoStageRecipesBeingCooked)
                 {
                     recipesReadyForCooking.Add(intermediateRecipe.Ingredient, intermediateRecipe.Recipe);
                 }
@@ -59,14 +59,14 @@ namespace Cooker
 
                 var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(context, docket, recipesReadyForCooking));
 
-                twoStageReceipesBeingCooked = new List<IngredientAndRecipe>();
+                twoStageRecipesBeingCooked = new List<IngredientAndRecipe>();
                 foreach (var batch in cooked)
                 {
                     foreach (var edibleItem in batch)
                     {
                         if (edibleItem.Value is IRecipe edibleRecipe)
                         {
-                            twoStageReceipesBeingCooked.Add(new IngredientAndRecipe(edibleItem.Key, edibleRecipe));
+                            twoStageRecipesBeingCooked.Add(new IngredientAndRecipe(edibleItem.Key, edibleRecipe));
                         }
                         else
                         {

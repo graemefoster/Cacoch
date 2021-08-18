@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <EmbeddedResource Include="Ingredients\Storage\Link.json" />
+      <EmbeddedResource Include="Ingredients\Link\Link.json" />
         <EmbeddedResource Include="Ingredients\Storage\Storage.json" />
         <EmbeddedResource Include="Ingredients\Secrets\Secrets.json" />
         <EmbeddedResource Include="Ingredients\WebApp\WebApp.json" />

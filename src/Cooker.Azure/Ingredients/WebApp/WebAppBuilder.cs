@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Cooker.Azure.KitchenStations.Arm;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Storage;
@@ -35,11 +36,22 @@ namespace Cooker.Azure.Ingredients.WebApp
                     {
                         { "name", webAppName },
                         {
+                            "appSettings", Ingredient.TypedIngredientData.Configuration.Select(x => new
+                            {
+                                name = x.Key,
+                                value = x.Value
+                            }).ToArray()
+                        },
+                        {
                             "serverFarmId",
                             _settings.Value.PlatformAppServicePlans[Ingredient.TypedIngredientData.Classification]
                         },
                     }),
-                output => new WebAppOutput((string)output["servicePrincipalId"]));
+                output => new WebAppOutput(
+                    (string)output["resourceId"],
+                    webAppName,
+                    (string)output["servicePrincipalId"]
+                ));
         }
     }
 }

@@ -10,13 +10,13 @@ namespace Cooker
     {
         public static void RegisterCooker<TPlatformContext>(
             this IServiceCollection services,
-            Dictionary<Type, Type> recipeBuilders) where TPlatformContext: IPlatformContext
+            Dictionary<Type, Type> recipeBuilders) where TPlatformContext : IPlatformContext
         {
-
             services.AddSingleton<IRestaurant, Restaurant<TPlatformContext>>();
             services.AddSingleton<Kitchen<TPlatformContext>>();
-            services.AddSingleton(sp => new CookbookLibrary<TPlatformContext>(i => 
-                (IRecipeBuilder<TPlatformContext>)ActivatorUtilities.CreateInstance(sp, recipeBuilders[i.GetType()], i)));
+            services.AddSingleton(sp => new CookbookLibrary<TPlatformContext>(i =>
+                (IRecipeBuilder<TPlatformContext>)ActivatorUtilities.CreateInstance(sp, recipeBuilders[i.GetType()],
+                    i)));
         }
     }
 }

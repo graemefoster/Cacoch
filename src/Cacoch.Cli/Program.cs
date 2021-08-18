@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
 using Cooker;
 using Cooker.Azure;
+using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Ingredients.WebApp;
@@ -18,10 +20,7 @@ namespace Cacoch.Cli
         static async Task Main(string[] args)
         {
             using var host = Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hb, svc) =>
-                {
-                    svc.RegisterAzureCooker(hb.Configuration);
-                })
+                .ConfigureServices((hb, svc) => { svc.RegisterAzureCooker(hb.Configuration); })
                 .ConfigureLogging(lb => lb.AddSerilog()).Build();
 
             await host.StartAsync();
@@ -29,18 +28,31 @@ namespace Cacoch.Cli
             using (var _ = host.Services.CreateScope())
             {
                 var restaurant = host.Services.GetRequiredService<IRestaurant>();
-                var docket = new Docket("cacochtest",
-                    new StorageData(
-                        "storageone",
-                        "Storage One",
-                        Array.Empty<string>(),
-                        Array.Empty<string>(),
-                        new[] {"my-container"}),
-                    new SecretsData(
-                        "grfsecretone1",
-                        "grfsecretone1",
-                        new[] {"secret-one"}),
-                    new WebAppData("grfwebapp1", "grfwebapp1", "Public"));
+                var docket = new Docket(
+                        "cacochtest",
+                        new StorageData(
+                            "storageone",
+                            "Storage One",
+                            Array.Empty<string>(),
+                            Array.Empty<string>(),
+                            new[] { "my-container" }),
+                        new SecretsData(
+                            "grfsecretone1",
+                            "grfsecretone1",
+                            new[] { "secret-one" }),
+                        new WebAppData(
+                            "grfwebapp1",
+                            "grfwebapp1",
+                            "Public",
+                            new Dictionary<string, string>()
+                            {
+                                ["setting1"] = "hello-world"
+                            },
+                            new[]
+                            {
+                                new SecretsData.SecretsLink("grfsecretone1", LinkAccess.Read)
+                            }))
+                    ;
 
                 var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
 
