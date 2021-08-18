@@ -4,7 +4,7 @@ using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Ingredients;
 using Microsoft.Extensions.Logging;
 
-namespace Cooker.Azure
+namespace Cooker.Azure.KitchenStations.Sdk
 {
     class AzureResourcesSdk : IAzureResourcesSdk
     {

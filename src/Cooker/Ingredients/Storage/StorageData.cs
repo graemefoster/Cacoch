@@ -1,7 +1,5 @@
 ﻿namespace Cooker.Ingredients.Storage
 {
-    public record StorageOutput(string Name) : ICookedIngredient;
-
     [CookerResource("secrets")]
     public record StorageData(
         string Id,

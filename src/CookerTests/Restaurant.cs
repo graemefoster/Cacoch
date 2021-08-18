@@ -5,6 +5,8 @@ using Cooker;
 using Cooker.Azure;
 using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Azure.Ingredients.Storage;
+using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
@@ -196,22 +198,6 @@ namespace CookerTests
                     throw new NotImplementedException();
                 }
             }
-        }
-    }
-
-    internal class FakeAzureResourcesSdk : IAzureResourcesSdk
-    {
-        private Stack<object> _stack = new Stack<object>();
-        
-        public void Seed(object obj)
-        {
-            _stack.Push(obj);
-        }
-        
-        public Task<ICookedIngredient> Execute<TOutput>(AzurePlatformContext platformContext,
-            Func<AzurePlatformContext, IAzureSdkProvider, Task<TOutput>> action) where TOutput : ICookedIngredient
-        {
-            return Task.FromResult((ICookedIngredient)_stack.Pop()!);
         }
     }
 }

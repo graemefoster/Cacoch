@@ -4,6 +4,8 @@ using System.Linq;
 using Azure.ResourceManager.KeyVault;
 using Azure.ResourceManager.Resources;
 using Azure.Security.KeyVault.Secrets;
+using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
 using Cooker.Kitchens;

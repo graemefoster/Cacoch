@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cooker.Azure;
+using Cooker.Azure.KitchenStations.Arm;
 
 namespace CookerTests
 {

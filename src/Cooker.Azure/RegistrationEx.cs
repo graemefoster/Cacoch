@@ -4,6 +4,8 @@ using System.Configuration;
 using Azure.Identity;
 using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Azure.Ingredients.Storage;
+using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;

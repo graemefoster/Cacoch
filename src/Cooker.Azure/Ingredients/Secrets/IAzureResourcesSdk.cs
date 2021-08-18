@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Azure.ResourceManager.Resources;
+using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 
 namespace Cooker.Azure.Ingredients.Secrets

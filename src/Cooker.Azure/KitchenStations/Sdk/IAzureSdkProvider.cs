@@ -2,7 +2,7 @@
 using Azure.ResourceManager.KeyVault;
 using Azure.ResourceManager.Resources;
 
-namespace Cooker.Azure
+namespace Cooker.Azure.KitchenStations.Sdk
 {
     public interface IAzureSdkProvider
     {

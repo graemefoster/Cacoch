@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Azure.ResourceManager.Resources.Models;
+using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Kitchens;
 using Microsoft.Extensions.Options;
 

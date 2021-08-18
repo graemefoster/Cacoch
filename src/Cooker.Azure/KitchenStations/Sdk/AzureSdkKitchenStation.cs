@@ -3,7 +3,7 @@ using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Ingredients;
 using Cooker.Kitchens;
 
-namespace Cooker.Azure
+namespace Cooker.Azure.KitchenStations.Sdk
 {
     public class AzureSdkKitchenStation : KitchenStation<AzurePlatformContext>
     {

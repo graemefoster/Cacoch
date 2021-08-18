@@ -3,7 +3,7 @@ using Azure.Core;
 using Azure.ResourceManager.KeyVault;
 using Azure.ResourceManager.Resources;
 
-namespace Cooker.Azure
+namespace Cooker.Azure.KitchenStations.Sdk
 {
     class AzureSdkProvider : IAzureSdkProvider
     {
