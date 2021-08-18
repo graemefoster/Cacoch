@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Cooker.Azure.Ingredients.WebApp
 {
+    // ReSharper disable once UnusedType.Global
     public class WebAppBuilder : IRecipeBuilder<AzurePlatformContext>
     {
         private readonly IOptions<AzureCookerSettings> _settings;
@@ -25,17 +26,20 @@ namespace Cooker.Azure.Ingredients.WebApp
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
             var webAppName = (Ingredient.Id + "-" + platformContext.Randomness).ToLowerInvariant();
-            var template = typeof(WebAppBuilder).GetResourceContents("WebApp", "bicep");
-            return new ArmRecipe<StorageOutput>(
+            var template = typeof(WebAppBuilder).GetResourceContents("WebApp");
+            return new ArmRecipe<WebAppOutput>(
                 new ArmDefinition(
-                    $"storage-{Ingredient.Id}",
+                    $"webapp-{Ingredient.Id}",
                     template,
                     new Dictionary<string, object>()
                     {
                         { "name", webAppName },
-                        { "serverFarmId", _settings.Value.PlatformAppServicePlans[Ingredient.TypedIngredientData.Classification] },
+                        {
+                            "serverFarmId",
+                            _settings.Value.PlatformAppServicePlans[Ingredient.TypedIngredientData.Classification]
+                        },
                     }),
-                output => new StorageOutput(Ingredient.DisplayName));
+                output => new WebAppOutput(Ingredient.DisplayName));
         }
     }
 }

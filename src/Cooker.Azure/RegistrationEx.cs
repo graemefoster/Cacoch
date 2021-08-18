@@ -21,7 +21,7 @@ namespace Cooker.Azure
             var configurationSection = configuration.GetSection("AzureSettings");
             services.Configure<AzureCookerSettings>(configurationSection);
 
-            var ingredients = typeof(SecretsIngredient)
+            var recipeBuilders = typeof(SecretsIngredient)
                 .Assembly
                 .GetTypes()
                 .Where(x => x.IsAssignableTo(typeof(IIngredient)))
@@ -38,8 +38,7 @@ namespace Cooker.Azure
                                     .Any(p => p.ParameterType == x)))
                 );
 
-
-            services.RegisterCooker<AzurePlatformContext>(ingredients);
+            services.RegisterCooker<AzurePlatformContext>(recipeBuilders);
             services.AddSingleton<IArmRunner, AzureResourceManagerArmRunner>();
             services.AddSingleton<IAzureResourcesSdk, AzureResourcesSdk>();
             services.AddSingleton<KitchenStation<AzurePlatformContext>, ArmKitchenStation>();

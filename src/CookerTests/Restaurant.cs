@@ -106,11 +106,13 @@ namespace CookerTests
                         new ArmKitchenStation(runner),
                         new AzureSdkKitchenStation(sdk)
                     }),
-                new CookbookLibrary<AzurePlatformContext>(new Dictionary<Type, Type>
-                {
-                    {typeof(SecretsIngredient), typeof(AzureSecretsBuilder)},
-                    {typeof(StorageIngredient), typeof(AzureStorageBuilder)},
-                }),
+                new CookbookLibrary<AzurePlatformContext>(
+                    x =>
+                    {
+                        if (x is SecretsIngredient ingredient) return new AzureSecretsBuilder(ingredient);
+                        if (x is StorageIngredient storageIngredient) return new AzureStorageBuilder(storageIngredient);
+                        throw new NotSupportedException();
+                    }),
                 new TestContextBuilder());
             
             return restaurant;
