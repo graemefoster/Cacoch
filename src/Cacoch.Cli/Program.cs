@@ -5,6 +5,7 @@ using Cooker;
 using Cooker.Azure;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
+using Cooker.Ingredients.WebApp;
 using Cooker.Kitchens;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,7 +39,8 @@ namespace Cacoch.Cli
                     new SecretsData(
                         "grfsecretone1",
                         "grfsecretone1",
-                        new[] {"secret-one"}));
+                        new[] {"secret-one"}),
+                    new WebAppData("grfwebapp1", "grfwebapp1", "Public"));
 
                 var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
 
