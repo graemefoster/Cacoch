@@ -21,6 +21,8 @@ namespace Cooker.Azure.Ingredients.Secrets
 
         public IRecipe CreateRecipe(
             AzurePlatformContext platformContext,
+            PlatformEnvironment environment,
+            Docket docket,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
             var vaultName = (Ingredient.Id + platformContext.Randomness).ToLowerInvariant();

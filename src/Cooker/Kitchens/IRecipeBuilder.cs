@@ -19,8 +19,14 @@ namespace Cooker.Kitchens
         /// Create a recipe which will be used to cook the item
         /// </summary>
         /// <param name="platformContext"></param>
+        /// <param name="environment"></param>
+        /// <param name="docket"></param>
         /// <param name="cooked"></param>
         /// <returns></returns>
-        IRecipe CreateRecipe(TContext platformContext, IDictionary<IIngredient, ICookedIngredient> cooked);
+        IRecipe CreateRecipe(
+            TContext platformContext,
+            PlatformEnvironment environment,
+            Docket docket,
+            IDictionary<IIngredient, ICookedIngredient> cooked);
     }
 }

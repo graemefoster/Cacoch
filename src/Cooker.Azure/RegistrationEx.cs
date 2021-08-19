@@ -46,7 +46,7 @@ namespace Cooker.Azure
             services.AddSingleton<IPlatformContextBuilder<AzurePlatformContext>, AzurePlatformContextBuilder>();
 
             services.AddSingleton<IAzureSdkProvider>(sp => new AzureSdkProvider(
-                new DefaultAzureCredential(),
+                new InteractiveBrowserCredential(),
                 sp.GetRequiredService<IOptions<AzureCookerSettings>>().Value.SubscriptionId!));
         }
     }

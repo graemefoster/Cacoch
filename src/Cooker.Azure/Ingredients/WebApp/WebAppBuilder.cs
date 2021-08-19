@@ -23,9 +23,11 @@ namespace Cooker.Azure.Ingredients.WebApp
 
         public IRecipe CreateRecipe(
             AzurePlatformContext platformContext,
+            PlatformEnvironment environment,
+            Docket docket,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
-            var webAppName = (Ingredient.Id + "-" + platformContext.Randomness).ToLowerInvariant();
+            var webAppName = $"{Ingredient.Id}-{environment.ShortName}-{platformContext.Randomness}".ToLowerInvariant();
             var template = typeof(WebAppBuilder).GetResourceContents("WebApp");
             return new ArmRecipe<WebAppOutput>(
                 new ArmDefinition(

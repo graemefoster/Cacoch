@@ -18,6 +18,8 @@ namespace Cooker.Azure.Ingredients.Storage
 
         public IRecipe CreateRecipe(
             AzurePlatformContext platformContext,
+            PlatformEnvironment environment,
+            Docket docket,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
             var storageName = (Ingredient.Id + platformContext.Randomness).ToLowerInvariant();

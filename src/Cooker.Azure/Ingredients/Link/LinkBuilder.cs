@@ -22,9 +22,12 @@ namespace Cooker.Azure.Ingredients.Link
 
         public IRecipe CreateRecipe(
             AzurePlatformContext platformContext,
+            PlatformEnvironment environment,
+            Docket docket,
             IDictionary<IIngredient, ICookedIngredient> cooked)
         {
-            var linkName = $"{Ingredient.TypedIngredientData!.FromResource}-{Ingredient.TypedIngredientData.Access}-{Ingredient.TypedIngredientData.ToResource}-{platformContext.Randomness}";
+            var linkName =
+                $"{Ingredient.TypedIngredientData!.FromResource}-{Ingredient.TypedIngredientData.Access}-{Ingredient.TypedIngredientData.ToResource}-{platformContext.Randomness}";
             var template = typeof(LinkBuilder).GetResourceContents("Link");
             return new ArmRecipe<EmptyOutput>(
                 new ArmDefinition(

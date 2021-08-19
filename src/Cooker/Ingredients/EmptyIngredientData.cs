@@ -2,7 +2,7 @@
 
 namespace Cooker.Ingredients
 {
-    public record EmptyIngredientData() : IngredientData(string.Empty, string.Empty)
+    public record EmptyIngredientData() : IngredientData(string.Empty)
     {
         public override IEnumerable<IIngredient> GatherIngredients()
         {

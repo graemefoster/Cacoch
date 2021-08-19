@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Cooker.Ingredients
 {
     public static class DataCloner
     {
         public static bool Clone<T>(this T input, IDictionary<IIngredient, ICookedIngredient> edibles, out T? clone)
-            where T : IngredientData
         {
             if (!IsRecord(input.GetType())) throw new NotSupportedException("All ingredients must be record types");
             var newProps = new Dictionary<string, object?>();
@@ -19,6 +20,7 @@ namespace Cooker.Ingredients
                     {
                         return false;
                     }
+
                     newProps.Add(property.Name, newValue);
                 }
 
@@ -30,7 +32,7 @@ namespace Cooker.Ingredients
                     {
                         newProps.Add(property.Name, newDictionary);
                     }
-                    
+
                     foreach (var entry in oldDictionary!)
                     {
                         if (!DepedencyHelper.IsSatisfied(entry.Value, edibles, out var newValue))
@@ -39,17 +41,50 @@ namespace Cooker.Ingredients
                         }
 
                         newDictionary.Add(entry.Key, newValue!);
-                    }                
+                    }
+
                     newProps.Add(property.Name, newDictionary);
+                }
+
+                if (property.PropertyType.IsAssignableTo(typeof(Array)))
+                {
+                    var newList =
+                        (IList)Activator.CreateInstance(
+                            typeof(List<>).MakeGenericType(property.PropertyType.GetElementType()!))!;
+                    var oldList = (IEnumerable)property.GetValue(input)!;
+                    foreach (var item in oldList)
+                    {
+                        if (item is string s)
+                        {
+                            if (!DepedencyHelper.IsSatisfied(s, edibles, out var newValue))
+                            {
+                                return false;
+                            }
+
+                            newList.Add(newValue);
+                        }
+                        else if (item.Clone<object>(edibles, out var cloned))
+                        {
+                            newList.Add(cloned);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    var toArray = newList.GetType().GetMethod("ToArray")!;
+                    newProps.Add(property.Name, toArray.Invoke(newList, Array.Empty<object?>()));
                 }
             }
 
-            var cloneMethod = typeof(T).GetMethod("<Clone>$")!;
+            var cloneMethod = input.GetType().GetMethod("<Clone>$")!;
             clone = (T)cloneMethod.Invoke(input, new object[] { })!;
             foreach (var replacement in newProps)
             {
                 clone.GetType().GetProperty(replacement.Key)!.SetValue(clone, replacement.Value);
             }
+
             return true;
         }
 

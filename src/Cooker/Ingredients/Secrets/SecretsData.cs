@@ -6,9 +6,9 @@ namespace Cooker.Ingredients.Secrets
     [CookerResource("secrets")]
     public record SecretsData(
         string Id,
-        string Name,
-        [DefaultValue(new string[] { })] string[] Secrets
-    ) : IngredientData(Id, Name)
+        [DefaultValue(new string[] { })] string[] Secrets,
+        SecretsData.KnownSecret[]? KnownSecrets
+    ) : IngredientData(Id)
     {
         public override IEnumerable<IIngredient> GatherIngredients()
         {
@@ -16,5 +16,7 @@ namespace Cooker.Ingredients.Secrets
         }
 
         public record SecretsLink(string Resource, LinkAccess Link) : CookerLink(Resource, Link);
+
+        public record KnownSecret(string Name, string Value);
     }
 }

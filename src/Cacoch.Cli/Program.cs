@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Threading.Tasks;
 using Cooker;
 using Cooker.Azure;
 using Cooker.Ingredients;
+using Cooker.Ingredients.OAuth2;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Ingredients.WebApp;
@@ -29,25 +29,30 @@ namespace Cacoch.Cli
             {
                 var restaurant = host.Services.GetRequiredService<IRestaurant>();
                 var docket = new Docket(
+                        new Guid("6e82545f-c7a6-4a3a-bf3d-cc34fd82e68b"),
                         "cacochtest",
                         new StorageData(
                             "storageone",
-                            "Storage One",
                             Array.Empty<string>(),
                             Array.Empty<string>(),
                             new[] { "my-container" }),
                         new SecretsData(
                             "grfsecretone1",
-                            "grfsecretone1",
-                            new[] { "secret-one" }),
+                            new[] { "secret-one" },
+                            new [] {new SecretsData.KnownSecret("cacoch-test-client-secret", "[cacoch-test-client-secret.ClientSecret]")}),
+                        new OAuthClientData(
+                            "cacoch-test-client",
+                            "Cacoch Test OAuth Client",
+                            new[] { "https://localhost:5001/signin-oidc" }),
                         new WebAppData(
                             "grfwebapp1",
-                            "grfwebapp1",
                             "Public",
-                            new Dictionary<string, string>()
+                            new Dictionary<string, string>
                             {
                                 ["setting1"] = "hello-world",
-                                ["setting2"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone1.SecretUrls.secret-one])"
+                                ["setting2"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone1.SecretUrls.secret-one])",
+                                ["AzureAd:ClientId"] = "[cacoch-test-client.Identity]",
+                                ["AzureAd:ClientSecret"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone1.SecretUrls.cacoch-test-client-secret])",
                             },
                             new[]
                             {

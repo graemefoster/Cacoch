@@ -5,11 +5,10 @@ namespace Cooker.Ingredients.WebApp
     [CookerResource("webapp")]
     public record WebAppData(
             string Id,
-            string Name,
             string Classification,
             Dictionary<string, string> Configuration,
             IEnumerable<CookerLink>? Links)
-        : IngredientData(Id, Name), ICanAccessOtherResources
+        : IngredientData(Id), ICanAccessOtherResources
     {
         public override IEnumerable<IIngredient> GatherIngredients()
         {

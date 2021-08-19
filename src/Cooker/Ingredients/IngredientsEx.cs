@@ -12,7 +12,6 @@ namespace Cooker.Ingredients
             return resource.Links.Select(x => new LinkIngredient(
                 new LinkData(
                     $"link-{resource.Id}-{x.Resource}-{x.Link}",
-                    "link",
                     resource.Id,
                     x.Resource,
                     x.Link)));

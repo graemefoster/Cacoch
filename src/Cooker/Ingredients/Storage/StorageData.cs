@@ -5,10 +5,9 @@ namespace Cooker.Ingredients.Storage
     [CookerResource("secrets")]
     public record StorageData(
         string Id,
-        string DisplayName,
         string[] Tables,
         string[] Queues,
-        string[] Containers) : IngredientData(Id, DisplayName)
+        string[] Containers) : IngredientData(Id)
     {
         public override IEnumerable<IIngredient> GatherIngredients()
         {

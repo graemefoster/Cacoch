@@ -44,7 +44,8 @@ namespace Cooker
             while (allRemainingInstructions.Any() || twoStageRecipesBeingCooked.Any())
             {
                 var recipesReadyForCooking =
-                    CreateRecipesThatAreReadyForCooking(allRemainingInstructions, cookedRecipes, context);
+                    CreateRecipesThatAreReadyForCooking(docket, platformEnvironment, allRemainingInstructions,
+                        cookedRecipes, context);
 
                 foreach (var intermediateRecipe in twoStageRecipesBeingCooked)
                 {
@@ -82,13 +83,17 @@ namespace Cooker
         }
 
         private static Dictionary<IIngredient, IRecipe> CreateRecipesThatAreReadyForCooking(
+            Docket docket,
+            PlatformEnvironment environment,
             List<IngredientAndCookbook> allRemainingInstructions,
             Dictionary<IIngredient, ICookedIngredient> cookedRecipes,
             TContext context)
         {
             return allRemainingInstructions
                 .Where(x => x.Ingredient.PrepareForCook(cookedRecipes))
-                .Select(x => new IngredientAndRecipe(x.Ingredient, x.Cookbook.CreateRecipe(context, cookedRecipes)))
+                .Select(x =>
+                    new IngredientAndRecipe(x.Ingredient,
+                        x.Cookbook.CreateRecipe(context, environment, docket, cookedRecipes)))
                 .ToDictionary(x => x.Ingredient, x => x.Recipe);
         }
     }
