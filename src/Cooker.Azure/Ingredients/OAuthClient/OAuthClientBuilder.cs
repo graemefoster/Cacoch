@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 using Cooker.Ingredients.OAuth2;
@@ -38,34 +39,66 @@ namespace Cooker.Azure.Ingredients.OAuthClient
 
                     if (aadApplication == null)
                     {
-                        aadApplication = await graphClient.Applications.Request().AddAsync(new Application()
-                        {
-                            Id = name,
-                            DisplayName = Ingredient.TypedIngredientData!.DisplayName,
-                            Tags = new[] { docket.Id.ToString(), name, environment.ShortName }
-                        });
+                        aadApplication = await CreateAadApplication(environment, docket, graphClient, name);
                     }
+
+                    await CreateServicePrincipal(graphClient, aadApplication!);
 
                     string? password = null;
                     if (!aadApplication.PasswordCredentials.Any())
                     {
-                        password = (await graphClient.Applications[aadApplication.Id].AddPassword(
-                            new PasswordCredential()
-                            {
-                                DisplayName = "Cooker Client Secret",
-                            }).Request().PostAsync()).SecretText;
+                        password = await CreateSecret(graphClient, aadApplication);
                     }
 
-                    await graphClient.Applications[aadApplication.Id].Request().UpdateAsync(new Application()
-                    {
-                        Web = new WebApplication()
-                        {
-                            RedirectUris = Ingredient.TypedIngredientData!.RedirectUrls
-                        }
-                    });
+                    await UpdateAadApplication(graphClient, aadApplication);
 
                     return new OAuthClientOutput(Ingredient.TypedIngredientData!, aadApplication.AppId, password);
                 });
         }
+
+        private async Task UpdateAadApplication(GraphServiceClient graphClient, Application aadApplication)
+        {
+            await graphClient.Applications[aadApplication.Id].Request().UpdateAsync(new Application()
+            {
+                IdentifierUris = new [] { $"api://{aadApplication.Id}" },
+                Web = new WebApplication()
+                {
+                    RedirectUris = Ingredient.TypedIngredientData!.RedirectUrls
+                }
+            });
+        }
+
+        private static async Task<string> CreateSecret(GraphServiceClient graphClient, Application aadApplication)
+        {
+            return (await graphClient.Applications[aadApplication.Id].AddPassword(
+                new PasswordCredential()
+                {
+                    DisplayName = "Cooker Client Secret",
+                }).Request().PostAsync()).SecretText;
+        }
+
+        private async Task<Application> CreateAadApplication(PlatformEnvironment environment, Docket docket, GraphServiceClient graphClient, string? name)
+        {
+            return await graphClient.Applications.Request().AddAsync(new Application()
+            {
+                Id = name,
+                DisplayName = Ingredient.TypedIngredientData!.DisplayName,
+                Tags = new[] { docket.Id.ToString(), name, environment.ShortName }
+            });
+        }
+        
+        private async Task<ServicePrincipal> CreateServicePrincipal(GraphServiceClient graphServiceClient, Application application)
+        {
+            var sps = await graphServiceClient.ServicePrincipals.Request().Filter($"appId eq '{application.AppId}'")
+                .GetAsync();
+            
+            var sp = sps.SingleOrDefault() ?? await graphServiceClient.ServicePrincipals.Request().AddAsync(new ServicePrincipal()
+            {
+                AppId = application.AppId
+            });
+
+            return sp;
+        }
+
     }
 }
