@@ -12,7 +12,8 @@ namespace Cooker.Ingredients.WebApp
     {
         public override IEnumerable<IIngredient> GatherIngredients()
         {
-            yield return new WebAppIngredient(this);
+            yield return new WebAppIngredient(new WebAppDataInternal(Id, Classification, Links));
+            yield return new WebAppConfigurationIngredient(new WebAppConfigurationDataInternal($"{Id}-configuration", $"[{Id}.PlatformName]", Configuration));
             foreach (var link in this.Gather())
             {
                 yield return link;

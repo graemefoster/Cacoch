@@ -36,26 +36,35 @@ namespace Cooker.Azure.Ingredients.OAuthClient
                     var aadApplication = aadApplications.SingleOrDefault(x =>
                         x.Tags.Contains(name) && x.Tags.Contains(environment.ShortName));
 
-                    if (aadApplication != null)
+                    if (aadApplication == null)
                     {
-                        return new OAuthClientOutput(Ingredient.TypedIngredientData!, aadApplication.AppId, null);
+                        aadApplication = await graphClient.Applications.Request().AddAsync(new Application()
+                        {
+                            Id = name,
+                            DisplayName = Ingredient.TypedIngredientData!.DisplayName,
+                            Tags = new[] { docket.Id.ToString(), name, environment.ShortName }
+                        });
                     }
 
-                    aadApplication = await graphClient.Applications.Request().AddAsync(new Application()
+                    string? password = null;
+                    if (!aadApplication.PasswordCredentials.Any())
                     {
-                        Id = name,
-                        DisplayName = Ingredient.TypedIngredientData!.DisplayName,
-                        Tags = new[] { docket.Id.ToString(), name, environment.ShortName }
+                        password = (await graphClient.Applications[aadApplication.Id].AddPassword(
+                            new PasswordCredential()
+                            {
+                                DisplayName = "Cooker Client Secret",
+                            }).Request().PostAsync()).SecretText;
+                    }
+
+                    await graphClient.Applications[aadApplication.Id].Request().UpdateAsync(new Application()
+                    {
+                        Web = new WebApplication()
+                        {
+                            RedirectUris = Ingredient.TypedIngredientData!.RedirectUrls
+                        }
                     });
 
-                    var password = await graphClient.Applications[aadApplication.Id].AddPassword(
-                        new PasswordCredential()
-                        {
-                            DisplayName = "Cooker Client Secret",
-                        }).Request().PostAsync();
-
-                    return new OAuthClientOutput(Ingredient.TypedIngredientData!, aadApplication.AppId,
-                        password.SecretText);
+                    return new OAuthClientOutput(Ingredient.TypedIngredientData!, aadApplication.AppId, password);
                 });
         }
     }

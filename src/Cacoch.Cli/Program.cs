@@ -37,26 +37,26 @@ namespace Cacoch.Cli
                             Array.Empty<string>(),
                             new[] { "my-container" }),
                         new SecretsData(
-                            "grfsecretone1",
+                            "grfsecretone2",
                             new[] { "secret-one" },
-                            new [] {new SecretsData.KnownSecret("cacoch-test-client-secret", "[cacoch-test-client-secret.ClientSecret]")}),
+                            new [] {new SecretsData.KnownSecret("cacoch-test-client-secret", "[cacoch-test-client.ClientSecret]")}),
                         new OAuthClientData(
                             "cacoch-test-client",
                             "Cacoch Test OAuth Client",
-                            new[] { "https://localhost:5001/signin-oidc" }),
+                            new[] { "https://localhost:5001/signin-oidc", "https://[grfwebapp1.HostName]/signin-oidc" }),
                         new WebAppData(
                             "grfwebapp1",
                             "Public",
                             new Dictionary<string, string>
                             {
                                 ["setting1"] = "hello-world",
-                                ["setting2"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone1.SecretUrls.secret-one])",
-                                ["AzureAd:ClientId"] = "[cacoch-test-client.Identity]",
-                                ["AzureAd:ClientSecret"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone1.SecretUrls.cacoch-test-client-secret])",
+                                ["setting2"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.secret-one])",
+                                ["AZUREAD_CLIENTID"] = "[cacoch-test-client.Identity]",
+                                ["AZUREAD_CLIENTSECRET"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.cacoch-test-client-secret])",
                             },
                             new[]
                             {
-                                new SecretsData.SecretsLink("grfsecretone1", LinkAccess.Read)
+                                new SecretsData.SecretsLink("grfsecretone2", LinkAccess.Read)
                             }))
                     ;
 

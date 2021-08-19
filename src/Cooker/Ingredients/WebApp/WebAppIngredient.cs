@@ -1,8 +1,8 @@
 ﻿namespace Cooker.Ingredients.WebApp
 {
-    public class WebAppIngredient : Ingredient<WebAppData>
+    public class WebAppIngredient : Ingredient<WebAppDataInternal>
     {
-        internal WebAppIngredient(WebAppData data) : base(data)
+        internal WebAppIngredient(WebAppDataInternal data) : base(data)
         {
         }
     }

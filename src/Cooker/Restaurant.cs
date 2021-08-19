@@ -55,7 +55,7 @@ namespace Cooker
                 if (!recipesReadyForCooking.Any())
                 {
                     throw new InvalidOperationException(
-                        "Remaining recipes but not can be built. Suspected dependency issue");
+                        $"Remaining recipes but not can be built. Suspected dependency issue. Remaining recipes: {string.Join(',', allRemainingInstructions.Select(x => x.Ingredient.Id))}.");
                 }
 
                 var cooked = await Task.WhenAll(_kitchen.CookNextRecipes(context, docket, recipesReadyForCooking));

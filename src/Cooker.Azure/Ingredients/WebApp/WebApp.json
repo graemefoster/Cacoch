@@ -7,9 +7,6 @@
     },
     "serverFarmId": {
       "type": "string"
-    },
-    "appSettings" : {
-      "type" : "array"
     }
   },
   "resources": [
@@ -24,9 +21,7 @@
       "properties": {
         "serverFarmId": "[parameters('serverFarmId')]",
         "siteConfig": {
-          "linuxFxVersion": "DOTNETCORE|5.0",
-          "appSettings" : "[parameters('appSettings')]"
-        }
+          "linuxFxVersion": "DOTNETCORE|5.0"        }
       }
     }
   ],
@@ -34,6 +29,10 @@
     "resourceId": {
       "type": "string",
       "value": "[resourceId('Microsoft.Web/sites', parameters('name'))]"
+    },
+    "hostName": {
+      "type": "string",
+      "value": "[reference(parameters('name')).defaultHostName]"
     },
     "servicePrincipalId": {
       "type": "string",

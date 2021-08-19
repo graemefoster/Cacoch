@@ -51,7 +51,20 @@ namespace Cooker.Azure.Ingredients.Secrets
                         return new ExistingSecretsOutput(Array.Empty<string>());
                     })
                     .Then(i =>
-                        new ArmRecipe<SecretsOutput>(
+                    {
+                        var allSecrets =
+                            Ingredient.TypedIngredientData!.Secrets.Select(
+                                    x => new SecretsData.KnownSecret(x, $"{Guid.NewGuid()}-{Guid.NewGuid()}"))
+                                .Union(Ingredient.TypedIngredientData!.KnownSecrets ??
+                                       Array.Empty<SecretsData.KnownSecret>())
+                                .ToArray();
+
+                        var secretsToCreate = allSecrets
+                            .Where(x => !i.ExistingSecrets.Contains(x.Name))
+                            .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                            .ToArray();
+
+                        return new ArmRecipe<SecretsOutput>(
                             new ArmDefinition(
                                 $"secrets-{Ingredient.Id}",
                                 typeof(AzureSecretsBuilder).GetResourceContents("Secrets"),
@@ -60,10 +73,8 @@ namespace Cooker.Azure.Ingredients.Secrets
                                     {
                                         "secrets", new
                                         {
-                                            array = Ingredient.TypedIngredientData!.Secrets
-                                                .Except(i.ExistingSecrets)
-                                                .Select(x => new
-                                                    { name = x, value = $"{Guid.NewGuid()}-{Guid.NewGuid()}" })
+                                            array = secretsToCreate
+                                                .Select(x => new { name = x.Name, value = x.Value })
                                                 .ToArray()
                                         }
                                     },
@@ -76,9 +87,9 @@ namespace Cooker.Azure.Ingredients.Secrets
                                 return new SecretsOutput(
                                     Ingredient.TypedIngredientData,
                                     (string)o["resourceId"],
-                                    Ingredient.TypedIngredientData.Secrets.ToDictionary(x => x, x => $"{vaultUrl}secrets/{x}"));
-                            })
-                    );
+                                    allSecrets.ToDictionary(x => x.Name, x => $"{vaultUrl}secrets/{x.Name}"));
+                            });
+                    });
         }
 
         public class ExistingSecretsOutput : ICookedIngredient

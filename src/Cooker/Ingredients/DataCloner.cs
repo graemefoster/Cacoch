@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Cooker.Ingredients
 {
@@ -11,7 +10,8 @@ namespace Cooker.Ingredients
         {
             if (!IsRecord(input.GetType())) throw new NotSupportedException("All ingredients must be record types");
             var newProps = new Dictionary<string, object?>();
-            clone = default(T);
+            clone = default;
+            
             foreach (var property in input.GetType().GetProperties())
             {
                 if (property.PropertyType == typeof(string))

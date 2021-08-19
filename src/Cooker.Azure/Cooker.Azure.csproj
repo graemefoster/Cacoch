@@ -10,6 +10,7 @@
         <EmbeddedResource Include="Ingredients\Storage\Storage.json" />
         <EmbeddedResource Include="Ingredients\Secrets\Secrets.json" />
         <EmbeddedResource Include="Ingredients\WebApp\WebApp.json" />
+        <EmbeddedResource Include="Ingredients\WebApp\WebAppConfiguration.json" />
     </ItemGroup>
 
     <ItemGroup>

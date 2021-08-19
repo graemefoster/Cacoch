@@ -1,4 +1,4 @@
 ﻿namespace Cooker.Ingredients.WebApp
 {
-    public record WebAppOutput(WebAppData Original, string Identity) : CookedIngredient<WebAppData>(Original), IHaveRuntimeIdentity;
+    public record WebAppOutput(WebAppDataInternal Original, string PlatformName, string HostName, string Identity) : CookedIngredient<WebAppDataInternal>(Original), IHaveRuntimeIdentity;
 }
