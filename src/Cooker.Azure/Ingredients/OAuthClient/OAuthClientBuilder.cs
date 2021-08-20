@@ -42,7 +42,7 @@ namespace Cooker.Azure.Ingredients.OAuthClient
                         aadApplication = await CreateAadApplication(environment, docket, graphClient, name);
                     }
 
-                    await CreateServicePrincipal(graphClient, aadApplication!);
+                    var servicePrincipal = await CreateServicePrincipal(graphClient, aadApplication!);
 
                     string? password = null;
                     if (!aadApplication.PasswordCredentials.Any())
@@ -52,7 +52,11 @@ namespace Cooker.Azure.Ingredients.OAuthClient
 
                     await UpdateAadApplication(graphClient, aadApplication);
 
-                    return new OAuthClientOutput(Ingredient.TypedIngredientData!, aadApplication.AppId, password);
+                    return new OAuthClientOutput(
+                        Ingredient.TypedIngredientData!,
+                        platformContext.TenantId,
+                        aadApplication.AppId, 
+                        password);
                 });
         }
 
@@ -61,9 +65,15 @@ namespace Cooker.Azure.Ingredients.OAuthClient
             await graphClient.Applications[aadApplication.Id].Request().UpdateAsync(new Application()
             {
                 IdentifierUris = new [] { $"api://{aadApplication.Id}" },
+                SignInAudience = "AzureADMyOrg",
                 Web = new WebApplication()
                 {
-                    RedirectUris = Ingredient.TypedIngredientData!.RedirectUrls
+                    RedirectUris = Ingredient.TypedIngredientData!.RedirectUrls,
+                    ImplicitGrantSettings = new ImplicitGrantSettings()
+                    {
+                        EnableIdTokenIssuance = true,
+                        EnableAccessTokenIssuance = false
+                    }
                 }
             });
         }

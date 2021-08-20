@@ -26,5 +26,6 @@ namespace Cooker.Azure
         public string ResourceGroupName { get; }
         public string Randomness { get; }
         public string DeploymentPrincipalId => _settings.DeploymentPrincipalId;
+        public string TenantId => _settings.TenantId;
     }
 }

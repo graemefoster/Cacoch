@@ -11,6 +11,7 @@ using Cooker.Ingredients.WebApp;
 using Cooker.Kitchens;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace Cacoch.Cli
@@ -51,8 +52,9 @@ namespace Cacoch.Cli
                             {
                                 ["setting1"] = "hello-world",
                                 ["setting2"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.secret-one])",
-                                ["AZUREAD_CLIENTID"] = "[cacoch-test-client.Identity]",
-                                ["AZUREAD_CLIENTSECRET"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.cacoch-test-client-secret])",
+                                ["AZUREAD__TENANTID"] = "[cacoch-test-client.Tenant]",
+                                ["AZUREAD__CLIENTID"] = "[cacoch-test-client.Identity]",
+                                ["AZUREAD__CLIENTSECRET"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.cacoch-test-client-secret])",
                             },
                             new[]
                             {
@@ -61,6 +63,8 @@ namespace Cacoch.Cli
                     ;
 
                 var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
+                
+                Console.WriteLine(JsonConvert.SerializeObject(meal, Formatting.Indented));
 
                 // await builder!.Deploy(
                 //     new Manifest(
