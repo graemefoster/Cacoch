@@ -2,6 +2,6 @@
 {
     public enum LinkAccess
     {
-        Read, Write
+        Read, ReadWrite
     }
 }

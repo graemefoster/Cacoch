@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cooker.Azure.KitchenStations.Arm;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Link;
+using Cooker.Ingredients.NoSql;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
@@ -21,6 +22,8 @@ namespace Cooker.Azure.Ingredients.Link
         private string StorageBlobDataContributor = "ba92f5b4-2d11-453d-a403-e96b0029c9fe";
         private string StorageQueueDataContributor = "974c5e8b-45b9-4653-ba55-5f855dd0fb88";
         private string StorageTableDataContributor = "0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3";
+        private string CosmosDbReader = "00000000-0000-0000-0000-000000000001";
+        private string CosmosDbContributor = "00000000-0000-0000-0000-000000000002";
 
         public LinkBuilder(LinkIngredient ingredient)
         {
@@ -79,6 +82,17 @@ namespace Cooker.Azure.Ingredients.Link
                     yield return StorageBlobDataContributor;
                     yield return StorageQueueDataContributor;
                     yield return StorageTableDataContributor;
+                }
+            }
+            if (ingredientTo is NoSqlOutput)
+            {
+                if (access == LinkAccess.Read)
+                {
+                    yield return CosmosDbReader;
+                }
+                else
+                {
+                    yield return CosmosDbContributor;
                 }
             }
         }

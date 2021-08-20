@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Cooker;
 using Cooker.Azure;
 using Cooker.Ingredients;
+using Cooker.Ingredients.NoSql;
 using Cooker.Ingredients.OAuth2;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
@@ -37,14 +38,22 @@ namespace Cacoch.Cli
                             Array.Empty<string>(),
                             Array.Empty<string>(),
                             new[] { "my-container" }),
+                        new NoSqlData("grfnosql1", new[] { "container-1", "container-2" }),
                         new SecretsData(
                             "grfsecretone2",
                             new[] { "secret-one" },
-                            new [] {new SecretsData.KnownSecret("cacoch-test-client-secret", "[cacoch-test-client.ClientSecret]")}),
+                            new[]
+                            {
+                                new SecretsData.KnownSecret("cacoch-test-client-secret",
+                                    "[cacoch-test-client.ClientSecret]")
+                            }),
                         new OAuthClientData(
                             "cacoch-test-client",
                             "Cacoch Test OAuth Client",
-                            new[] { "https://localhost:5001/signin-oidc", "https://[grfwebapp1.HostName]/signin-oidc" }),
+                            new[]
+                            {
+                                "https://localhost:5001/signin-oidc", "https://[grfwebapp1.HostName]/signin-oidc"
+                            }),
                         new WebAppData(
                             "grfwebapp1",
                             "Public",
@@ -54,17 +63,19 @@ namespace Cacoch.Cli
                                 ["setting2"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.secret-one])",
                                 ["AZUREAD__TENANTID"] = "[cacoch-test-client.Tenant]",
                                 ["AZUREAD__CLIENTID"] = "[cacoch-test-client.Identity]",
-                                ["AZUREAD__CLIENTSECRET"] = "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.cacoch-test-client-secret])",
+                                ["AZUREAD__CLIENTSECRET"] =
+                                    "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.cacoch-test-client-secret])",
                             },
                             new[]
                             {
                                 new CookerLink("grfsecretone2", LinkAccess.Read),
-                                new CookerLink("storageone", LinkAccess.Write)
+                                new CookerLink("storageone", LinkAccess.ReadWrite),
+                                new CookerLink("grfnosql1", LinkAccess.ReadWrite),
                             }))
                     ;
 
                 var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
-                
+
                 Console.WriteLine(JsonConvert.SerializeObject(meal, Formatting.Indented));
 
                 // await builder!.Deploy(
