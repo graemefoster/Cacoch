@@ -39,7 +39,12 @@ namespace CookerTests
         public void can_navigate_property_trees_with_lists()
         {
             var edibleApp = new OAuthClientOutput(
-                new OAuthClientData("test", "test", Array.Empty<string>()), "12345",
+                new OAuthClientData(
+                    "test",
+                    "test",
+                    Array.Empty<string>()),
+                "00000",
+                "12345",
                 "secret");
 
             var oauthIngredient = new OAuthClientIngredient(edibleApp.Data);

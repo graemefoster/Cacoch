@@ -13,6 +13,7 @@ using Cooker.Ingredients.OAuth2;
 using Cooker.Ingredients.Secrets;
 using Cooker.Ingredients.Storage;
 using Cooker.Kitchens;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using Xunit;
 
@@ -124,7 +125,8 @@ namespace CookerTests
                         if (x is OAuthClientIngredient oauthIngredient) return new OAuthClientBuilder(oauthIngredient);
                         throw new NotSupportedException();
                     }),
-                new TestContextBuilder());
+                new TestContextBuilder(),
+                new NullLogger<Restaurant<AzurePlatformContext>>());
 
             return restaurant;
         }

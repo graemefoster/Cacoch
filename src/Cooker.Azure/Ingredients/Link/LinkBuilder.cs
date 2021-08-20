@@ -84,6 +84,7 @@ namespace Cooker.Azure.Ingredients.Link
                     yield return StorageTableDataContributor;
                 }
             }
+            
             if (ingredientTo is NoSqlOutput)
             {
                 if (access == LinkAccess.Read)

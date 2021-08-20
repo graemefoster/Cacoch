@@ -38,7 +38,7 @@ namespace Cacoch.Cli
                             Array.Empty<string>(),
                             Array.Empty<string>(),
                             new[] { "my-container" }),
-                        new NoSqlData("grfnosql1", new[] { "container-1", "container-2" }),
+                        // new NoSqlData("grfnosql1", new[] { "container-1", "container-2" }),
                         new SecretsData(
                             "grfsecretone2",
                             new[] { "secret-one" },
@@ -70,7 +70,7 @@ namespace Cacoch.Cli
                             {
                                 new CookerLink("grfsecretone2", LinkAccess.Read),
                                 new CookerLink("storageone", LinkAccess.ReadWrite),
-                                new CookerLink("grfnosql1", LinkAccess.ReadWrite),
+                                // new CookerLink("grfnosql1", LinkAccess.ReadWrite),
                             }))
                     ;
 
