@@ -35,7 +35,9 @@ namespace Cooker.Azure.Ingredients.Storage
                         { "queues", Ingredient.TypedIngredientData.Queues },
                         { "containers", Ingredient.TypedIngredientData.Containers }
                     }),
-                output => new StorageOutput(Ingredient.TypedIngredientData)
+                output => new StorageOutput(
+                    Ingredient.TypedIngredientData, 
+                    (string)output["resourceId"])
             );
         }
     }

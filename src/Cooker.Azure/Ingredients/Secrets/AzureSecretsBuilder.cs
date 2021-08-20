@@ -100,8 +100,6 @@ namespace Cooker.Azure.Ingredients.Secrets
             {
                 ExistingSecrets = existingSecrets;
             }
-
-            public string? PlatformId { get; }
         }
     }
 }

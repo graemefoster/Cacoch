@@ -58,7 +58,8 @@ namespace Cacoch.Cli
                             },
                             new[]
                             {
-                                new SecretsData.SecretsLink("grfsecretone2", LinkAccess.Read)
+                                new CookerLink("grfsecretone2", LinkAccess.Read),
+                                new CookerLink("storageone", LinkAccess.Write)
                             }))
                     ;
 

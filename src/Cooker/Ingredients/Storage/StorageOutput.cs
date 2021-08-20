@@ -1,4 +1,5 @@
 ﻿namespace Cooker.Ingredients.Storage
 {
-    public record StorageOutput(StorageData Data) : CookedIngredient<StorageData>(Data);
+    public record StorageOutput(StorageData Data, string PlatformId) : CookedIngredient<StorageData>(Data),
+        IHavePlatformIdentity;
 }

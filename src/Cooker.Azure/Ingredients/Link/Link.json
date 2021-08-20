@@ -11,20 +11,24 @@
     "requestorPrincipalId" : {
       "type" : "string"
     },
-    "roleId" : {
-      "type" : "string"
+    "roleIds" : {
+      "type" : "array"
     }
   },
   "resources": [
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2018-09-01-preview",
-      "name": "[guid(parameters('name'))]",
+      "name": "[guid(concat(parameters('name'), '-', parameters('roleIds')[copyIndex()]))]",
       "scope": "[parameters('scope')]",
       "properties": {
-        "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', parameters('roleId'))]",
+        "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', parameters('roleIds')[copyIndex()])]",
         "principalId": "[parameters('requestorPrincipalId')]",
         "principalType": "ServicePrincipal"
+      },
+      "copy": {
+        "name": "roles",
+        "count": "[length(parameters('roleIds'))]"
       }
     }
   ]

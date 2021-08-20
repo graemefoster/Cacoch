@@ -15,8 +15,6 @@ namespace Cooker.Ingredients.Secrets
             yield return new SecretsIngredient(this);
         }
 
-        public record SecretsLink(string Resource, LinkAccess Link) : CookerLink(Resource, Link);
-
         public record KnownSecret(string Name, string Value);
     }
 }
