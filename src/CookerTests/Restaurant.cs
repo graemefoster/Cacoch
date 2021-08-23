@@ -6,7 +6,7 @@ using Cooker.Azure;
 using Cooker.Azure.Ingredients.OAuthClient;
 using Cooker.Azure.Ingredients.Secrets;
 using Cooker.Azure.Ingredients.Storage;
-using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.AzureResourceManager;
 using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 using Cooker.Ingredients.OAuth2;

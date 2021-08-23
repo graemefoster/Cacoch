@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Cooker.Azure.Ingredients.Storage;
-using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.AzureResourceManager;
 using Cooker.Ingredients;
 using Cooker.Ingredients.NoSql;
 using Cooker.Kitchens;

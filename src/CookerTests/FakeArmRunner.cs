@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Cooker.Azure;
-using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.AzureResourceManager;
 
 namespace CookerTests
 {

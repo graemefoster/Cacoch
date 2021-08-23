@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Cooker.Azure.Ingredients.WebApp;
-using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.AzureResourceManager;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Functions;
 using Cooker.Kitchens;

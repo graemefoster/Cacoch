@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Azure.Security.KeyVault.Secrets;
-using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.AzureResourceManager;
 using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;

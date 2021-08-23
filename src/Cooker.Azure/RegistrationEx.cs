@@ -1,7 +1,7 @@
 using System.Linq;
 using Azure.Identity;
 using Cooker.Azure.Ingredients.Secrets;
-using Cooker.Azure.KitchenStations.Arm;
+using Cooker.Azure.KitchenStations.AzureResourceManager;
 using Cooker.Azure.KitchenStations.Sdk;
 using Cooker.Ingredients;
 using Cooker.Ingredients.Secrets;
