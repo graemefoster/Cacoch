@@ -6,6 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="Ingredients\Functions\Function.json" />
+      <EmbeddedResource Include="Ingredients\Functions\FunctionConfiguration.json" />
       <EmbeddedResource Include="Ingredients\Link\Link.json" />
       <EmbeddedResource Include="Ingredients\NoSql\NoSql.json" />
         <EmbeddedResource Include="Ingredients\Storage\Storage.json" />

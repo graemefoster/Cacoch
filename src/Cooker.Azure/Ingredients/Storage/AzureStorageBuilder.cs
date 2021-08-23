@@ -37,7 +37,8 @@ namespace Cooker.Azure.Ingredients.Storage
                     }),
                 output => new StorageOutput(
                     Ingredient.TypedIngredientData, 
-                    (string)output["resourceId"])
+                    (string)output["resourceId"],
+                    storageName)
             );
         }
     }
