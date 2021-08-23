@@ -123,11 +123,6 @@
         "locationName": "[parameters('primaryRegion')]",
         "failoverPriority": 0,
         "isZoneRedundant": false
-      },
-      {
-        "locationName": "[parameters('secondaryRegion')]",
-        "failoverPriority": 1,
-        "isZoneRedundant": false
       }
     ]
   },
@@ -187,5 +182,15 @@
         "count": "[length(parameters('containers'))]"
       }
     }
-  ]
+  ],
+  "outputs" : {
+    "resourceId" : {
+      "type" : "string",
+      "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('name'))]"
+    },
+    "connectionString": {
+      "type": "string",
+      "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('name')), '2019-12-12').connectionStrings[0].connectionString]"
+    }
+  }
 }

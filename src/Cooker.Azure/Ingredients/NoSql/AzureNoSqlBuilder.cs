@@ -26,12 +26,13 @@ namespace Cooker.Azure.Ingredients.NoSql
         {
             var name = (Ingredient.Id + platformContext.Randomness).ToLowerInvariant();
             var armTemplate = typeof(AzureNoSqlBuilder).GetResourceContents("NoSql");
+            var secondaryRegion = GetSecondaryRegion(platformContext.PrimaryLocation, out var newPrimaryRegion);
 
             var parameters = new Dictionary<string, object>
             {
                 ["name"] = name,
-                ["primaryRegion"] = platformContext.PrimaryLocation,
-                ["secondaryRegion"] = GetSecondaryRegion(platformContext.PrimaryLocation),
+                ["primaryRegion"] = newPrimaryRegion,
+                ["secondaryRegion"] = secondaryRegion,
                 ["databaseName"] = name,
                 ["containers"] = Ingredient.TypedIngredientData!.Containers,
             };
@@ -43,16 +44,23 @@ namespace Cooker.Azure.Ingredients.NoSql
                     parameters),
                 output => new NoSqlOutput(
                     Ingredient.TypedIngredientData,
-                    (string)output["resourceId"])
+                    (string)output["resourceId"],
+                    (string)output["connectionString"]
+                    )
             );
         }
 
-        private string GetSecondaryRegion(string region)
+        private string GetSecondaryRegion(string preferredRegion, out string primaryRegion)
         {
-            switch (region)
+            switch (preferredRegion)
             {
-                case "australiaeast": return "australiasoutheast";
-                default: throw new NotSupportedException($"Need to define a secondary region for {region}");
+                case "australiaeast":
+                {
+                    primaryRegion = "australiasoutheast"; //capacity issues in australia east in my subscription!!
+                    return "australiaeast";
+                }
+
+                default: throw new NotSupportedException($"Need to define a secondary region for {preferredRegion}");
             }
         }
     }

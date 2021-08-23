@@ -38,14 +38,16 @@ namespace Cacoch.Cli
                             Array.Empty<string>(),
                             Array.Empty<string>(),
                             new[] { "my-container" }),
-                        // new NoSqlData("grfnosql1", new[] { "container-1", "container-2" }),
+                        new NoSqlData("grfnosql1", new[] { "container-1", "container-2" }),
                         new SecretsData(
                             "grfsecretone2",
                             new[] { "secret-one" },
                             new[]
                             {
                                 new SecretsData.KnownSecret("cacoch-test-client-secret",
-                                    "[cacoch-test-client.ClientSecret]")
+                                    "[cacoch-test-client.ClientSecret]"),
+                                new SecretsData.KnownSecret("grfnosql1-connectionstring",
+                                    "[grfnosql1.ConnectionString]"),
                             }),
                         new OAuthClientData(
                             "cacoch-test-client",
@@ -65,71 +67,19 @@ namespace Cacoch.Cli
                                 ["AZUREAD__CLIENTID"] = "[cacoch-test-client.Identity]",
                                 ["AZUREAD__CLIENTSECRET"] =
                                     "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.cacoch-test-client-secret])",
+                                ["Settings__GRF_CONNECTIONSTRING"] =
+                                    "@Microsoft.KeyVault(SecretUri=[grfsecretone2.SecretUrls.grfnosql1-connectionstring])",
                             },
                             new[]
                             {
                                 new CookerLink("grfsecretone2", LinkAccess.Read),
                                 new CookerLink("storageone", LinkAccess.ReadWrite),
-                                // new CookerLink("grfnosql1", LinkAccess.ReadWrite),
                             }))
                     ;
 
                 var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
 
                 Console.WriteLine(JsonConvert.SerializeObject(meal, Formatting.Indented));
-
-                // await builder!.Deploy(
-                //     new Manifest(
-                //         Guid.Parse("03872adb-06cd-42c2-95ef-ef67d590aee3"),
-                //         "1.0",
-                //         "cacochtest",
-                //         "Cacoch Test",
-                //         new List<CacochResourceMetadata>
-                //         {
-                //             new CacochSecretContainerResourceMetadata("secrets",
-                //                 new HashSet<string>()
-                //                 {
-                //                     "secret-one",
-                //                     "secret-two",
-                //                     "secret-three",
-                //                     "secret-four",
-                //                     "secret-five",
-                //                     "secret-six",
-                //                     "secret-seven"
-                //                 },
-                //                 new Dictionary<string, string>(),
-                //                 new List<CacochResourceLinkMetadata>
-                //                 {
-                //                     new SecretsLink("cacochapp", LinkAccess.Read)
-                //                 }),
-                //             new CacochStorageResourceMetadata(
-                //                 "cacochstorage",
-                //                 new[]
-                //                 {
-                //                     new CacochStorageResourceContainer(CacochStorageResourceContainerType.Storage,
-                //                         "containerone"),
-                //                     new CacochStorageResourceContainer(CacochStorageResourceContainerType.Storage,
-                //                         "containertwo"),
-                //                     new CacochStorageResourceContainer(CacochStorageResourceContainerType.Table,
-                //                         "tableone"),
-                //                     new CacochStorageResourceContainer(CacochStorageResourceContainerType.Queue,
-                //                         "queueone")
-                //                 }, new List<CacochResourceLinkMetadata>()
-                //                 {
-                //                     new StorageLink("cacochapp", LinkAccess.ReadWrite)
-                //                 }),
-                //             new CacochWebAppResourceMetadata("cacochapp", new Dictionary<string, string>()
-                //             {
-                //                 {"CONFIG_SETTING_ONE", "ONE"},
-                //                 {"CONFIG_SETTING_TWO", "TWO"},
-                //                 {"SECRET_REFERENCE", "[secret.secrets.secret-two]"},
-                //                 {"AzureAD.ClientSecret", "[secret.secrets.cacochtestapp-ClientSecret]"},
-                //             }),
-                //             new CacochOAuthClientResourceMetadata("cacochtestapp", OAuthClientType.Web,
-                //                 "http://localhost:9000/", new[] {"http://localhost:9000/sign-oidc"},
-                //                 new[] {"cacochapp"}, new[] {""}, new List<OAuthRole>(), new List<OAuthScope>(),
-                //                 new List<CacochResourceLinkMetadata>())
-                //         }));
             }
         }
     }
