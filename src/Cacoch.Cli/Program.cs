@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Cooker;
 using Cooker.Azure;
@@ -13,6 +14,8 @@ using Cooker.Kitchens;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 
 namespace Cacoch.Cli
@@ -77,8 +80,22 @@ namespace Cacoch.Cli
                             }))
                     ;
 
-                var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
+                Console.WriteLine(
+                    JsonConvert.SerializeObject(
+                        docket,
+                        Formatting.Indented,
+                        new JsonSerializerSettings()
+                        {
+                            TypeNameHandling = TypeNameHandling.Auto,
+                            SerializationBinder = new CookerSerializationBinder(),
+                            Converters = new JsonConverter[]
+                            {
+                                new StringEnumConverter(),
+                            },
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        }));
 
+                var meal = await restaurant.PlaceOrder(new PlatformEnvironment("dev", "Development"), docket);
                 Console.WriteLine(JsonConvert.SerializeObject(meal, Formatting.Indented));
             }
         }

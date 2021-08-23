@@ -6,7 +6,7 @@ namespace Cooker.Ingredients
 {
     public static class DataCloner
     {
-        public static bool Clone<T>(this T input, IDictionary<IIngredient, ICookedIngredient> edibles, out T? clone)
+        public static bool Clone<T>(this T input, IDictionary<IIngredient, ICookedIngredient> edibles, out T? clone) where T:class
         {
             if (!IsRecord(input.GetType())) throw new NotSupportedException("All ingredients must be record types");
             var newProps = new Dictionary<string, object?>();

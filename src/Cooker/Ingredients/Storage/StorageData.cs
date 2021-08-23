@@ -2,7 +2,7 @@
 
 namespace Cooker.Ingredients.Storage
 {
-    [CookerResource("secrets")]
+    [CookerResource("storage")]
     public record StorageData(
         string Id,
         string[] Tables,

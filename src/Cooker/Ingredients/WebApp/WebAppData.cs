@@ -7,7 +7,7 @@ namespace Cooker.Ingredients.WebApp
             string Id,
             string Classification,
             Dictionary<string, string> Configuration,
-            IEnumerable<CookerLink>? Links)
+            CookerLink[]? Links)
         : IngredientData(Id), ICanAccessOtherResources
     {
         public override IEnumerable<IIngredient> GatherIngredients()
