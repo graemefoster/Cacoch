@@ -87,7 +87,8 @@ namespace Cacoch.Cli
                         Array.Empty<string>(),
                         Array.Empty<string>(),
                         new[] { "my-container" }),
-                    new NoSqlData("grfnosql1", new[] { "container-1", "container-2" }),
+                    new NoSqlData("grfnosql1",
+                        new NoSqlData.NoSqlContainer[] { new("container-1", "/id"), new("container-2", "/id") }),
                     new SecretsData(
                         "grfsecretone2",
                         new[] { "secret-one" },

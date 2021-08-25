@@ -158,17 +158,17 @@
     {
       "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
       "apiVersion": "2021-01-15",
-      "name": "[concat(parameters('name'), '/', parameters('databaseName'), '/', parameters('containers')[copyIndex()])]",
+      "name": "[concat(parameters('name'), '/', parameters('databaseName'), '/', parameters('containers')[copyIndex()].Name)]",
       "dependsOn": [
         "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('name'), parameters('databaseName'))]"
       ],
       "tags": "[parameters('tags')]",
       "properties": {
         "resource": {
-          "id": "[parameters('containers')[copyIndex()]]",
+          "id": "[parameters('containers')[copyIndex()].Name]",
           "partitionKey": {
             "paths": [
-              "/myPartitionKey"
+              "[parameters('containers')[copyIndex()].PartitionKey]"
             ],
             "kind": "Hash"
           }

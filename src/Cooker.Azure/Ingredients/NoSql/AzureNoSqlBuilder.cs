@@ -31,9 +31,9 @@ namespace Cooker.Azure.Ingredients.NoSql
             var parameters = new Dictionary<string, object>
             {
                 ["name"] = name,
+                ["databaseName"] = Ingredient.TypedIngredientData!.Id,
                 ["primaryRegion"] = newPrimaryRegion,
                 ["secondaryRegion"] = secondaryRegion,
-                ["databaseName"] = name,
                 ["containers"] = Ingredient.TypedIngredientData!.Containers,
             };
 

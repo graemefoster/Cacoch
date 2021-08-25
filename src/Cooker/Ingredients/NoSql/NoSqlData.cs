@@ -5,8 +5,10 @@ namespace Cooker.Ingredients.NoSql
     [CookerResource("nosql")]
     public record NoSqlData(
         string Id,
-        string[] Containers) : IngredientData(Id)
+        NoSqlData.NoSqlContainer[] Containers) : IngredientData(Id)
     {
+        public record NoSqlContainer(string Name, string PartitionKey);
+
         public override IEnumerable<IIngredient> GatherIngredients()
         {
             yield return new NoSqlIngredient(this);
